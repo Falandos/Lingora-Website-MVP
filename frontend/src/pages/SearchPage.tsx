@@ -6,6 +6,7 @@ import { Card, CardBody } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import ProviderCard from '../components/search/ProviderCard';
 import SimpleMap from '../components/search/SimpleMap';
+import CityAutocomplete from '../components/ui/CityAutocomplete';
 
 interface SearchResult {
   id: number;
@@ -39,6 +40,10 @@ interface SearchFilters {
   mode: string;
   keyword: string;
   sortBy: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  } | null;
 }
 
 const SearchPage = () => {
@@ -53,11 +58,12 @@ const SearchPage = () => {
   const [filters, setFilters] = useState<SearchFilters>({
     languages: searchParams.get('languages')?.split(',') || [],
     categories: searchParams.get('categories')?.split(',') || [],
-    city: searchParams.get('city') || 'Amsterdam', // Default to Amsterdam
-    radius: parseInt(searchParams.get('radius') || '100'),
+    city: searchParams.get('city') || '', // Start empty so user can select
+    radius: parseInt(searchParams.get('radius') || '25'),
     mode: searchParams.get('mode') || '',
     keyword: searchParams.get('keyword') || '',
     sortBy: searchParams.get('sortBy') || 'distance',
+    coordinates: null
   });
   
   // Available languages and categories for filters
@@ -134,8 +140,15 @@ const SearchPage = () => {
     let filtered = [...rawResults];
     
     // Get user's location coordinates
-    const [userLat, userLng] = getCityCoordinates(filters.city);
-    console.log(`User location: ${filters.city} at [${userLat}, ${userLng}]`);
+    let userLat, userLng;
+    if (filters.coordinates) {
+      userLat = filters.coordinates.lat;
+      userLng = filters.coordinates.lng;
+      console.log(`User location: ${filters.city} at [${userLat}, ${userLng}] (from coordinates)`);
+    } else {
+      [userLat, userLng] = getCityCoordinates(filters.city);
+      console.log(`User location: ${filters.city} at [${userLat}, ${userLng}] (from lookup)`);
+    }
 
     // Calculate distances from user location to each provider
     filtered = filtered.map(result => {
@@ -208,10 +221,16 @@ const SearchPage = () => {
       if (filters.categories.length > 0) params.set('categories', filters.categories.join(','));
       if (filters.city) {
         params.set('city', filters.city);
-        // Add coordinates for radius filtering
-        const [lat, lng] = getCityCoordinates(filters.city);
-        params.set('lat', lat.toString());
-        params.set('lng', lng.toString());
+        // Use actual selected coordinates or fallback to lookup
+        if (filters.coordinates) {
+          params.set('lat', filters.coordinates.lat.toString());
+          params.set('lng', filters.coordinates.lng.toString());
+        } else {
+          // Fallback to coordinate lookup if no coordinates stored
+          const [lat, lng] = getCityCoordinates(filters.city);
+          params.set('lat', lat.toString());
+          params.set('lng', lng.toString());
+        }
       }
       params.set('radius', filters.radius.toString());
       // Service mode filter removed - mode displayed on provider cards only
@@ -265,9 +284,11 @@ const SearchPage = () => {
       languages: [],
       categories: [],
       city: '',
-      radius: 250,
+      radius: 25,
       mode: '',
       keyword: '',
+      sortBy: 'distance',
+      coordinates: null
     });
     setSearchParams({});
   };
@@ -312,18 +333,25 @@ const SearchPage = () => {
                 {/* Location Filter */}
                 <div className="mb-6">
                   <label className="label">{t('search.distance')}</label>
-                  <div className="relative mb-3">
-                    <input
-                      type="text"
-                      placeholder="Enter city (e.g. Amsterdam, Rotterdam)"
+                  <div className="mb-3">
+                    <CityAutocomplete
                       value={filters.city}
-                      onChange={(e) => updateFilters({ city: e.target.value })}
-                      className="input-field pl-10"
+                      onChange={(city, cityName) => {
+                        if (city) {
+                          // Use selected city with coordinates
+                          updateFilters({ 
+                            city: city.name,
+                            // Store coordinates for backend API
+                            coordinates: city.coordinates
+                          });
+                        } else {
+                          // User cleared or typed custom text
+                          updateFilters({ city: cityName, coordinates: null });
+                        }
+                      }}
+                      placeholder="Enter city (e.g. Amsterdam, Rotterdam)"
+                      showGeolocation={true}
                     />
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
                   </div>
                   <div className="flex items-center space-x-3">
                     <input
