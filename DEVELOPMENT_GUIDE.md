@@ -158,13 +158,69 @@ messages: Contact form history with admin monitoring
 
 ## 🛠️ Development Workflow
 
+### 🔄 Git Workflow & Version Control
+
+#### Automatic Commit Strategy
+**When I Commit:**
+1. ✅ After completing any task marked in TodoWrite
+2. ✅ After fixing any critical bug or error
+3. ✅ Before switching between major features
+4. ✅ At the end of each development session
+5. ✅ Never commit broken/non-functional code
+
+#### Commit Message Standards
+```bash
+# Feature additions
+feat: add staff-service association system
+
+# Bug fixes  
+fix: resolve language modal crash in staff management
+
+# Documentation updates
+docs: update deployment guide with Docker steps
+
+# Code improvements
+refactor: optimize search query performance
+
+# UI/styling changes
+style: improve responsive design for mobile devices
+```
+
+#### Repository Details
+- **GitHub**: https://github.com/Falandos/Lingora-Website-MVP.git
+- **Authentication**: HTTPS with Personal Access Token
+- **Auto-sync**: All commits automatically pushed to GitHub
+- **Credential Storage**: Git credential helper (secure)
+
+#### Git Commands Reference
+```bash
+# Check repository status
+git status
+
+# View commit history  
+git log --oneline -10
+
+# Stage specific files
+git add frontend/src/pages/dashboard/StaffPage.tsx
+
+# Commit with descriptive message
+git commit -m "fix: resolve staff language modal crash"
+
+# Push to GitHub (automatic)
+git push origin master
+
+# Pull latest changes (if working with team)
+git pull origin master
+```
+
 ### Feature Development Process
 1. **Plan**: Update `FEATURE_PROGRESS.md` with new feature
 2. **Design**: Consider UI/UX and API requirements
 3. **Implement**: Build frontend + backend components
 4. **Test**: Manual testing + verify all user flows
 5. **Document**: Update relevant .md files
-6. **Review**: Check for code quality and security
+6. **Commit**: Automatic Git commit with descriptive message
+7. **Review**: Check for code quality and security
 
 ### Code Standards
 - **TypeScript**: Strict mode, proper typing

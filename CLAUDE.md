@@ -23,6 +23,7 @@
 2. **Log Issues**: Add any discovered bugs to `BUG_MANAGEMENT.md`
 3. **Update Overview**: Refresh `PROJECT_OVERVIEW.md` if major milestones reached
 4. **Technical Changes**: Document architectural changes in `TECHNICAL_NOTES.md`
+5. **🔄 Git Commit**: Automatically commit all changes with descriptive message and push to GitHub
 
 ### For Handovers Between Sessions:
 1. **Start**: Read `PROJECT_OVERVIEW.md` for current project status  
@@ -70,6 +71,7 @@
 - ✅ Add new bugs/issues to `BUG_MANAGEMENT.md` immediately
 - ✅ Keep `PROJECT_OVERVIEW.md` current with overall project status
 - ✅ Use consistent formatting and update "Last Updated" dates
+- ✅ **Commit to Git after completing each feature/task with descriptive messages**
 
 ---
 
