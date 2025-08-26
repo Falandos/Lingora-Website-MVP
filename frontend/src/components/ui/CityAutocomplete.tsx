@@ -240,19 +240,9 @@ const CityAutocomplete = ({
                   : 'hover:bg-gray-50'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-medium">{city.name}</span>
-                  <span className="text-sm text-gray-500 ml-2">{city.province}</span>
-                  {city.is_major_city && (
-                    <span className="inline-block ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                      Major City
-                    </span>
-                  )}
-                </div>
-                <span className="text-xs text-gray-400">
-                  {city.population.toLocaleString()} inh.
-                </span>
+              <div>
+                <span className="font-medium">{city.name}</span>
+                <span className="text-sm text-gray-500 ml-2">{city.province}</span>
               </div>
             </li>
           ))}

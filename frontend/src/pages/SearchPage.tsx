@@ -332,8 +332,8 @@ const SearchPage = () => {
 
                 {/* Location Filter */}
                 <div className="mb-6">
-                  <label className="label">{t('search.distance')}</label>
-                  <div className="mb-3">
+                  <label className="label">City</label>
+                  <div className="mb-4">
                     <CityAutocomplete
                       value={filters.city}
                       onChange={(city, cityName) => {
@@ -353,6 +353,8 @@ const SearchPage = () => {
                       showGeolocation={true}
                     />
                   </div>
+                  
+                  <label className="label">{t('search.distance')}</label>
                   <div className="flex items-center space-x-3">
                     <input
                       type="range"
