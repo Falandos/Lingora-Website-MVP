@@ -568,17 +568,25 @@ const SearchPage = () => {
                 </div>
               ) : (
                 <div className="h-[600px] rounded-xl overflow-hidden">
-                  <SimpleMap providers={results.map(result => ({
-                    ...result,
-                    provider: result.provider || {
-                      id: result.id,
-                      name: result.business_name,
-                      slug: result.slug,
-                      city: result.city,
-                      lat: result.latitude,
-                      lng: result.longitude
-                    }
-                  }))} />
+                  <SimpleMap 
+                    providers={results.map(result => ({
+                      ...result,
+                      provider: result.provider || {
+                        id: result.id,
+                        name: result.business_name,
+                        slug: result.slug,
+                        city: result.city,
+                        lat: result.latitude,
+                        lng: result.longitude
+                      }
+                    }))}
+                    userLocation={filters.city ? {
+                      lat: filters.coordinates?.lat || getCityCoordinates(filters.city)[0],
+                      lng: filters.coordinates?.lng || getCityCoordinates(filters.city)[1],
+                      city: filters.city
+                    } : null}
+                    searchRadius={filters.radius}
+                  />
                 </div>
               )
             ) : (
