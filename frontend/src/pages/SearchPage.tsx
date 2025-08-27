@@ -70,6 +70,19 @@ const SearchPage = () => {
   // Available languages and categories for filters
   const [availableLanguages, setAvailableLanguages] = useState<any[]>([]);
   const [availableCategories, setAvailableCategories] = useState<any[]>([]);
+  
+  // Filter section collapse state for cleaner UI
+  const [expandedSections, setExpandedSections] = useState({
+    languages: true,
+    categories: false
+  });
+
+  const toggleSection = (section: 'languages' | 'categories') => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   // City coordinates lookup for Netherlands
   const getCityCoordinates = (cityName: string): [number, number] => {
@@ -395,9 +408,31 @@ const SearchPage = () => {
 
                 {/* Language Filter */}
                 <div className="mb-6">
-                  <label className="label">{t('search.languages')}</label>
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {availableLanguages.slice(0, 10).map((lang) => (
+                  <button
+                    type="button"
+                    onClick={() => toggleSection('languages')}
+                    className="w-full flex items-center justify-between py-2 text-left hover:text-primary-600 transition-colors"
+                  >
+                    <span className="label flex items-center">
+                      {t('search.languages')}
+                      {filters.languages.length > 0 && (
+                        <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-primary-600 rounded-full">
+                          {filters.languages.length}
+                        </span>
+                      )}
+                    </span>
+                    <svg
+                      className={`w-5 h-5 transition-transform ${expandedSections.languages ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {expandedSections.languages && (
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {availableLanguages.slice(0, expandedSections.languages ? 15 : 5).map((lang) => (
                       <label key={lang.code} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
                         <input
                           type="checkbox"
@@ -420,15 +455,38 @@ const SearchPage = () => {
                           {i18n.language === 'nl' ? lang.name_native : lang.name_en}
                         </span>
                       </label>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Category Filter */}
                 <div className="mb-6">
-                  <label className="label">{t('search.categories')}</label>
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {availableCategories.filter(cat => !cat.parent_id).slice(0, 10).map((category) => (
+                  <button
+                    type="button"
+                    onClick={() => toggleSection('categories')}
+                    className="w-full flex items-center justify-between py-2 text-left hover:text-primary-600 transition-colors"
+                  >
+                    <span className="label flex items-center">
+                      {t('search.categories')}
+                      {filters.categories.length > 0 && (
+                        <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-primary-600 rounded-full">
+                          {filters.categories.length}
+                        </span>
+                      )}
+                    </span>
+                    <svg
+                      className={`w-5 h-5 transition-transform ${expandedSections.categories ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {expandedSections.categories && (
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {availableCategories.filter(cat => !cat.parent_id).slice(0, 10).map((category) => (
                       <label key={category.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
                         <input
                           type="checkbox"
@@ -447,8 +505,9 @@ const SearchPage = () => {
                           {i18n.language === 'nl' ? category.name_nl : category.name_en}
                         </span>
                       </label>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Active Filters */}
@@ -491,57 +550,58 @@ const SearchPage = () => {
             <div className="flex items-center justify-between mb-6">
               {/* Left: Results count */}
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {loading ? 'Searching...' : `${total} results found`}
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {loading ? 'Searching...' : `${total} providers found`}
                 </h2>
                 {filters.city && (
-                  <p className="text-gray-600 mt-1">Near {filters.city}</p>
+                  <p className="text-sm text-gray-500 mt-1">Near {filters.city}</p>
                 )}
               </div>
               
               {/* Center: Sort Options (List View Only) */}
               <div className="flex-1 flex justify-center">
                 {viewMode === 'list' && (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Sort by:</span>
-                    <select 
-                      className="input-field text-sm py-1"
-                      value={filters.sortBy}
-                      onChange={(e) => updateFilters({ sortBy: e.target.value })}
-                    >
-                      <option value="best_match">{t('search.best_match')}</option>
-                      <option value="distance">{t('search.distance_asc')}</option>
-                      <option value="name">Name A-Z</option>
-                    </select>
-                  </div>
+                  <select 
+                    className="text-sm border border-gray-300 rounded-md px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    value={filters.sortBy}
+                    onChange={(e) => updateFilters({ sortBy: e.target.value })}
+                  >
+                    <option value="best_match">{t('search.best_match')}</option>
+                    <option value="distance">{t('search.distance_asc')}</option>
+                    <option value="name">Name A-Z</option>
+                  </select>
                 )}
               </div>
 
-              {/* Right: View Toggle - Always in the same position */}
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant={viewMode === 'list' ? 'primary' : 'outline'}
-                  size="sm"
+              {/* Right: View Toggle - Clean icon buttons */}
+              <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                <button
                   onClick={() => setViewMode('list')}
-                  className="flex items-center space-x-2"
+                  className={`px-3 py-2 transition-colors ${
+                    viewMode === 'list' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                  title="List view"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                   </svg>
-                  <span>{t('search.show_list')}</span>
-                </Button>
-                <Button
-                  variant={viewMode === 'map' ? 'primary' : 'outline'}
-                  size="sm"
+                </button>
+                <button
                   onClick={() => setViewMode('map')}
-                  className="flex items-center space-x-2"
+                  className={`px-3 py-2 transition-colors border-l border-gray-200 ${
+                    viewMode === 'map' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                  title="Map view"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span>{t('search.show_map')}</span>
-                </Button>
+                </button>
               </div>
             </div>
 

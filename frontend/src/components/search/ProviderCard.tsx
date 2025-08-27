@@ -67,12 +67,12 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
   const remainingLanguages = 0; // No truncation needed
 
   return (
-    <Card variant="hover" className="h-full cursor-pointer group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out" onClick={() => window.location.href = `/provider/${slug}`}>
-      <CardBody className="p-4 bg-gradient-to-br from-white to-gray-50/30">
+    <Card variant="hover" className="h-full cursor-pointer group hover:shadow-lg transition-shadow duration-200" onClick={() => window.location.href = `/provider/${slug}`}>
+      <CardBody className="p-4">
         {/* Header */}
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
-            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200 mb-1">
+            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200 mb-1">
               {business_name}
             </h3>
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
@@ -95,11 +95,11 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
           {/* Gallery Preview */}
           {gallery.length > 0 && (
             <div className="ml-4 flex-shrink-0">
-              <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 ring-2 ring-white shadow-sm group-hover:ring-primary-200 transition-all duration-200">
+              <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 ring-2 ring-white shadow-sm">
                 <img
                   src={gallery[0]}
                   alt={business_name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
@@ -128,7 +128,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
                   <img 
                     src={getFlagUrl(lang.language_code)} 
                     alt={currentLanguage === 'nl' ? lang.name_native : lang.name_en}
-                    className="w-6 h-4 rounded-sm border border-white shadow-sm group-hover:scale-110 transition-transform duration-200 group-hover:shadow-md"
+                    className="w-6 h-4 rounded-sm border border-white shadow-sm"
                   />
                 </div>
               ))}
@@ -141,16 +141,13 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
           <Button 
             variant="primary" 
             size="sm"
-            className="bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+            className="bg-blue-600 hover:bg-blue-700 transition-colors duration-150"
             onClick={(e) => {
               e.stopPropagation(); // Prevent card click when clicking contact
               setShowContactModal(true);
             }}
           >
-            <span className="flex items-center gap-1">
-              💬
-              <span>Contact</span>
-            </span>
+            Contact Provider
           </Button>
         </div>
       </CardBody>
