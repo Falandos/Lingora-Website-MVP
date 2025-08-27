@@ -1,8 +1,49 @@
 # Technical Notes & Reference
 *Detailed technical analysis and system documentation*
-*Last Updated: 2025-08-27 (PROFESSIONAL SEARCH INTERFACE + ENTERPRISE UX PATTERNS)*
+*Last Updated: 2025-08-27 (PRE-ALPHA 0.1 - SMART FLAG HIGHLIGHTING + LOCATION FILTERING)*
 
 ## 🏢 Professional Search Interface Architecture (Aug 27 Session)
+
+## 🚩 Smart Language Flag Highlighting System (Revolutionary UX)
+
+### Intelligent Visual Feedback Architecture
+Advanced visual feedback system that provides instant clarity about filter matches:
+
+#### Props Interface Enhancement
+```typescript
+interface ProviderCardProps {
+  // ... existing props
+  activeLanguageFilters?: string[]; // Currently filtered languages for smart highlighting
+}
+```
+
+#### Smart Flag Styling Logic
+```typescript
+const getFlagClassName = (langCode: string) => {
+  const hasActiveFilters = activeLanguageFilters.length > 0;
+  const isMatchingFilter = activeLanguageFilters.includes(langCode);
+  const baseClasses = "w-6 h-4 rounded-sm border border-white shadow-sm transition-all duration-200 hover:scale-110 transform";
+  
+  if (!hasActiveFilters || isMatchingFilter) {
+    // No filters active (show all in color) OR this flag matches the filter
+    return `${baseClasses} hover:shadow-md`;
+  } else {
+    // Filters are active but this flag doesn't match - grey it out
+    return `${baseClasses} grayscale opacity-40 hover:opacity-70 hover:grayscale-50`;
+  }
+};
+```
+
+#### Visual State Management
+- **Default State**: All flags in full color when no language filters applied
+- **Active Filtering**: Only matching flags remain colored, others become greyscale
+- **Hover Interactions**: Both active and inactive flags respond with appropriate feedback
+- **Smooth Transitions**: 200ms duration for all state changes
+
+### Performance Considerations
+- CSS-only transitions (no JavaScript animations)
+- Tailwind utility classes for optimal performance
+- Minimal re-renders through smart prop comparison
 
 ### Progressive Disclosure Pattern for Filters
 Implemented enterprise-grade filter organization to reduce cognitive load:
