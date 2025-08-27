@@ -429,7 +429,12 @@ messages (contact history) - Contact form submissions with admin monitoring
 - [ ] **Staff-Service Association**: Connect team members to services
 - [ ] **Admin Workflow**: Provider approval and management
 
-### Phase 2: Business Logic - 0% Complete
+### Phase 2: AI-Powered Search & Business Logic - 0% Complete
+- [ ] **🧠 AI-Powered Semantic Search**: Multi-language semantic understanding with Sentence Transformers
+  - Free open-source solution (no API costs)
+  - Multi-language queries: "dokter" + "طبيب" + "doctor" → same results
+  - Intent understanding: "need help with taxes" → finds financial advisors
+  - Complete implementation guide available in TECHNICAL_NOTES.md
 - [ ] **Trial Management**: 3-month trial implementation with UI
 - [ ] **Subscription Logic**: Account freeze/unfreeze functionality
 - [ ] **Email Verification**: Complete registration flow
