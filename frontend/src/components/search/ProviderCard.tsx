@@ -63,32 +63,43 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
   const [showContactModal, setShowContactModal] = useState(false);
 
   const bio = currentLanguage === 'nl' ? bio_nl : bio_en;
-  const displayLanguages = languages.slice(0, 3);
-  const remainingLanguages = languages.length - 3;
+  const displayLanguages = languages; // Show all languages without truncation
+  const remainingLanguages = 0; // No truncation needed
 
   return (
-    <Card variant="hover" className="h-full cursor-pointer group" onClick={() => window.location.href = `/provider/${slug}`}>
-      <CardBody className="p-6">
+    <Card variant="hover" className="h-full cursor-pointer group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out" onClick={() => window.location.href = `/provider/${slug}`}>
+      <CardBody className="p-4 bg-gradient-to-br from-white to-gray-50/30">
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200 mb-1">
+            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200 mb-1">
               {business_name}
             </h3>
-            <p className="text-sm text-gray-500 mb-2">
-              {city}
-              {distance && <span> • {Math.round(distance)} km away</span>}
-            </p>
+            <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+              <span>{city}</span>
+              {distance && (
+                <div className="flex items-center gap-1">
+                  <span>•</span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {Math.round(distance)} km
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
           
           {/* Gallery Preview */}
           {gallery.length > 0 && (
             <div className="ml-4 flex-shrink-0">
-              <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
+              <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 ring-2 ring-white shadow-sm group-hover:ring-primary-200 transition-all duration-200">
                 <img
                   src={gallery[0]}
                   alt={business_name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
@@ -100,59 +111,46 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
 
         {/* Bio */}
         {bio && (
-          <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+          <p className="text-gray-600 text-sm leading-relaxed mb-3 line-clamp-1">
             {bio}
           </p>
         )}
 
-        {/* Languages - Text with Small Flags */}
+        {/* Language Flag Grid - Clean & Scannable */}
         {languages.length > 0 && (
-          <div className="mb-4">
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Languages:</span>{' '}
-              <span className="inline-flex items-center flex-wrap gap-1">
-                {displayLanguages.map((lang, index) => (
-                  <span key={lang.language_code} className="inline-flex items-center">
-                    <img 
-                      src={getFlagUrl(lang.language_code)} 
-                      alt={lang.language_code}
-                      className="w-3 h-2 mr-1 rounded-sm"
-                    />
-                    <span>{currentLanguage === 'nl' ? lang.name_native : lang.name_en}</span>
-                    {index < displayLanguages.length - 1 && <span className="mx-1">,</span>}
-                  </span>
-                ))}
-                {remainingLanguages > 0 && <span className="text-gray-500 ml-1"> +{remainingLanguages} more</span>}
-              </span>
-            </p>
-          </div>
-        )}
-
-        {/* Services - Clean Summary Format */}
-        {services.length > 0 && (
-          <div className="mb-4">
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">
-                {services.length} service{services.length !== 1 ? 's' : ''}
-              </span>
-              {services.length > 0 && services[0].category_name && (
-                <span className="text-gray-500"> in {services[0].category_name}</span>
-              )}
-            </p>
+          <div className="mb-3">
+            <div className="flex flex-wrap gap-1.5">
+              {displayLanguages.map((lang) => (
+                <div
+                  key={lang.language_code}
+                  className="group"
+                >
+                  <img 
+                    src={getFlagUrl(lang.language_code)} 
+                    alt={currentLanguage === 'nl' ? lang.name_native : lang.name_en}
+                    className="w-6 h-4 rounded-sm border border-white shadow-sm group-hover:scale-110 transition-transform duration-200 group-hover:shadow-md"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {/* Single Action Button */}
-        <div className="flex justify-end pt-4 border-t border-gray-50">
+        <div className="flex justify-end pt-3 mt-2 border-t border-gray-100">
           <Button 
             variant="primary" 
             size="sm"
+            className="bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
             onClick={(e) => {
               e.stopPropagation(); // Prevent card click when clicking contact
               setShowContactModal(true);
             }}
           >
-            Contact
+            <span className="flex items-center gap-1">
+              💬
+              <span>Contact</span>
+            </span>
           </Button>
         </div>
       </CardBody>

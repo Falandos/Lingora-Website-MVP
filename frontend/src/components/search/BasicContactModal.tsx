@@ -72,7 +72,11 @@ const BasicContactModal: React.FC<BasicContactModalProps> = ({
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black bg-opacity-50"
-        onClick={onClose}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+        }}
       />
       
       {/* Modal */}
@@ -85,7 +89,11 @@ const BasicContactModal: React.FC<BasicContactModalProps> = ({
               <p className="text-sm text-gray-600">{city}</p>
             </div>
             <button
-              onClick={onClose}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
               className="text-gray-400 hover:text-gray-600 text-xl leading-none"
             >
               ×
@@ -241,7 +249,11 @@ const BasicContactModal: React.FC<BasicContactModalProps> = ({
           {/* Actions */}
           <div className="flex space-x-3">
             <button
-              onClick={onClose}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
               Close

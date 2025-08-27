@@ -1,18 +1,19 @@
 # CLAUDE.md - Documentation System Guide
 *Instructions for using Lingora's consolidated documentation*
-*Last Updated: 2025-08-25*
+*Last Updated: 2025-08-27*
 
 ## 📚 New Documentation Structure
 
-**IMPORTANT**: We've consolidated 17+ scattered .md files into 5 organized documents. Always use this structured approach:
+**IMPORTANT**: We've consolidated 20+ scattered .md files into 6 organized documents. Always use this structured approach:
 
-### 🗂️ The 5 Core Documents
+### 🗂️ The 6 Core Documents
 
 1. **PROJECT_OVERVIEW.md** - Start here for project status and MVP requirements
 2. **DEVELOPMENT_GUIDE.md** - Setup, architecture, and development workflow  
 3. **FEATURE_PROGRESS.md** - Implementation tracking and sprint management
 4. **BUG_MANAGEMENT.md** - Issue tracking and fix procedures
 5. **TECHNICAL_NOTES.md** - Detailed technical reference and troubleshooting
+6. **HANDOVERS.md** - Unified session transfer documentation (replaces all individual handover files)
 
 ---
 
@@ -23,13 +24,15 @@
 2. **Log Issues**: Add any discovered bugs to `BUG_MANAGEMENT.md`
 3. **Update Overview**: Refresh `PROJECT_OVERVIEW.md` if major milestones reached
 4. **Technical Changes**: Document architectural changes in `TECHNICAL_NOTES.md`
-5. **🔄 Git Commit**: Automatically commit all changes with descriptive message and push to GitHub
+5. **Session Handover**: Update `HANDOVERS.md` with current session status and next priorities
+6. **🔄 Git Commit**: Automatically commit all changes with descriptive message and push to GitHub
 
 ### For Handovers Between Sessions:
-1. **Start**: Read `PROJECT_OVERVIEW.md` for current project status  
-2. **Check Progress**: Review `FEATURE_PROGRESS.md` for active sprint
-3. **Review Issues**: Check `BUG_MANAGEMENT.md` for critical problems
-4. **Setup**: Use `DEVELOPMENT_GUIDE.md` for technical context
+1. **Start**: Read `HANDOVERS.md` for latest session status and immediate next steps
+2. **Check Overview**: Review `PROJECT_OVERVIEW.md` for overall project status  
+3. **Check Progress**: Review `FEATURE_PROGRESS.md` for active sprint
+4. **Review Issues**: Check `BUG_MANAGEMENT.md` for critical problems
+5. **Setup**: Use `DEVELOPMENT_GUIDE.md` for technical context
 
 ### When Starting New Features:
 1. **Plan**: Add feature to `FEATURE_PROGRESS.md` backlog
@@ -60,16 +63,19 @@
 ## ⚠️ Documentation Rules (MANDATORY)
 
 ### DO NOT:
-- ❌ Create new .md files without consolidating into the 5 core documents
+- ❌ Create new .md files without consolidating into the 6 core documents
+- ❌ Create new handover files (use `HANDOVERS.md` instead)
 - ❌ Leave features uncommitted without updating `FEATURE_PROGRESS.md`
 - ❌ Fix bugs without logging in `BUG_MANAGEMENT.md`  
 - ❌ Make architectural changes without documenting in `TECHNICAL_NOTES.md`
+- ❌ End sessions without updating `HANDOVERS.md` with current status
 
 ### ALWAYS DO:
 - ✅ Update relevant documentation after each coding session
 - ✅ Mark tasks as completed in `FEATURE_PROGRESS.md`
 - ✅ Add new bugs/issues to `BUG_MANAGEMENT.md` immediately
 - ✅ Keep `PROJECT_OVERVIEW.md` current with overall project status
+- ✅ Update `HANDOVERS.md` at end of each session with current status
 - ✅ Use consistent formatting and update "Last Updated" dates
 - ✅ **Commit to Git after completing each feature/task with descriptive messages**
 
@@ -78,10 +84,11 @@
 ## 🚀 Quick Start for Any Developer
 
 ### First Time Setup:
-1. Read `PROJECT_OVERVIEW.md` - Understand project scope and current status
-2. Follow `DEVELOPMENT_GUIDE.md` - Get environment running
-3. Check `FEATURE_PROGRESS.md` - See what's in current sprint
-4. Review `BUG_MANAGEMENT.md` - Understand known issues
+1. Read `HANDOVERS.md` - Get immediate context and current session status
+2. Read `PROJECT_OVERVIEW.md` - Understand project scope and current status
+3. Follow `DEVELOPMENT_GUIDE.md` - Get environment running
+4. Check `FEATURE_PROGRESS.md` - See what's in current sprint
+5. Review `BUG_MANAGEMENT.md` - Understand known issues
 
 ### Before Coding:
 1. Update your target feature status to "in_progress" in `FEATURE_PROGRESS.md`
@@ -93,6 +100,7 @@
 2. Add any discovered issues to `BUG_MANAGEMENT.md`
 3. Update `PROJECT_OVERVIEW.md` if significant milestone reached
 4. Document technical decisions in `TECHNICAL_NOTES.md`
+5. Update `HANDOVERS.md` with session results and next priorities
 
 ---
 
@@ -121,6 +129,20 @@ If documentation is unclear or missing:
 4. **Feature Status**: Always check `FEATURE_PROGRESS.md` first
 
 **Remember**: This consolidated system prevents information fragmentation and ensures continuity across development sessions.
+
+## 📋 Handover System
+
+**CRITICAL**: Use `HANDOVERS.md` for all session transfers instead of creating new handover files. This unified system:
+- Archives all historical handovers for reference
+- Maintains current session status at the top
+- Prevents handover file proliferation 
+- Ensures continuity between development sessions
+
+**Handover Workflow:**
+1. **Start Session**: Check `HANDOVERS.md` for latest status and priorities
+2. **During Session**: Update current session section with progress
+3. **End Session**: Archive completed session, update current status for next developer
+4. **Never**: Create files like `HANDOVER_NEW.md`, `SESSION_HANDOVER.md`, etc.
 
 ---
 
