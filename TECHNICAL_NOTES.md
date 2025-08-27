@@ -24,19 +24,19 @@ const getFlagClassName = (langCode: string) => {
   const isMatchingFilter = activeLanguageFilters.includes(langCode);
   const baseClasses = "w-6 h-4 rounded-sm border border-white shadow-sm transition-all duration-200 hover:scale-110 transform";
   
-  if (!hasActiveFilters || isMatchingFilter) {
-    // No filters active (show all in color) OR this flag matches the filter
+  if (hasActiveFilters && isMatchingFilter) {
+    // Show in color - only when filter is active AND matches
     return `${baseClasses} hover:shadow-md`;
   } else {
-    // Filters are active but this flag doesn't match - grey it out
+    // Show greyed - default state (no filters) OR non-matching when filters active
     return `${baseClasses} grayscale opacity-40 hover:opacity-70 hover:grayscale-50`;
   }
 };
 ```
 
 #### Visual State Management
-- **Default State**: All flags in full color when no language filters applied
-- **Active Filtering**: Only matching flags remain colored, others become greyscale
+- **Default State**: All flags greyed out when no language filters applied (clean, minimal appearance)
+- **Active Filtering**: Only matching flags show in full color, others remain greyscale
 - **Hover Interactions**: Both active and inactive flags respond with appropriate feedback
 - **Smooth Transitions**: 200ms duration for all state changes
 

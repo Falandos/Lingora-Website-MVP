@@ -74,11 +74,11 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
     const isMatchingFilter = activeLanguageFilters.includes(langCode);
     const baseClasses = "w-6 h-4 rounded-sm border border-white shadow-sm transition-all duration-200 hover:scale-110 transform";
     
-    if (!hasActiveFilters || isMatchingFilter) {
-      // No filters active (show all in color) OR this flag matches the filter
+    if (hasActiveFilters && isMatchingFilter) {
+      // Show in color - only when filter is active AND matches
       return `${baseClasses} hover:shadow-md`;
     } else {
-      // Filters are active but this flag doesn't match - grey it out
+      // Show greyed - default state (no filters) OR non-matching when filters active
       return `${baseClasses} grayscale opacity-40 hover:opacity-70 hover:grayscale-50`;
     }
   };
