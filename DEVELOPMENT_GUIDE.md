@@ -12,8 +12,8 @@
 ### Installation Steps
 1. **Clone Repository**
    ```bash
-   git clone [repository-url]
-   cd lingora
+   git clone https://github.com/Falandos/Lingora-Website-MVP.git
+   cd Lingora-Website-MVP
    ```
 
 2. **Backend Setup**
@@ -160,8 +160,39 @@ messages: Contact form history with admin monitoring
 
 ### 🔄 Git Workflow & Version Control
 
+#### Repository Information
+- **GitHub Repository**: https://github.com/Falandos/Lingora-Website-MVP.git
+- **Main Branch**: `main` (not master)
+- **Authentication**: Personal Access Token (PAT)
+
+#### Daily Git Workflow
+```bash
+# Before starting work
+git status                    # Check current state
+git pull origin main          # Get latest changes
+
+# During development
+git add .                     # Stage changes
+git commit -m "✨ Descriptive commit message"  # Commit with good message
+git push origin main          # Push to GitHub
+
+# End of session
+git status                    # Verify clean working tree
+```
+
+#### Git Authentication Setup
+**If you get 403/Permission Denied errors:**
+1. **Create new Personal Access Token**: https://github.com/settings/tokens
+2. **Update remote URL**:
+   ```bash
+   git remote set-url origin https://Falandos:YOUR_NEW_TOKEN@github.com/Falandos/Lingora-Website-MVP.git
+   ```
+3. **Test connection**: `git push origin main`
+
+**📋 For complete Git procedures, see:** `GIT_WORKFLOW.md`
+
 #### Automatic Commit Strategy
-**When I Commit:**
+**When to Commit:**
 1. ✅ After completing any task marked in TodoWrite
 2. ✅ After fixing any critical bug or error
 3. ✅ Before switching between major features
