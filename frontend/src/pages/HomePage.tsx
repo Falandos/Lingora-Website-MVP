@@ -7,7 +7,6 @@ import LanguageSelector from '../components/ui/LanguageSelector';
 import SearchBar from '../components/ui/SearchBar';
 import StatisticsBar from '../components/home/StatisticsBar';
 import HeroSearchBar from '../components/home/HeroSearchBar';
-import LanguageFlags from '../components/home/LanguageFlags';
 import AISearchShowcase from '../components/home/AISearchShowcase';
 import RecentProvidersCarousel from '../components/home/RecentProvidersCarousel';
 import TrustSignalsSection from '../components/home/TrustSignalsSection';
@@ -93,31 +92,23 @@ const HomePage = () => {
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="pt-16 pb-24 sm:pt-20 sm:pb-32">
+          <div className="pt-20 pb-32 sm:pt-24 sm:pb-40">
             <div className="text-center">
               {/* Main Headline */}
-              <div className="animate-fade-in mb-8">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
+              <div className="animate-fade-in mb-12">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-8 tracking-tight">
                   Find Professionals Who Speak
-                  <span className="block">
+                  <span className="block mt-4">
                     <LanguageCarousel className="language-text-shadow" />
                   </span>
                 </h1>
-                <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Connect with verified professionals in healthcare, legal, financial, 
-                  and educational services across the Netherlands.
-                </p>
               </div>
 
               {/* Hero Search Bar */}
-              <div className="animate-slide-up mb-12">
+              <div className="animate-slide-up mb-16">
                 <HeroSearchBar />
               </div>
 
-              {/* Language Support */}
-              <div className="animate-fade-in">
-                <LanguageFlags className="mb-8" />
-              </div>
             </div>
           </div>
         </div>

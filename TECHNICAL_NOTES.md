@@ -1,6 +1,81 @@
 # Technical Notes & Reference
 *Detailed technical analysis and system documentation*
-*Last Updated: 2025-08-27 (PRE-ALPHA 0.1 - SMART FLAG HIGHLIGHTING + LOCATION FILTERING)*
+*Last Updated: 2025-08-27 (PRE-ALPHA 0.2 - HOMEPAGE REDESIGN + AI SEMANTIC SEARCH)*
+
+## 🏠 Professional Homepage Components Architecture (Aug 27 Session)
+
+### Dynamic Language Carousel Implementation
+**Component**: `LanguageCarousel.tsx`
+
+**Key Features**:
+- **15 Native Languages**: Rotates through Nederlands → English → العربية → Deutsch → etc.
+- **RTL Support**: Automatic text direction for Arabic and Berber scripts
+- **Color Coding**: Each language has distinct brand colors (`#FF6B35` for Dutch, `#059669` for Arabic)
+- **Accessibility**: ARIA labels, hover pause, screen reader friendly
+- **Smooth Animations**: 300ms fade transitions with micro-movements
+
+**Technical Implementation**:
+```typescript
+const languages: Language[] = [
+  { code: 'nl', native: 'Nederlands', color: '#FF6B35' },
+  { code: 'ar', native: 'العربية', color: '#059669', rtl: true },
+  { code: 'zgh', native: 'ⵜⴰⵎⴰⵣⵉⵖⵜ', color: '#10B981' } // Berber
+];
+
+// Animation system with pause-on-hover
+useEffect(() => {
+  if (isPaused) return;
+  const timer = setInterval(() => {
+    setIsVisible(false);
+    setTimeout(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % languages.length);
+      setIsVisible(true);
+    }, 200);
+  }, interval);
+  return () => clearInterval(timer);
+}, [interval, languages.length, isPaused]);
+```
+
+### Real-time Statistics Integration
+**Component**: `StatisticsBar.tsx`
+
+**Fallback System**: Uses API data when available, gracefully falls back to hardcoded values
+```typescript
+// API endpoint: GET /api/statistics
+setStats({
+  active_providers: 19,
+  total_staff: 54,
+  languages_offered: 15,
+  total_services: 44
+});
+```
+
+### AI Search Integration (Subtle Professional Approach)
+**Component**: `HeroSearchBar.tsx`
+
+**Removed**: Intrusive AI-powered badge that covered search button
+**Added**: Subtle integration in placeholder and examples section
+```typescript
+placeholder="Smart search: try 'dokter', 'stressed', or 'need help'..."
+```
+
+### Professional Animation System
+**Global CSS Patterns**:
+```css
+/* Professional fade transitions */
+.transition-all duration-300
+opacity: isVisible ? 1 : 0
+transform: isVisible ? 'translateY(0px)' : 'translateY(-10px)'
+
+/* Language-specific typography */
+direction: currentLanguage.rtl ? 'rtl' : 'ltr'
+```
+
+### Component Architecture Patterns
+- **Portal-based Modals**: All modals use `createPortal(content, document.body)` to prevent z-index issues
+- **Responsive Design**: Mobile-first approach with `sm:`, `md:`, `lg:` breakpoints
+- **Accessibility First**: ARIA labels, semantic HTML, keyboard navigation
+- **Performance**: Lazy loading, efficient re-renders, minimal DOM manipulation
 
 ## 🏢 Professional Search Interface Architecture (Aug 27 Session)
 
