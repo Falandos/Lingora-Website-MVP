@@ -60,6 +60,16 @@
 
 ---
 
+## 🔑 Project Location Reminder (CRITICAL)
+
+**PRIMARY PROJECT LOCATION**: `C:\Cursor\Lingora\`
+- **Documentation Files**: All .md files are in `C:\Cursor\Lingora\`
+- **Backend Code**: `C:\xampp\htdocs\lingora\backend\` 
+- **Frontend Code**: `C:\Cursor\Lingora\frontend\`
+- **AI Services**: `C:\xampp\htdocs\lingora\backend\ai_services\`
+
+**IMPORTANT**: Always check `C:\Cursor\Lingora\` FIRST for documentation files, not `C:\xampp\htdocs\lingora\`. The xampp location only contains the backend PHP code and databases.
+
 ## ⚠️ Documentation Rules (MANDATORY)
 
 ### DO NOT:
@@ -69,6 +79,7 @@
 - ❌ Fix bugs without logging in `BUG_MANAGEMENT.md`  
 - ❌ Make architectural changes without documenting in `TECHNICAL_NOTES.md`
 - ❌ End sessions without updating `HANDOVERS.md` with current status
+- ❌ Look in `C:\xampp\htdocs\lingora\` for documentation files (they're in `C:\Cursor\Lingora\`)
 
 ### ALWAYS DO:
 - ✅ Update relevant documentation after each coding session
