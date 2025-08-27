@@ -68,7 +68,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
 
   return (
     <Card variant="hover" className="h-full cursor-pointer group hover:shadow-lg transition-shadow duration-200" onClick={() => window.location.href = `/provider/${slug}`}>
-      <CardBody className="p-4">
+      <CardBody className="p-4 flex flex-col h-full">
         {/* Header */}
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
@@ -116,19 +116,25 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
           </p>
         )}
 
-        {/* Language Flag Grid - Clean & Scannable */}
+        {/* Language Capabilities - Warm & Welcoming */}
         {languages.length > 0 && (
           <div className="mb-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-medium text-gray-600 tracking-wide">
+                🗣️ We speak your language
+              </span>
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {displayLanguages.map((lang) => (
                 <div
                   key={lang.language_code}
-                  className="group"
+                  className="group relative"
+                  title={currentLanguage === 'nl' ? lang.name_native : lang.name_en}
                 >
                   <img 
                     src={getFlagUrl(lang.language_code)} 
                     alt={currentLanguage === 'nl' ? lang.name_native : lang.name_en}
-                    className="w-6 h-4 rounded-sm border border-white shadow-sm"
+                    className="w-6 h-4 rounded-sm border border-white shadow-sm hover:shadow-md transition-shadow duration-200 hover:scale-110 transform"
                   />
                 </div>
               ))}
@@ -136,18 +142,18 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
           </div>
         )}
 
-        {/* Single Action Button */}
-        <div className="flex justify-end pt-3 mt-2 border-t border-gray-100">
+        {/* Quick Contact Button - Always Bottom Right */}
+        <div className="flex justify-end mt-auto pt-3">
           <Button 
-            variant="primary" 
+            variant="secondary" 
             size="sm"
-            className="bg-blue-600 hover:bg-blue-700 transition-colors duration-150"
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors duration-150 border-0"
             onClick={(e) => {
               e.stopPropagation(); // Prevent card click when clicking contact
               setShowContactModal(true);
             }}
           >
-            Contact Provider
+            Quick Contact
           </Button>
         </div>
       </CardBody>

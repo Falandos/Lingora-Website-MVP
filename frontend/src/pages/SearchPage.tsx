@@ -63,7 +63,7 @@ const SearchPage = () => {
     radius: parseInt(searchParams.get('radius') || '25'),
     mode: searchParams.get('mode') || '',
     keyword: searchParams.get('keyword') || '',
-    sortBy: searchParams.get('sortBy') || 'distance',
+    sortBy: searchParams.get('sortBy') || 'best_match',
     coordinates: null
   });
   
@@ -84,8 +84,8 @@ const SearchPage = () => {
     }));
   };
 
-  // City coordinates lookup for Netherlands
-  const getCityCoordinates = (cityName: string): [number, number] => {
+  // City coordinates lookup for Netherlands - Returns null for empty cities to show ALL providers
+  const getCityCoordinates = (cityName: string): [number, number] | null => {
     const cities: Record<string, [number, number]> = {
       'amsterdam': [52.3676, 4.9041],
       'rotterdam': [51.9244, 4.4777],
@@ -100,7 +100,8 @@ const SearchPage = () => {
     };
     
     const city = cityName.toLowerCase().trim();
-    return cities[city] || cities['amsterdam']; // Default to Amsterdam
+    if (!city) return null; // No city = show ALL providers (no distance filter)
+    return cities[city] || null; // Return null for unknown cities too
   };
 
   // Calculate distance between two coordinates (Haversine formula)
@@ -171,25 +172,37 @@ const SearchPage = () => {
   const applyLocalFilters = (rawResults: any[]) => {
     let filtered = [...rawResults];
     
-    // Get user's location coordinates
-    let userLat, userLng;
+    // Get user's location coordinates - ONLY if city is provided
+    let userLat: number | null = null;
+    let userLng: number | null = null;
+    let hasLocation = false;
+    
     if (filters.coordinates) {
       userLat = filters.coordinates.lat;
       userLng = filters.coordinates.lng;
+      hasLocation = true;
       console.log(`User location: ${filters.city} at [${userLat}, ${userLng}] (from coordinates)`);
+    } else if (filters.city) {
+      const coords = getCityCoordinates(filters.city);
+      if (coords) {
+        [userLat, userLng] = coords;
+        hasLocation = true;
+        console.log(`User location: ${filters.city} at [${userLat}, ${userLng}] (from lookup)`);
+      }
     } else {
-      [userLat, userLng] = getCityCoordinates(filters.city);
-      console.log(`User location: ${filters.city} at [${userLat}, ${userLng}] (from lookup)`);
+      console.log('No location provided - showing ALL providers without distance filtering');
     }
 
-    // Calculate distances from user location to each provider
-    filtered = filtered.map(result => {
-      if (result.provider?.lat && result.provider?.lng) {
-        const distance = calculateDistance(userLat, userLng, result.provider.lat, result.provider.lng);
-        return { ...result, distance_km: distance };
-      }
-      return result;
-    });
+    // Calculate distances ONLY if we have a location
+    if (hasLocation && userLat !== null && userLng !== null) {
+      filtered = filtered.map(result => {
+        if (result.provider?.lat && result.provider?.lng) {
+          const distance = calculateDistance(userLat!, userLng!, result.provider.lat, result.provider.lng);
+          return { ...result, distance_km: distance };
+        }
+        return result;
+      });
+    }
 
     // Language filter
     if (filters.languages.length > 0) {
@@ -198,8 +211,8 @@ const SearchPage = () => {
       );
     }
 
-    // Distance filter
-    if (filters.radius < 100) {
+    // Distance filter - ONLY apply if we have a location
+    if (hasLocation && filters.radius < 100) {
       console.log(`Filtering by distance: ${filters.radius}km from ${filters.city}`);
       const beforeCount = filtered.length;
       filtered = filtered.filter(result => {
@@ -209,6 +222,8 @@ const SearchPage = () => {
         return withinRange;
       });
       console.log(`Distance filter: ${beforeCount} -> ${filtered.length} results`);
+    } else if (!hasLocation) {
+      console.log('No distance filtering applied - showing all providers');
     }
 
     // Service mode filter removed - mode displayed on provider cards only
@@ -227,8 +242,13 @@ const SearchPage = () => {
     // Sorting
     switch (filters.sortBy) {
       case 'distance':
-        filtered.sort((a, b) => (a.distance_km || 999) - (b.distance_km || 999));
-        console.log('Sorted by distance:', filtered.map(r => `${r.provider?.name}: ${r.distance_km}km`));
+        if (hasLocation) {
+          filtered.sort((a, b) => (a.distance_km || 999) - (b.distance_km || 999));
+          console.log('Sorted by distance:', filtered.map(r => `${r.provider?.name}: ${r.distance_km}km`));
+        } else {
+          // No location provided - fall back to best match sort
+          console.log('No location for distance sort - using best match order');
+        }
         break;
       case 'name':
         filtered.sort((a, b) => (a.provider?.name || '').localeCompare(b.provider?.name || ''));
@@ -259,9 +279,12 @@ const SearchPage = () => {
           params.set('lng', filters.coordinates.lng.toString());
         } else {
           // Fallback to coordinate lookup if no coordinates stored
-          const [lat, lng] = getCityCoordinates(filters.city);
-          params.set('lat', lat.toString());
-          params.set('lng', lng.toString());
+          const coords = getCityCoordinates(filters.city);
+          if (coords) {
+            const [lat, lng] = coords;
+            params.set('lat', lat.toString());
+            params.set('lng', lng.toString());
+          }
         }
       }
       params.set('radius', filters.radius.toString());
@@ -362,30 +385,28 @@ const SearchPage = () => {
                   </Button>
                 </div>
 
-                {/* Location Filter */}
+                {/* Location Filter - Clean & Streamlined */}
                 <div className="mb-6">
-                  <label className="label">City</label>
-                  <div className="mb-4">
-                    <CityAutocomplete
-                      value={filters.city}
-                      onChange={(city, cityName) => {
-                        if (city) {
-                          // Use selected city with coordinates
-                          updateFilters({ 
-                            city: city.name,
-                            // Store coordinates for backend API
-                            coordinates: city.coordinates
-                          });
-                        } else {
-                          // User cleared or typed custom text
-                          updateFilters({ city: cityName, coordinates: null });
-                        }
-                      }}
-                      placeholder="Enter city (e.g. Amsterdam, Rotterdam)"
-                      showGeolocation={true}
-                    />
-                  </div>
-                  
+                  <CityAutocomplete
+                    value={filters.city}
+                    onChange={(city, cityName) => {
+                      if (city) {
+                        // Use selected city with coordinates
+                        updateFilters({ 
+                          city: city.name,
+                          // Store coordinates for backend API
+                          coordinates: city.coordinates
+                        });
+                      } else {
+                        // User cleared or typed custom text
+                        updateFilters({ city: cityName, coordinates: null });
+                      }
+                    }}
+                    placeholder="Enter city name..."
+                    showGeolocation={true}
+                    className="mb-4"
+                  />
+                
                   <label className="label">{t('search.distance')}</label>
                   <div className="flex items-center space-x-3">
                     <input
@@ -567,7 +588,7 @@ const SearchPage = () => {
                     onChange={(e) => updateFilters({ sortBy: e.target.value })}
                   >
                     <option value="best_match">{t('search.best_match')}</option>
-                    <option value="distance">{t('search.distance_asc')}</option>
+                    {filters.city && <option value="distance">{t('search.distance_asc')}</option>}
                     <option value="name">Name A-Z</option>
                   </select>
                 )}
@@ -645,7 +666,7 @@ const SearchPage = () => {
                         name_native: lang.toUpperCase() 
                       })) || []}
                       services={result.services || []}
-                      distance={result.distance}
+                      distance={result.distance_km || result.distance}
                       currentLanguage={i18n.language}
                     />
                   ))}
@@ -664,11 +685,14 @@ const SearchPage = () => {
                         lng: result.longitude
                       }
                     }))}
-                    userLocation={filters.city ? {
-                      lat: filters.coordinates?.lat || getCityCoordinates(filters.city)[0],
-                      lng: filters.coordinates?.lng || getCityCoordinates(filters.city)[1],
-                      city: filters.city
-                    } : null}
+                    userLocation={filters.city ? (() => {
+                      const coords = filters.coordinates || getCityCoordinates(filters.city);
+                      return coords ? {
+                        lat: coords.lat || coords[0],
+                        lng: coords.lng || coords[1],
+                        city: filters.city
+                      } : null;
+                    })() : null}
                     searchRadius={filters.radius}
                   />
                 </div>
