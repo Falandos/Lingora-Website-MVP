@@ -1,6 +1,6 @@
 # Development Guide
 *Setup, architecture, and development workflow*
-*Last Updated: 2025-08-26 (COMPREHENSIVE MOCK DATA COMPLETE)*
+*Last Updated: 2025-08-27 (HOMEPAGE REDESIGN + AI SEMANTIC SEARCH)*
 
 ## 🚀 Quick Setup
 
@@ -30,9 +30,29 @@
    npm run dev
    ```
 
-4. **Access Application**
+4. **AI Service Setup** 🚀 **NEW**
+   ```bash
+   cd /c/xampp/htdocs/lingora/backend/ai_services
+   python -m venv ai_search_env
+   ai_search_env\Scripts\activate
+   pip install flask flask-cors mysql-connector-python sentence-transformers numpy scikit-learn
+   ```
+
+5. **Run Full Development Environment**
+   ```bash
+   # Start XAMPP (Apache + MySQL)
+   # Then in project root:
+   npm run dev
+   ```
+   This automatically starts:
+   - Mock API server (port 3001)
+   - AI Semantic Search Service (port 5001) 🚀 **NEW**
+   - Frontend development server (port 5174)
+
+6. **Access Application**
    - Frontend: http://localhost:5174
    - Backend API: http://localhost/lingora/backend/public
+   - AI Service: http://localhost:5001/health 🚀 **NEW**
    - Database: phpMyAdmin at http://localhost/phpmyadmin
 
 ---
@@ -48,7 +68,8 @@ lingora/
 │   │   │   ├── ui/         # Basic components (Button, Card, etc.)
 │   │   │   ├── search/     # Search-related components
 │   │   │   ├── provider/   # Provider-specific components
-│   │   │   └── dashboard/  # Dashboard components
+│   │   │   ├── dashboard/  # Dashboard components
+│   │   │   └── home/       # 🚀 NEW: Homepage components
 │   │   ├── pages/          # Route components
 │   │   ├── services/       # API service functions
 │   │   ├── contexts/       # React contexts (Auth, etc.)
@@ -79,6 +100,39 @@ lingora/
 
 ---
 
+## 🤖 AI Semantic Search Service 🚀 **NEW**
+
+### Architecture
+- **Flask API** running on port 5001
+- **Sentence Transformers** (paraphrase-multilingual-MiniLM-L12-v2)
+- **384-dimensional embeddings** stored in MySQL JSON columns
+- **Multilingual support** for 50+ languages
+- **Sub-100ms response times** for semantic search
+
+### Key Features
+```
+✅ Natural language understanding ("need haircut" → hair salons)
+✅ Multilingual search (Arabic, Dutch, English, etc.)
+✅ Intent recognition ("stressed" → psychology services) 
+✅ Zero API costs (open-source models)
+✅ Hybrid search (semantic + keyword matching)
+✅ Automatic fallback to semantic-only results
+```
+
+### Manual Startup (if needed)
+```bash
+cd /c/xampp/htdocs/lingora/backend/ai_services
+ai_search_env\Scripts\python.exe embedding_service.py
+```
+
+### Health Check
+```bash
+curl http://localhost:5001/health
+# Should return: {"status": "healthy", "model_loaded": true}
+```
+
+---
+
 ## 🔌 API Integration
 
 ### Authentication
@@ -100,9 +154,15 @@ POST /api/auth/login          # User login
 POST /api/auth/register       # Provider registration
 
 Search:
-GET /api/search              # Search providers
+GET /api/search              # Search providers (with AI semantic search 🚀 **NEW**)
 GET /api/categories          # Service categories
 GET /api/languages           # Supported languages
+
+AI Service: 🚀 **NEW**
+GET /health                  # AI service health check
+POST /search                 # Semantic search
+POST /embed                  # Generate embeddings
+POST /batch_embed           # Batch embedding generation
 
 Providers:
 GET /api/providers/{slug}     # Public provider profile
@@ -126,6 +186,57 @@ GET /api/admin/pending-providers  # Providers awaiting approval
   message?: string,
   error?: string
 }
+```
+
+---
+
+## 🏠 Homepage Components 🚀 **NEW**
+
+### Architecture
+Professional, modern landing page with dynamic elements and real data integration.
+
+### Key Components
+```typescript
+// StatisticsBar.tsx - Real-time statistics
+<StatisticsBar />
+// Shows: 19 Active Businesses, 54 Professional Staff, 15 Languages, 44 Services
+
+// LanguageCarousel.tsx - Dynamic language rotation
+<LanguageCarousel className="language-text-shadow" />
+// Rotates: Nederlands → English → العربية → Deutsch → etc.
+
+// HeroSearchBar.tsx - Smart search with examples  
+<HeroSearchBar />
+// Placeholder: "Smart search: try 'dokter', 'stressed', or 'need help'..."
+
+// AISearchShowcase.tsx - Interactive demo
+<AISearchShowcase />
+// Shows semantic search examples with live results
+
+// RecentProvidersCarousel.tsx - Provider showcase
+<RecentProvidersCarousel />  
+// Latest 6 verified providers with language flags
+
+// TrustSignalsSection.tsx - Trust building & CTA
+<TrustSignalsSection />
+// KVK verified, GDPR compliant, dual call-to-action
+```
+
+### Features
+✅ **Dynamic Language Carousel** with 15 native languages and color accents  
+✅ **Real-time Statistics** from API endpoints  
+✅ **AI Search Demo** with interactive examples  
+✅ **Provider Carousel** with latest verified businesses  
+✅ **Trust Signals** with professional badges and CTA  
+✅ **Accessibility** with RTL support, screen readers, hover pause  
+✅ **Mobile Responsive** design across all components  
+✅ **Professional Animations** with smooth transitions  
+
+### API Endpoints Used
+```
+GET /api/statistics              # Homepage statistics
+GET /api/providers/recent        # Recently added providers  
+GET /api/languages               # Supported languages for carousel
 ```
 
 ---
@@ -370,6 +481,80 @@ npm run build  # Creates optimized production build
 - Image optimization and compression
 - CDN integration for static assets
 - Database query optimization
+
+---
+
+## 🔧 Troubleshooting
+
+### AI Service Issues 🚀 **NEW**
+
+#### AI Service Not Starting
+```bash
+# Check if Python virtual environment exists
+ls /c/xampp/htdocs/lingora/backend/ai_services/ai_search_env
+
+# If missing, recreate environment
+cd /c/xampp/htdocs/lingora/backend/ai_services
+python -m venv ai_search_env
+ai_search_env\Scripts\activate
+pip install flask flask-cors mysql-connector-python sentence-transformers numpy scikit-learn
+```
+
+#### AI Service Not Responding
+```bash
+# Check if service is running
+curl http://localhost:5001/health
+
+# If not running, start manually
+cd /c/xampp/htdocs/lingora/backend/ai_services
+ai_search_env\Scripts\python.exe embedding_service.py
+
+# Check for port conflicts
+netstat -an | grep 5001
+```
+
+#### Search Not Using AI
+```bash
+# Verify embeddings exist
+mysql -u root -e "USE lingora; SELECT COUNT(*) FROM provider_embeddings;"
+
+# If empty, regenerate embeddings
+php /c/xampp/htdocs/lingora/backend/scripts/init_embeddings.php
+
+# Check PHP can reach AI service
+curl -X POST http://localhost:5001/health
+```
+
+### Common Development Issues
+
+#### XAMPP Services
+```bash
+# Start XAMPP services
+net start apache2.4
+net start mysql
+
+# Check if ports are available
+netstat -an | grep :80   # Apache
+netstat -an | grep :3306 # MySQL
+```
+
+#### Frontend Build Issues
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+```
+
+#### Database Connection
+```php
+// Check MySQL connection in PHP
+$conn = new mysqli("localhost", "root", "", "lingora");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+echo "Connected successfully";
+```
 
 ---
 

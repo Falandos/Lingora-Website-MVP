@@ -25,7 +25,7 @@
 3. **Update Overview**: Refresh `PROJECT_OVERVIEW.md` if major milestones reached
 4. **Technical Changes**: Document architectural changes in `TECHNICAL_NOTES.md`
 5. **Session Handover**: Update `HANDOVERS.md` with current session status and next priorities
-6. **🔄 Git Commit**: Automatically commit all changes with descriptive message and push to GitHub
+6. **🔄 Git Commit & Push**: ALWAYS follow `GIT_WORKFLOW.md` procedures for committing and pushing changes
 
 ### For Handovers Between Sessions:
 1. **Start**: Read `HANDOVERS.md` for latest session status and immediate next steps
@@ -88,7 +88,8 @@
 - ✅ Keep `PROJECT_OVERVIEW.md` current with overall project status
 - ✅ Update `HANDOVERS.md` at end of each session with current status
 - ✅ Use consistent formatting and update "Last Updated" dates
-- ✅ **Commit to Git after completing each feature/task with descriptive messages**
+- ✅ **CRITICAL**: Follow `GIT_WORKFLOW.md` for all Git operations (commit & push)
+- ✅ **Git Repository**: Always use proper authentication and push procedures from workflow guide
 
 ---
 

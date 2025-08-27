@@ -5,6 +5,13 @@ import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
 import LanguageSelector from '../components/ui/LanguageSelector';
 import SearchBar from '../components/ui/SearchBar';
+import StatisticsBar from '../components/home/StatisticsBar';
+import HeroSearchBar from '../components/home/HeroSearchBar';
+import LanguageFlags from '../components/home/LanguageFlags';
+import AISearchShowcase from '../components/home/AISearchShowcase';
+import RecentProvidersCarousel from '../components/home/RecentProvidersCarousel';
+import TrustSignalsSection from '../components/home/TrustSignalsSection';
+import LanguageCarousel from '../components/home/LanguageCarousel';
 
 interface Language {
   code: string;
@@ -73,178 +80,161 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Statistics Bar */}
+      <StatisticsBar />
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden gradient-bg">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
+      <section className="relative bg-white">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-[0.02]">
           <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230ea5e9' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%233B82F6'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E")`,
           }} />
         </div>
 
-        <div className="container-custom relative z-10">
-          <div className="section-padding">
-            <div className="text-center max-w-4xl mx-auto">
-              <div className="animate-fade-in">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 text-balance">
-                  {t('home.hero_title')}
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="pt-16 pb-24 sm:pt-20 sm:pb-32">
+            <div className="text-center">
+              {/* Main Headline */}
+              <div className="animate-fade-in mb-8">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
+                  Find Professionals Who Speak
+                  <span className="block">
+                    <LanguageCarousel className="language-text-shadow" />
+                  </span>
                 </h1>
-                <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-                  {t('home.hero_subtitle')}
+                <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                  Connect with verified professionals in healthcare, legal, financial, 
+                  and educational services across the Netherlands.
                 </p>
               </div>
 
-              {/* Modern Search Form */}
-              <div className="animate-slide-up">
-                <Card className="max-w-6xl mx-auto shadow-large border-0">
-                  <CardBody className="p-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-                      {/* Language Selection - 3 columns */}
-                      <div className="lg:col-span-3 space-y-3">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          {t('home.search_language')}
-                        </label>
-                        <LanguageSelector
-                          selectedLanguages={searchForm.languages}
-                          onLanguageChange={(languages) => setSearchForm(prev => ({ ...prev, languages }))}
-                        />
-                      </div>
+              {/* Hero Search Bar */}
+              <div className="animate-slide-up mb-12">
+                <HeroSearchBar />
+              </div>
 
-                      {/* Google-Style Search Bar - 6 columns */}
-                      <div className="lg:col-span-6 space-y-3">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          What are you looking for?
-                        </label>
-                        <SearchBar
-                          value={searchForm.query}
-                          onChange={(query) => setSearchForm(prev => ({ ...prev, query }))}
-                          placeholder="Search for services, businesses, professionals..."
-                          onSearch={handleSearch}
-                        />
-                      </div>
-
-                      {/* Location - 3 columns */}
-                      <div className="lg:col-span-3 space-y-3">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          {t('home.search_location')}
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            placeholder={t('home.search_location')}
-                            value={searchForm.location}
-                            onChange={(e) => setSearchForm(prev => ({ ...prev, location: e.target.value }))}
-                            className="w-full px-4 py-4 pl-12 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-gray-700"
-                          />
-                          <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-center">
-                      <Button
-                        onClick={handleSearch}
-                        size="xl"
-                        className="px-16 py-4 text-lg font-semibold"
-                        leftIcon={
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                          </svg>
-                        }
-                      >
-                        {t('home.search_button')}
-                      </Button>
-                    </div>
-                  </CardBody>
-                </Card>
+              {/* Language Support */}
+              <div className="animate-fade-in">
+                <LanguageFlags className="mb-8" />
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* AI Search Showcase */}
+      <AISearchShowcase />
 
       {/* How it Works Section */}
-      <section className="section-padding bg-white">
-        <div className="container-custom">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              {t('home.how_it_works')}
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Find professionals who speak your language in just three simple steps
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-medium group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t('home.step_1')}</h3>
-              <p className="text-gray-600 leading-relaxed">Use our advanced filters to find professionals who speak your language and offer the services you need.</p>
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                How It Works
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Find professionals who speak your language in just three simple steps
+              </p>
             </div>
 
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-medium group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+              {/* Step 1: Search */}
+              <div className="text-center group">
+                <div className="relative mb-8">
+                  <div className="w-16 h-16 bg-primary-600 rounded-xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-sm font-bold">
+                    1
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Search Smart</h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  Use our AI-powered search to find professionals in any language. 
+                  Try "dokter" or "stressed" - our system understands what you need.
+                </p>
+                <div className="text-sm text-primary-600 bg-primary-50 px-3 py-1 rounded-full inline-block">
+                  15+ languages supported
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t('home.step_2')}</h3>
-              <p className="text-gray-600 leading-relaxed">Browse verified professionals with detailed profiles showing their qualifications and language skills.</p>
+
+              {/* Step 2: Browse */}
+              <div className="text-center group">
+                <div className="relative mb-8">
+                  <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-bold">
+                    2
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Browse Verified Profiles</h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  Every provider is KVK verified with detailed profiles showing their 
+                  language skills, services, and professional qualifications.
+                </p>
+                <div className="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block">
+                  19 verified businesses
+                </div>
+              </div>
+
+              {/* Step 3: Connect */}
+              <div className="text-center group">
+                <div className="relative mb-8">
+                  <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-bold">
+                    3
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Connect Directly</h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  Contact professionals directly through our secure platform. 
+                  Communicate in your preferred language with confidence.
+                </p>
+                <div className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full inline-block">
+                  Free for residents
+                </div>
+              </div>
             </div>
 
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-medium group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+            {/* Success Stories Preview */}
+            <div className="mt-16 text-center">
+              <div className="bg-white rounded-2xl p-8 shadow-lg max-w-4xl mx-auto">
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-4">
+                  <div className="flex -space-x-2">
+                    <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">🇳🇱</div>
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">🇸🇦</div>
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">🇺🇦</div>
+                    <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">🇩🇪</div>
+                  </div>
+                  <span>Join thousands of satisfied users</span>
+                </div>
+                <blockquote className="text-lg text-gray-700 italic mb-4">
+                  "Finally found a doctor who speaks Arabic! The search was so easy - 
+                  I just typed 'dokter' and found exactly what I needed."
+                </blockquote>
+                <p className="text-sm text-gray-500">— Recent user from Amsterdam</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t('home.step_3')}</h3>
-              <p className="text-gray-600 leading-relaxed">Contact professionals directly through our platform and communicate in your preferred language.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Popular Categories */}
-      <section className="section-padding bg-gray-50">
-        <div className="container-custom">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Popular Categories
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Explore our most popular service categories
-            </p>
-          </div>
+      {/* Recently Added Providers */}
+      <RecentProvidersCarousel />
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {categories.filter(cat => !cat.parent_id).slice(0, 10).map((category, index) => (
-              <Card
-                key={`category-${category.id}-${index}`}
-                variant="interactive"
-                className="text-center group"
-                onClick={() => navigate(`/search?categories=${category.id}`)}
-              >
-                <CardBody className="p-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-primary-200 group-hover:to-secondary-200 transition-all duration-300">
-                    <span className="text-2xl">{category.icon || '🏢'}</span>
-                  </div>
-                  <div className="text-sm font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200">
-                    {currentLang === 'nl' ? category.name_nl : category.name_en}
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Trust Signals & CTA */}
+      <TrustSignalsSection />
     </div>
   );
 };
