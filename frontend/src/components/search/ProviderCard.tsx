@@ -44,6 +44,7 @@ interface ProviderCardProps {
   services: Service[];
   distance?: number;
   currentLanguage: string;
+  activeLanguageFilters?: string[]; // Currently filtered languages for smart highlighting
 }
 
 const ProviderCard: React.FC<ProviderCardProps> = ({
@@ -58,6 +59,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
   services,
   distance,
   currentLanguage,
+  activeLanguageFilters = [],
 }) => {
   const { t } = useTranslation();
   const [showContactModal, setShowContactModal] = useState(false);
@@ -65,6 +67,21 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
   const bio = currentLanguage === 'nl' ? bio_nl : bio_en;
   const displayLanguages = languages; // Show all languages without truncation
   const remainingLanguages = 0; // No truncation needed
+
+  // Determine flag styling based on active language filters
+  const getFlagClassName = (langCode: string) => {
+    const hasActiveFilters = activeLanguageFilters.length > 0;
+    const isMatchingFilter = activeLanguageFilters.includes(langCode);
+    const baseClasses = "w-6 h-4 rounded-sm border border-white shadow-sm transition-all duration-200 hover:scale-110 transform";
+    
+    if (!hasActiveFilters || isMatchingFilter) {
+      // No filters active (show all in color) OR this flag matches the filter
+      return `${baseClasses} hover:shadow-md`;
+    } else {
+      // Filters are active but this flag doesn't match - grey it out
+      return `${baseClasses} grayscale opacity-40 hover:opacity-70 hover:grayscale-50`;
+    }
+  };
 
   return (
     <Card variant="hover" className="h-full cursor-pointer group hover:shadow-lg transition-shadow duration-200" onClick={() => window.location.href = `/provider/${slug}`}>
@@ -134,7 +151,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
                   <img 
                     src={getFlagUrl(lang.language_code)} 
                     alt={currentLanguage === 'nl' ? lang.name_native : lang.name_en}
-                    className="w-6 h-4 rounded-sm border border-white shadow-sm hover:shadow-md transition-shadow duration-200 hover:scale-110 transform"
+                    className={getFlagClassName(lang.language_code)}
                   />
                 </div>
               ))}

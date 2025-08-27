@@ -212,7 +212,7 @@ const SearchPage = () => {
     }
 
     // Distance filter - ONLY apply if we have a location
-    if (hasLocation && filters.radius < 100) {
+    if (hasLocation) {
       console.log(`Filtering by distance: ${filters.radius}km from ${filters.city}`);
       const beforeCount = filtered.length;
       filtered = filtered.filter(result => {
@@ -412,13 +412,13 @@ const SearchPage = () => {
                     <input
                       type="range"
                       min="5"
-                      max="300"
-                      step={filters.radius <= 50 ? 5 : filters.radius <= 100 ? 10 : 25}
+                      max="350"
+                      step="5"
                       value={filters.radius}
                       onChange={(e) => updateFilters({ radius: parseInt(e.target.value) })}
                       className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                       style={{
-                        background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${((filters.radius - 5) / (300 - 5)) * 100}%, #E5E7EB ${((filters.radius - 5) / (300 - 5)) * 100}%, #E5E7EB 100%)`
+                        background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${((filters.radius - 5) / (350 - 5)) * 100}%, #E5E7EB ${((filters.radius - 5) / (350 - 5)) * 100}%, #E5E7EB 100%)`
                       }}
                     />
                     <span className="text-sm font-medium text-gray-700 min-w-[3rem]">{filters.radius} km</span>
@@ -668,6 +668,7 @@ const SearchPage = () => {
                       services={result.services || []}
                       distance={result.distance_km || result.distance}
                       currentLanguage={i18n.language}
+                      activeLanguageFilters={filters.languages}
                     />
                   ))}
                 </div>
