@@ -1,0 +1,139 @@
+{
+  "languages": [
+    {"code": "nl", "name_en": "Dutch", "name_native": "Nederlands", "flag": "🇳🇱", "country": "Netherlands"},
+    {"code": "en", "name_en": "English", "name_native": "English", "flag": "🇬🇧", "country": "United Kingdom"},
+    {"code": "de", "name_en": "German", "name_native": "Deutsch", "flag": "🇩🇪", "country": "Germany"},
+    {"code": "ar", "name_en": "Arabic", "name_native": "العربية", "flag": "🇸🇦", "country": "Saudi Arabia"},
+    {"code": "zgh", "name_en": "Amazigh (Berber)", "name_native": "ⵜⴰⵎⴰⵣⵉⵖⵜ", "flag": "🇲🇦", "country": "Morocco"},
+    {"code": "uk", "name_en": "Ukrainian", "name_native": "Українська", "flag": "🇺🇦", "country": "Ukraine"},
+    {"code": "pl", "name_en": "Polish", "name_native": "Polski", "flag": "🇵🇱", "country": "Poland"},
+    {"code": "zh", "name_en": "Chinese (Mandarin)", "name_native": "中文", "flag": "🇨🇳", "country": "China"},
+    {"code": "yue", "name_en": "Chinese (Cantonese)", "name_native": "粵語", "flag": "🇭🇰", "country": "Hong Kong"},
+    {"code": "es", "name_en": "Spanish", "name_native": "Español", "flag": "🇪🇸", "country": "Spain"},
+    {"code": "hi", "name_en": "Hindi", "name_native": "हिन्दी", "flag": "🇮🇳", "country": "India"},
+    {"code": "tr", "name_en": "Turkish", "name_native": "Türkçe", "flag": "🇹🇷", "country": "Turkey"},
+    {"code": "fr", "name_en": "French", "name_native": "Français", "flag": "🇫🇷", "country": "France"},
+    {"code": "ti", "name_en": "Tigrinya", "name_native": "ትግርኛ", "flag": "🇪🇷", "country": "Eritrea"},
+    {"code": "so", "name_en": "Somali", "name_native": "Soomaali", "flag": "🇸🇴", "country": "Somalia"}
+  ],
+
+  "categories": [
+    {"id": 1, "slug": "healthcare", "name_nl": "Zorgverlening", "name_en": "Healthcare", "icon": "🏥", "parent_id": null},
+    {"id": 2, "slug": "dental", "name_nl": "Tandheelkunde", "name_en": "Dental Care", "icon": "🦷", "parent_id": 1},
+    {"id": 3, "slug": "legal", "name_nl": "Juridisch", "name_en": "Legal Services", "icon": "⚖️", "parent_id": null},
+    {"id": 4, "slug": "beauty", "name_nl": "Schoonheid", "name_en": "Beauty & Wellness", "icon": "💇", "parent_id": null},
+    {"id": 5, "slug": "hair-salon", "name_nl": "Kapsalon", "name_en": "Hair Salon", "icon": "✂️", "parent_id": 4},
+    {"id": 6, "slug": "education", "name_nl": "Onderwijs", "name_en": "Education", "icon": "📚", "parent_id": null},
+    {"id": 7, "slug": "language-lessons", "name_nl": "Taallessen", "name_en": "Language Lessons", "icon": "🗣️", "parent_id": 6},
+    {"id": 8, "slug": "accounting", "name_nl": "Boekhouding", "name_en": "Accounting", "icon": "💰", "parent_id": null},
+    {"id": 9, "slug": "therapy", "name_nl": "Therapie", "name_en": "Therapy", "icon": "🧘", "parent_id": 1},
+    {"id": 10, "slug": "translation", "name_nl": "Vertaling", "name_en": "Translation", "icon": "🌐", "parent_id": null}
+  ],
+
+  "search": {
+    "page": 1,
+    "size": 20,
+    "total": 8,
+    "items": [
+      {
+        "provider": {"id":1,"slug":"salon-mira","name":"Salon Mira","city":"Amsterdam","lat":52.3676,"lng":4.9041},
+        "languages":["nl","en","ar"],
+        "distance_km":3.2,
+        "services":[{"id":10,"title":"Haircut & Styling","category_id":5,"price_min":25,"price_max":40,"mode":"in_person"}],
+        "media":[{"url":"https://picsum.photos/seed/mira/1200/800","w":1200,"h":800}]
+      },
+      {
+        "provider": {"id":2,"slug":"tandarts-west","name":"Tandarts West","city":"Rotterdam","lat":51.9244,"lng":4.4777},
+        "languages":["nl","en","tr"],
+        "distance_km":2.1,
+        "services":[{"id":21,"title":"Dental Check-up","category_id":2,"price_min":30,"price_max":50,"mode":"in_person"}],
+        "media":[{"url":"https://picsum.photos/seed/dentist/1200/800","w":1200,"h":800}]
+      },
+      {
+        "provider": {"id":3,"slug":"advocaat-hassan","name":"Advocatenkantoor Hassan","city":"Amsterdam","lat":52.3702,"lng":4.8952},
+        "languages":["nl","ar","en"],
+        "distance_km":1.5,
+        "services":[{"id":31,"title":"Immigration Law","category_id":3,"price_min":150,"price_max":300,"mode":"both"}],
+        "media":[{"url":"https://picsum.photos/seed/law/1200/800","w":1200,"h":800}]
+      },
+      {
+        "provider": {"id":4,"slug":"therapie-anna","name":"Therapie Centrum Anna","city":"Utrecht","lat":52.0907,"lng":5.1214},
+        "languages":["nl","uk","en"],
+        "distance_km":8.3,
+        "services":[{"id":41,"title":"Psychological Therapy","category_id":9,"price_min":80,"price_max":120,"mode":"both"}],
+        "media":[{"url":"https://picsum.photos/seed/therapy/1200/800","w":1200,"h":800}]
+      },
+      {
+        "provider": {"id":5,"slug":"taal-school-global","name":"Global Language School","city":"Amsterdam","lat":52.3792,"lng":4.8994},
+        "languages":["nl","en","es","zh","hi"],
+        "distance_km":2.8,
+        "services":[{"id":51,"title":"Dutch Language Courses","category_id":7,"price_min":20,"price_max":35,"mode":"both"}],
+        "media":[{"url":"https://picsum.photos/seed/school/1200/800","w":1200,"h":800}]
+      },
+      {
+        "provider": {"id":6,"slug":"boekhouder-ahmet","name":"Administratiekantoor Ahmet","city":"Rotterdam","lat":51.9225,"lng":4.4792},
+        "languages":["nl","tr","de"],
+        "distance_km":4.1,
+        "services":[{"id":61,"title":"Small Business Accounting","category_id":8,"price_min":45,"price_max":75,"mode":"both"}],
+        "media":[{"url":"https://picsum.photos/seed/accounting/1200/800","w":1200,"h":800}]
+      },
+      {
+        "provider": {"id":7,"slug":"vertaler-liu","name":"Translation Services Liu","city":"Den Haag","lat":52.0705,"lng":4.3007},
+        "languages":["nl","zh","yue","en"],
+        "distance_km":6.2,
+        "services":[{"id":71,"title":"Document Translation","category_id":10,"price_min":25,"price_max":50,"mode":"online"}],
+        "media":[{"url":"https://picsum.photos/seed/translation/1200/800","w":1200,"h":800}]
+      },
+      {
+        "provider": {"id":8,"slug":"kapper-omar","name":"Barbershop Omar","city":"Amsterdam","lat":52.3555,"lng":4.9139},
+        "languages":["nl","ar","fr","zgh"],
+        "distance_km":1.8,
+        "services":[{"id":81,"title":"Men's Haircut","category_id":5,"price_min":18,"price_max":30,"mode":"in_person"}],
+        "media":[{"url":"https://picsum.photos/seed/barber/1200/800","w":1200,"h":800}]
+      }
+    ]
+  },
+
+  "providerBySlug": {
+    "salon-mira": {
+      "id":1,"slug":"salon-mira","name":"Salon Mira","city":"Amsterdam",
+      "bio_i18n":{"nl":"Beste kapsalon in de buurt met internationale ervaring","en":"Top salon nearby with international experience"},
+      "languages":["nl","en","ar"],
+      "opening_hours":{"mon":[["09:00","17:00"]],"tue":[["09:00","17:00"]],"wed":[["09:00","17:00"]],"thu":[["09:00","19:00"]],"fri":[["09:00","19:00"]],"sat":[["10:00","16:00"]]},
+      "services":[{"id":10,"title":"Haircut & Styling","description_i18n":{"nl":"Professioneel knippen en stylen","en":"Professional cutting and styling"},"price_min":25,"price_max":40,"currency":"EUR","mode":"in_person","contact_staff_id":1}],
+      "staff":[{"id":1,"name":"Mira","role_title":"Head Stylist","languages":["nl","en","ar"],"email_public":"mira@salon-mira.nl","phone_public":"+31 6 12 34 56 78"}],
+      "media":[{"url":"https://picsum.photos/seed/mira/1200/800","w":1200,"h":800},{"url":"https://picsum.photos/seed/mira2/1200/800","w":1200,"h":800}]
+    },
+    "tandarts-west": {
+      "id":2,"slug":"tandarts-west","name":"Tandarts West","city":"Rotterdam",
+      "bio_i18n":{"nl":"Moderne tandheelkundige praktijk met meertalig team","en":"Modern dental practice with multilingual team"},
+      "languages":["nl","en","tr"],
+      "opening_hours":{"mon":[["08:00","17:00"]],"tue":[["08:00","17:00"]],"wed":[["08:00","17:00"]],"thu":[["08:00","20:00"]],"fri":[["08:00","17:00"]]},
+      "services":[{"id":21,"title":"Dental Check-up","description_i18n":{"nl":"Uitgebreide controle en reiniging","en":"Comprehensive check-up and cleaning"},"price_min":30,"price_max":50,"currency":"EUR","mode":"in_person","contact_staff_id":2}],
+      "staff":[{"id":2,"name":"Dr. Kaya","role_title":"Dentist","languages":["nl","tr","en"],"email_public":"dr.kaya@tandarts-west.nl","phone_public":"+31 10 123 45 67"}],
+      "media":[{"url":"https://picsum.photos/seed/dentist/1200/800","w":1200,"h":800}]
+    }
+  },
+
+  "auth": {
+    "users": [
+      {"id": 1, "email": "test@example.com", "password": "password123", "role": "provider", "email_verified": true, "business_name": "Test Business", "kvk_number": "12345678", "btw_number": "NL123456789B01"},
+      {"id": 2, "email": "admin@lingora.nl", "password": "admin123", "role": "admin", "email_verified": true}
+    ],
+    "sessions": {}
+  },
+
+  "user_profiles": {
+    "1": {
+      "id": 1,
+      "email": "test@example.com",
+      "business_name": "Test Business",
+      "kvk_number": "12345678",
+      "btw_number": "NL123456789B01",
+      "status": "approved",
+      "subscription_status": "trial",
+      "trial_expires": "2025-11-24",
+      "profile_complete": false
+    }
+  }
+}

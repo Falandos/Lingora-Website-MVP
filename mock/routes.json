@@ -1,0 +1,10 @@
+{
+  "/api/languages": "/languages",
+  "/api/categories": "/categories",
+  "/api/search": "/search",
+  "/api/providers/slug/:slug": "/providerBySlug/:slug",
+  "/api/auth/login": "/auth/login",
+  "/api/auth/register": "/auth/register",
+  "/api/auth/me": "/auth/me",
+  "/api/user/profile": "/user_profiles"
+}

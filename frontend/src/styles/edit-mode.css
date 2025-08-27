@@ -1,0 +1,218 @@
+/* Edit Mode Visual Indicators */
+
+/* Base editable field styling */
+.editable-field {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover state when edit mode is active */
+.editable-hover:hover {
+  background: rgba(59, 130, 246, 0.05);
+  border: 2px dashed rgba(59, 130, 246, 0.3) !important;
+  border-radius: 8px;
+}
+
+/* Active editing state */
+.editable-active {
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid rgba(59, 130, 246, 0.5) !important;
+  border-radius: 8px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Edit mode body styling */
+body.edit-mode {
+  cursor: default;
+}
+
+body.edit-mode .editable-field {
+  position: relative;
+}
+
+/* Section-level edit indicators */
+.edit-section {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.edit-section:hover {
+  background: rgba(59, 130, 246, 0.02);
+  border-radius: 12px;
+}
+
+/* Edit section headers */
+.edit-section-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 2px dashed transparent;
+  transition: all 0.2s;
+}
+
+.edit-section:hover .edit-section-header {
+  border-bottom-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Plus/Add buttons in edit mode - DEPRECATED: Now always visible */
+.edit-add-button {
+  /* Legacy class - buttons now use inline styles for better visibility */
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.3s ease;
+  background: rgb(59, 130, 246);
+  border: none;
+  color: white;
+}
+
+/* Enhanced buttons for edit mode - Always visible and interactive */
+.edit-action-button {
+  opacity: 1;
+  background: rgb(59, 130, 246);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  transition: all 0.2s ease;
+}
+
+.edit-action-button:hover {
+  background: rgb(37, 99, 235);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Edit mode overlay for containers */
+.edit-mode-overlay {
+  position: absolute;
+  inset: 0;
+  border: 2px dashed rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.02);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.edit-section:hover .edit-mode-overlay {
+  opacity: 1;
+}
+
+/* Edit mode help tooltip */
+.edit-help-tooltip {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(59, 130, 246, 0.95);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 14px;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.edit-help-tooltip.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Animation classes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(1deg); }
+  75% { transform: rotate(-1deg); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s infinite;
+}
+
+/* Enhanced pulse for edit indicators */
+@keyframes edit-pulse {
+  0%, 100% { 
+    opacity: 0.8; 
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  }
+}
+
+.animate-edit-pulse {
+  animation: edit-pulse 2.5s infinite;
+}
+
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+/* Edit mode grid helpers */
+.edit-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+    linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.edit-section:hover .edit-grid-overlay {
+  opacity: 0.3;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .edit-section:hover {
+    /* No padding/margin changes to prevent layout shifts */
+  }
+  
+  .edit-help-tooltip {
+    position: fixed;
+    top: auto;
+    bottom: 100px;
+    left: 20px;
+    right: 20px;
+    transform: none;
+    text-align: center;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .editable-hover:hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  .editable-active {
+    background: rgba(59, 130, 246, 0.15);
+  }
+  
+  .edit-section:hover {
+    background: rgba(59, 130, 246, 0.05);
+  }
+}
