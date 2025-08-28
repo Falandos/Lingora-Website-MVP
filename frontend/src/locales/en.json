@@ -66,7 +66,22 @@
     "button_search": "Search",
     "ai_powered": "🧠 AI-powered",
     "search_any_language": "Search in any language",
-    "no_registration": "🇳🇱 🇬🇧 🇸🇦 🇩🇪 🇪🇸 +10 more"
+    "no_registration": "🇳🇱 🇬🇧 🇸🇦 🇩🇪 🇪🇸 +10 more",
+    "results_title": "Search Results",
+    "no_results": "No professionals found matching your criteria",
+    "filters": "Filters",
+    "distance": "Distance",
+    "languages": "Languages",
+    "categories": "Categories",
+    "service_mode": "Service Mode",
+    "in_person": "In Person",
+    "online": "Online",
+    "both": "Both",
+    "sort_by": "Sort by",
+    "best_match": "Best Match",
+    "distance_asc": "Distance",
+    "show_map": "Show Map",
+    "show_list": "Show List"
   },
   "stats": {
     "active_businesses": "Active Businesses",
@@ -93,23 +108,6 @@
     "example_4_query": "طبيب نفسي",
     "example_4_desc": "Arabic for psychologist",
     "example_4_results": "Found 2 providers"
-  },
-  "search": {
-    "results_title": "Search Results",
-    "no_results": "No professionals found matching your criteria",
-    "filters": "Filters",
-    "distance": "Distance",
-    "languages": "Languages",
-    "categories": "Categories",
-    "service_mode": "Service Mode",
-    "in_person": "In Person",
-    "online": "Online",
-    "both": "Both",
-    "sort_by": "Sort by",
-    "best_match": "Best Match",
-    "distance_asc": "Distance",
-    "show_map": "Show Map",
-    "show_list": "Show List"
   },
   "provider": {
     "quick_contact": "Quick Contact",

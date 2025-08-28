@@ -57,7 +57,22 @@
     "button_search": "Ara",
     "ai_powered": "🧠 AI-powered",
     "search_any_language": "Herhangi bir dilde arama yapın",
-    "no_registration": "🇳🇱 🇬🇧 🇸🇦 🇩🇪 🇪🇸 +10 daha"
+    "no_registration": "🇳🇱 🇬🇧 🇸🇦 🇩🇪 🇪🇸 +10 daha",
+    "results_title": "Search Results",
+    "no_results": "No professionals found matching your criteria",
+    "filters": "Filters",
+    "distance": "Distance",
+    "languages": "Languages",
+    "categories": "Categories",
+    "service_mode": "Service Mode",
+    "in_person": "In Person",
+    "online": "Online",
+    "both": "Both",
+    "sort_by": "Sort by",
+    "best_match": "Best Match",
+    "distance_asc": "Distance",
+    "show_map": "Show Map",
+    "show_list": "Show List"
   },
   "stats": {
     "active_businesses": "Aktif İşletmeler",
@@ -84,23 +99,6 @@
     "example_4_query": "طبيب نفسي",
     "example_4_desc": "Psikolog için Arapça",
     "example_4_results": "2 sağlayıcı bulundu"
-  },
-  "search": {
-    "results_title": "Search Results",
-    "no_results": "No professionals found matching your criteria",
-    "filters": "Filters",
-    "distance": "Distance",
-    "languages": "Languages",
-    "categories": "Categories",
-    "service_mode": "Service Mode",
-    "in_person": "In Person",
-    "online": "Online",
-    "both": "Both",
-    "sort_by": "Sort by",
-    "best_match": "Best Match",
-    "distance_asc": "Distance",
-    "show_map": "Show Map",
-    "show_list": "Show List"
   },
   "provider": {
     "services": "Services",
