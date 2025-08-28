@@ -100,7 +100,7 @@ const HomePage = () => {
           <div className="pt-20 pb-32 sm:pt-24 sm:pb-40">
             <div className="text-center">
               {/* Main Headline */}
-              <div className="animate-fade-in mb-12">
+              <div className="animate-fade-in mb-64">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-8 tracking-tight">
                   Find Professionals Who Speak
                   <span className="block mt-4">
