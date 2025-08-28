@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost/lingora/backend/public',
+        target: 'http://localhost/lingora/backend',
         changeOrigin: true,
         secure: false,
         configure: (proxy, options) => {

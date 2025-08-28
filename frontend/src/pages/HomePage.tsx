@@ -119,11 +119,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Discover Section with Tabs */}
-      <DiscoverSection />
-
       {/* Recently Added Providers */}
       <RecentProvidersCarousel />
+
+      {/* Discover Section with Tabs */}
+      <DiscoverSection />
 
       {/* Trust Signals & CTA */}
       <TrustSignalsSection />
