@@ -29,7 +29,8 @@
     "admin": "Admin-Panel"
   },
   "home": {
-    "hero_title_template": "Finden Sie Fachkräfte, die {{language}} sprechen",
+    "hero_title_before": "Finden Sie Fachkräfte, die",
+    "hero_title_after": "sprechen",
     "hero_subtitle": "Verbinden Sie sich mit Dienstleistern in den Niederlanden, die Ihre bevorzugte Sprache sprechen",
     "search_language": "Sprache auswählen",
     "search_category": "Kategorie auswählen",

@@ -29,7 +29,8 @@
     "admin": "Panel administratora"
   },
   "home": {
-    "hero_title_template": "Znajdź profesjonalistów mówiących {{language}}",
+    "hero_title_before": "Znajdź profesjonalistów mówiących",
+    "hero_title_after": "",
     "hero_subtitle": "Połącz się z dostawcami usług w Holandii, którzy mówią w Twoim preferowanym języku",
     "search_language": "Wybierz język",
     "search_category": "Wybierz kategorię",

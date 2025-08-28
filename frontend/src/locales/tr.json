@@ -29,7 +29,8 @@
     "admin": "Yönetim Paneli"
   },
   "home": {
-    "hero_title_template": "{{language}} Konuşan Profesyonelleri Bulun",
+    "hero_title_before": "",
+    "hero_title_after": "Konuşan Profesyonelleri Bulun",
     "hero_subtitle": "Hollanda genelinde tercih ettiğiniz dili konuşan hizmet sağlayıcılarıyla iletişime geçin",
     "search_language": "Dil seçin",
     "search_category": "Kategori seçin",

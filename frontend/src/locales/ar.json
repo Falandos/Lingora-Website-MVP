@@ -29,7 +29,8 @@
     "admin": "لوحة الإدارة"
   },
   "home": {
-    "hero_title_template": "ابحث عن محترفين يتحدثون {{language}}",
+    "hero_title_before": "ابحث عن محترفين يتحدثون",
+    "hero_title_after": "",
     "hero_subtitle": "تواصل مع مقدمي الخدمات في هولندا الذين يتكلمون لغتك المفضلة",
     "search_language": "اختر اللغة",
     "search_category": "اختر الفئة",

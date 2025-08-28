@@ -105,12 +105,29 @@ const HomePage = () => {
                   <LanguageCarousel 
                     className="language-text-shadow" 
                     renderWithTitle={(currentLanguage) => (
-                      <span>
-                        {t('home.hero_title_template', { language: currentLanguage.native })}
-                        <span className="block mt-4 language-text-shadow" style={{ color: currentLanguage.color }}>
+                      <div className="space-y-2">
+                        {/* Row 1: Text before rotating language */}
+                        {t('home.hero_title_before') && (
+                          <div className="text-gray-900">
+                            {t('home.hero_title_before')}
+                          </div>
+                        )}
+                        
+                        {/* Row 2: Rotating language with color */}
+                        <div 
+                          className="language-text-shadow" 
+                          style={{ color: currentLanguage.color }}
+                        >
                           {currentLanguage.native}
-                        </span>
-                      </span>
+                        </div>
+                        
+                        {/* Row 3: Text after rotating language */}
+                        {t('home.hero_title_after') && (
+                          <div className="text-gray-900">
+                            {t('home.hero_title_after')}
+                          </div>
+                        )}
+                      </div>
                     )}
                   />
                 </h1>

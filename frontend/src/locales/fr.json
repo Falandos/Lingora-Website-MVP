@@ -29,7 +29,8 @@
     "admin": "Admin Panel"
   },
   "home": {
-    "hero_title": "Find Professionals Who Speak Your Language",
+    "hero_title_before": "Trouvez des Professionnels Qui Parlent",
+    "hero_title_after": "",
     "hero_subtitle": "Connect with service providers across the Netherlands who speak your preferred language",
     "search_language": "Select language",
     "search_category": "Select category",

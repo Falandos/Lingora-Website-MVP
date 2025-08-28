@@ -38,7 +38,8 @@
     "admin": "Beheerpaneel"
   },
   "home": {
-    "hero_title_template": "Vind Professionals Die {{language}} Spreken",
+    "hero_title_before": "Vind Professionals Die",
+    "hero_title_after": "Spreken",
     "hero_subtitle": "Maak contact met dienstverleners in heel Nederland die jouw voorkeurstaal spreken",
     "search_language": "Selecteer taal",
     "search_category": "Selecteer categorie",
