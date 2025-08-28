@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 import { Card, CardBody } from '../ui/Card';
 
@@ -48,6 +49,7 @@ interface RecentProvidersCarouselProps {
 }
 
 export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarouselProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [providers, setProviders] = useState<RecentProvider[]>([]);
   const [loading, setLoading] = useState(true);
@@ -183,7 +185,7 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
           {/* Section Header */}
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Recently Joined Professionals
+              {t('carousel.recently_joined')}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Verified businesses ready to serve you in your language

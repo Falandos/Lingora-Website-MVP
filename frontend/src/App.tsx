@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
+import { useEffect } from 'react';
 import i18n from './services/i18n';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -20,6 +21,25 @@ import LoginPage from './pages/LoginPage';
 import LegalPage from './pages/LegalPage';
 
 function App() {
+  // Handle RTL languages
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      const isRTL = ['ar', 'he'].includes(i18n.language);
+      document.dir = isRTL ? 'rtl' : 'ltr';
+      document.documentElement.lang = i18n.language;
+    };
+
+    // Set initial direction
+    handleLanguageChange();
+
+    // Listen for language changes
+    i18n.on('languageChanged', handleLanguageChange);
+
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, []);
+
   return (
     <I18nextProvider i18n={i18n}>
       <AuthProvider>

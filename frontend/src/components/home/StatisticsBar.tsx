@@ -71,25 +71,25 @@ export const StatisticsBar = ({ className = '' }: StatisticsBarProps) => {
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-center">
           <StatItem 
             value={stats.active_providers} 
-            label="Active Businesses" 
+            label={t('stats.active_businesses')} 
             delay={0}
           />
           <div className="w-px h-4 bg-gray-300 hidden sm:block" />
           <StatItem 
             value={stats.total_staff} 
-            label="Professional Staff" 
+            label={t('stats.professional_staff')} 
             delay={200}
           />
           <div className="w-px h-4 bg-gray-300 hidden sm:block" />
           <StatItem 
             value={stats.languages_offered} 
-            label="Languages" 
+            label={t('stats.languages')} 
             delay={400}
           />
           <div className="w-px h-4 bg-gray-300 hidden sm:block" />
           <StatItem 
             value={stats.total_services} 
-            label="Services" 
+            label={t('stats.services')} 
             delay={600}
           />
         </div>

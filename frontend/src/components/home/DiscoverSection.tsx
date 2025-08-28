@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
 interface DiscoverSectionProps {
@@ -9,6 +10,7 @@ interface DiscoverSectionProps {
 type TabType = 'try-it' | 'how-it-works' | 'trust';
 
 export const DiscoverSection = ({ className = '' }: DiscoverSectionProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('try-it');
   const [activeExample, setActiveExample] = useState(0);
@@ -114,9 +116,9 @@ export const DiscoverSection = ({ className = '' }: DiscoverSectionProps) => {
   };
 
   const tabs = [
-    { id: 'try-it', label: 'Try Search' },
-    { id: 'for-providers', label: 'For Businesses' },
-    { id: 'get-started', label: 'Get Started' }
+    { id: 'try-it', label: t('home.tab_try_search') },
+    { id: 'for-providers', label: t('home.tab_for_businesses') },
+    { id: 'get-started', label: t('home.tab_get_started') }
   ];
 
   return (
@@ -282,13 +284,13 @@ export const DiscoverSection = ({ className = '' }: DiscoverSectionProps) => {
                     className="bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-bold py-4 px-8 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                   >
                     <span className="flex items-center justify-center gap-2">
-                      Try Your Own Search Now
+                      {t('home.try_your_search')}
                       <span className="text-xl animate-bounce">🚀</span>
                     </span>
                   </Button>
                   
                   <p className="text-sm text-gray-500 mt-4">
-                    {magicMode ? "Your linguistic adventure awaits! ✨" : "Search in any language • Get instant results • No registration needed"}
+                    {magicMode ? "Your linguistic adventure awaits! ✨" : t('home.search_tagline')}
                   </p>
                 </div>
               </div>
@@ -496,9 +498,9 @@ export const DiscoverSection = ({ className = '' }: DiscoverSectionProps) => {
                         </svg>
                       </div>
                       
-                      <h4 className="text-2xl font-bold text-gray-900 mb-4">For Businesses</h4>
+                      <h4 className="text-2xl font-bold text-gray-900 mb-4">{t('home.for_businesses_title')}</h4>
                       <p className="text-gray-600 mb-8">
-                        Connect with thousands of residents who need services in their language. Grow your international client base.
+                        {t('home.for_businesses_subtitle')}
                       </p>
                       
                       <div className="text-3xl font-bold text-blue-600 mb-2">€9.99<span className="text-lg text-gray-600">/month</span></div>

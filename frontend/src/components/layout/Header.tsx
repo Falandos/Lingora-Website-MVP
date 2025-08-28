@@ -13,6 +13,7 @@ const Header = () => {
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+    localStorage.setItem('lingora-language', lng);
   };
 
   const handleLogout = () => {

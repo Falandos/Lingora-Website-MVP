@@ -102,10 +102,17 @@ const HomePage = () => {
               {/* Main Headline */}
               <div className="animate-fade-in mb-64">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-8 tracking-tight">
-                  Find Professionals Who Speak
-                  <span className="block mt-4">
-                    <LanguageCarousel className="language-text-shadow" />
-                  </span>
+                  <LanguageCarousel 
+                    className="language-text-shadow" 
+                    renderWithTitle={(currentLanguage) => (
+                      <span>
+                        {t('home.hero_title_template', { language: currentLanguage.native })}
+                        <span className="block mt-4 language-text-shadow" style={{ color: currentLanguage.color }}>
+                          {currentLanguage.native}
+                        </span>
+                      </span>
+                    )}
+                  />
                 </h1>
               </div>
 

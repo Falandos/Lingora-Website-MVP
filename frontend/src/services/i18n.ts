@@ -36,10 +36,18 @@ const resources = {
   so: { translation: so },
 };
 
-// Detect browser language
-const getBrowserLanguage = (): string => {
-  const browserLang = navigator.language;
+// Detect initial language with localStorage persistence
+const getInitialLanguage = (): string => {
   const supportedLanguages = Object.keys(resources);
+  
+  // First check localStorage
+  const savedLanguage = localStorage.getItem('lingora-language');
+  if (savedLanguage && supportedLanguages.includes(savedLanguage)) {
+    return savedLanguage;
+  }
+  
+  // Then check browser language
+  const browserLang = navigator.language;
   
   // Check exact match
   if (supportedLanguages.includes(browserLang)) {
@@ -60,7 +68,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: getBrowserLanguage(),
+    lng: getInitialLanguage(),
     fallbackLng: 'nl',
     
     interpolation: {

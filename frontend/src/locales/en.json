@@ -38,7 +38,7 @@
     "admin": "Admin Panel"
   },
   "home": {
-    "hero_title": "Find Professionals Who Speak Your Language",
+    "hero_title_template": "Find Professionals Who Speak {{language}}",
     "hero_subtitle": "Connect with service providers across the Netherlands who speak your preferred language",
     "search_language": "Select language",
     "search_category": "Select category",
@@ -47,7 +47,52 @@
     "how_it_works": "How it works",
     "step_1": "Search by language and service",
     "step_2": "Browse qualified professionals",
-    "step_3": "Contact directly in your language"
+    "step_3": "Contact directly in your language",
+    "tab_try_search": "Try Search",
+    "tab_for_businesses": "For Businesses", 
+    "tab_get_started": "Get Started",
+    "try_your_search": "Try Your Own Search Now",
+    "search_tagline": "Search in any language • Get instant results • No registration needed",
+    "for_businesses_title": "For Businesses",
+    "for_businesses_subtitle": "Connect with thousands of residents who need services in their language. Grow your international client base.",
+    "get_started_title": "Get Started",
+    "register_business": "Register Your Business", 
+    "search_professionals": "Search Professionals"
+  },
+  "search": {
+    "placeholder_prefix": "I'm searching for a:",
+    "location_near": "Near:",
+    "my_location": "📍 My location",
+    "button_search": "Search",
+    "ai_powered": "🧠 AI-powered",
+    "search_any_language": "Search in any language",
+    "no_registration": "🇳🇱 🇬🇧 🇸🇦 🇩🇪 🇪🇸 +10 more"
+  },
+  "stats": {
+    "active_businesses": "Active Businesses",
+    "professional_staff": "Professional Staff",
+    "languages": "Languages",
+    "services": "Services"
+  },
+  "carousel": {
+    "recently_joined": "Recently Joined Professionals"
+  },
+  "discover": {
+    "try_your_search": "Try Your Own Search Now",
+    "search_tagline": "Search in any language • Get instant results • No registration needed",
+    "examples_title": "Real Search Examples:",
+    "example_1_query": "dokter die arabisch spreekt",
+    "example_1_desc": "Arabic-speaking doctor in Dutch",
+    "example_1_results": "Found 3 providers",
+    "example_2_query": "need help with stress",
+    "example_2_desc": "Natural English expression",
+    "example_2_results": "Found 2 psychologists",
+    "example_3_query": "Turkish lawyer immigration",
+    "example_3_desc": "Mixed language search",
+    "example_3_results": "Found 1 specialist",
+    "example_4_query": "طبيب نفسي",
+    "example_4_desc": "Arabic for psychologist",
+    "example_4_results": "Found 2 providers"
   },
   "search": {
     "results_title": "Search Results",
@@ -67,6 +112,9 @@
     "show_list": "Show List"
   },
   "provider": {
+    "quick_contact": "Quick Contact",
+    "we_speak_language": "We speak your language",
+    "distance_km": "km",
     "services": "Services",
     "staff": "Team",
     "opening_hours": "Opening Hours",

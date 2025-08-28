@@ -38,7 +38,7 @@
     "admin": "Beheerpaneel"
   },
   "home": {
-    "hero_title": "Vind Professionals Die Jouw Taal Spreken",
+    "hero_title_template": "Vind Professionals Die {{language}} Spreken",
     "hero_subtitle": "Maak contact met dienstverleners in heel Nederland die jouw voorkeurstaal spreken",
     "search_language": "Selecteer taal",
     "search_category": "Selecteer categorie",
@@ -47,7 +47,52 @@
     "how_it_works": "Hoe het werkt",
     "step_1": "Zoek op taal en dienst",
     "step_2": "Bekijk gekwalificeerde professionals",
-    "step_3": "Neem direct contact op in jouw taal"
+    "step_3": "Neem direct contact op in jouw taal",
+    "tab_try_search": "Probeer Zoeken",
+    "tab_for_businesses": "Voor Bedrijven",
+    "tab_get_started": "Begin Hier",
+    "try_your_search": "Probeer Nu Je Eigen Zoekopdracht",
+    "search_tagline": "Zoek in elke taal • Onmiddellijke resultaten • Geen registratie vereist",
+    "for_businesses_title": "Voor Bedrijven",
+    "for_businesses_subtitle": "Maak contact met duizenden inwoners die diensten nodig hebben in hun taal. Laat je internationale klantenbestand groeien.",
+    "get_started_title": "Begin Hier",
+    "register_business": "Registreer Je Bedrijf",
+    "search_professionals": "Zoek Professionals"
+  },
+  "search": {
+    "placeholder_prefix": "Ik zoek naar:",
+    "location_near": "Nabij:",
+    "my_location": "📍 Mijn locatie",
+    "button_search": "Zoeken",
+    "ai_powered": "🧠 AI-powered",
+    "search_any_language": "Zoek in elke taal",
+    "no_registration": "🇳🇱 🇬🇧 🇸🇦 🇩🇪 🇪🇸 +10 meer"
+  },
+  "stats": {
+    "active_businesses": "Actieve Bedrijven",
+    "professional_staff": "Professioneel Personeel", 
+    "languages": "Talen",
+    "services": "Diensten"
+  },
+  "carousel": {
+    "recently_joined": "Recent Aangesloten Professionals"
+  },
+  "discover": {
+    "try_your_search": "Probeer Nu Je Eigen Zoekopdracht",
+    "search_tagline": "Zoek in elke taal • Onmiddellijke resultaten • Geen registratie vereist",
+    "examples_title": "Echte Zoekvoorbeelden:",
+    "example_1_query": "dokter die arabisch spreekt",
+    "example_1_desc": "Arabisch sprekende dokter in het Nederlands",
+    "example_1_results": "3 aanbieders gevonden",
+    "example_2_query": "hulp bij stress",
+    "example_2_desc": "Natuurlijke Nederlandse uitdrukking",
+    "example_2_results": "2 psychologen gevonden",
+    "example_3_query": "Turkse advocaat immigratie",
+    "example_3_desc": "Gemixte taal zoekopdracht",
+    "example_3_results": "1 specialist gevonden",
+    "example_4_query": "طبيب نفسي",
+    "example_4_desc": "Arabisch voor psycholoog",
+    "example_4_results": "2 aanbieders gevonden"
   },
   "search": {
     "results_title": "Zoekresultaten",
@@ -67,6 +112,9 @@
     "show_list": "Toon Lijst"
   },
   "provider": {
+    "quick_contact": "Snel Contact",
+    "we_speak_language": "Wij spreken jouw taal",
+    "distance_km": "km",
     "services": "Diensten",
     "staff": "Team",
     "opening_hours": "Openingstijden",
