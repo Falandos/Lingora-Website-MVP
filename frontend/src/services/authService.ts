@@ -41,19 +41,23 @@ export class AuthService {
 
       const data = await response.json();
 
-      if (data.success && data.data) {
+      // Handle backend response format: {token, user} directly or {error}
+      if (response.ok && data.token && data.user) {
         // Store token and user data
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         
         return {
           success: true,
-          data: data.data
+          data: {
+            token: data.token,
+            user: data.user
+          }
         };
       } else {
         return {
           success: false,
-          message: data.message || 'Login failed'
+          message: data.error || data.message || 'Login failed'
         };
       }
     } catch (error) {
@@ -106,7 +110,8 @@ export class AuthService {
 
       if (response.ok) {
         const data = await response.json();
-        return data.success ? data.data : null;
+        // Handle backend response format: user object directly or {error}
+        return data.email ? data : null;
       } else {
         // Token is invalid, clear it
         this.logout();
