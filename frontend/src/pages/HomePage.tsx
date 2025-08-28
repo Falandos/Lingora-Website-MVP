@@ -102,34 +102,36 @@ const HomePage = () => {
               {/* Main Headline */}
               <div className="animate-fade-in mb-64">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-8 tracking-tight">
-                  <LanguageCarousel 
-                    className="language-text-shadow" 
-                    renderWithTitle={(currentLanguage) => (
-                      <div className="space-y-2">
-                        {/* Row 1: Text before rotating language */}
-                        {t('home.hero_title_before') && (
-                          <div className="text-gray-900">
-                            {t('home.hero_title_before')}
-                          </div>
-                        )}
-                        
-                        {/* Row 2: Rotating language with color */}
-                        <div 
-                          className="language-text-shadow" 
-                          style={{ color: currentLanguage.color }}
-                        >
-                          {currentLanguage.native}
-                        </div>
-                        
-                        {/* Row 3: Text after rotating language */}
-                        {t('home.hero_title_after') && (
-                          <div className="text-gray-900">
-                            {t('home.hero_title_after')}
-                          </div>
-                        )}
+                  <div className="space-y-4">
+                    {/* Row 1: Static text before rotating language */}
+                    {t('home.hero_title_before') && (
+                      <div className="text-gray-900">
+                        {t('home.hero_title_before')}
                       </div>
                     )}
-                  />
+                    
+                    {/* Row 2: Rotating language with color (always has consistent height) */}
+                    <div className="min-h-[1.2em] flex items-center justify-center">
+                      <LanguageCarousel 
+                        className="language-text-shadow" 
+                        renderWithTitle={(currentLanguage) => (
+                          <div 
+                            className="language-text-shadow" 
+                            style={{ color: currentLanguage.color }}
+                          >
+                            {currentLanguage.native}
+                          </div>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Row 3: Static text after rotating language */}
+                    {t('home.hero_title_after') && (
+                      <div className="text-gray-900">
+                        {t('home.hero_title_after')}
+                      </div>
+                    )}
+                  </div>
                 </h1>
               </div>
 
