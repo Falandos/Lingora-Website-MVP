@@ -10,6 +10,7 @@ import StaffPage from './dashboard/StaffPage';
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import DataTable, { type Column } from '../components/dashboard/DataTable';
+import { useTranslation } from 'react-i18next';
 
 interface Message {
   id: number;
@@ -25,6 +26,7 @@ interface Message {
 
 const MessagesPage = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -53,10 +55,10 @@ const MessagesPage = () => {
         const messagesData = result.data?.messages || result.messages || result.data || result;
         setMessages(Array.isArray(messagesData) ? messagesData : []);
       } else {
-        setError('Failed to load messages');
+        setError(t('messages.failed_to_load'));
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(t('messages.network_error'));
       setMessages([]);
     } finally {
       setLoading(false);
@@ -76,7 +78,7 @@ const MessagesPage = () => {
   const columns: Column[] = [
     {
       key: 'sender_name',
-      label: 'Sender',
+      label: t('messages.sender'),
       sortable: true,
       render: (value, row) => (
         <div>
@@ -87,30 +89,30 @@ const MessagesPage = () => {
     },
     ...(isAdmin ? [{
       key: 'business_name',
-      label: 'To Provider',
+      label: t('messages.to_provider'),
       sortable: true,
       render: (value: string) => value || 'N/A'
     }] : []),
     {
       key: 'subject',
-      label: 'Subject',
+      label: t('messages.subject'),
       sortable: true,
     },
     {
       key: 'created_at',
-      label: 'Received',
+      label: t('messages.received'),
       sortable: true,
       render: (value: string) => formatDate(value)
     },
     ...(isAdmin ? [{
       key: 'is_read',
-      label: 'Status',
+      label: t('messages.status'),
       sortable: true,
       render: (value: boolean) => (
         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
           value ? 'bg-gray-100 text-gray-800' : 'bg-blue-100 text-blue-800'
         }`}>
-          {value ? 'Read' : 'New'}
+          {value ? t('messages.read') : t('messages.new')}
         </span>
       )
     }] : [])
@@ -118,12 +120,12 @@ const MessagesPage = () => {
 
   const actions = [
     {
-      label: 'View',
+      label: t('messages.view'),
       onClick: (row: Message) => alert(`From: ${row.sender_name}\n\nMessage:\n${row.message}`),
       variant: 'secondary' as const
     },
     ...(isAdmin ? [{
-      label: 'Reply',
+      label: t('messages.reply'),
       onClick: (row: Message) => window.open(`mailto:${row.sender_email}?subject=Re: ${row.subject}`, '_blank'),
       variant: 'primary' as const
     }] : [])
@@ -133,12 +135,12 @@ const MessagesPage = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          {isAdmin ? 'All Messages' : 'Messages'}
+          {isAdmin ? t('messages.all_messages_title') : t('messages.title')}
         </h1>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-1 text-gray-600">
           {isAdmin 
-            ? `Monitor all contact messages sent through the platform. ${messages.filter(m => !m.is_read).length} unread messages.`
-            : 'Messages related to your provider profile.'
+            ? `${t('messages.admin_description')} ${messages.filter(m => !m.is_read).length} ${t('messages.unread_messages')}.`
+            : t('messages.description')
           }
         </p>
       </div>
@@ -157,7 +159,7 @@ const MessagesPage = () => {
             actions={actions}
             searchable
             searchKeys={['sender_name', 'sender_email', 'subject']}
-            emptyMessage={loading ? "Loading messages..." : "No messages found."}
+            emptyMessage={loading ? t('messages.loading_messages') : t('messages.no_messages')}
           />
         </div>
       </div>

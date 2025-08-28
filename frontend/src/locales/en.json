@@ -157,6 +157,26 @@
     "pending_approval": "Pending Approval",
     "approved": "Approved"
   },
+  "messages": {
+    "title": "Messages",
+    "all_messages_title": "All Messages",
+    "description": "Messages related to your provider profile.",
+    "admin_description": "Monitor all contact messages sent through the platform.",
+    "unread_messages": "unread messages",
+    "sender": "Sender",
+    "to_provider": "To Provider",
+    "subject": "Subject",
+    "received": "Received",
+    "status": "Status",
+    "new": "New",
+    "read": "Read",
+    "view": "View",
+    "reply": "Reply",
+    "no_messages": "No messages found.",
+    "loading_messages": "Loading messages...",
+    "failed_to_load": "Failed to load messages",
+    "network_error": "Network error. Please try again."
+  },
   "admin": {
     "title": "Admin Panel",
     "pending_providers": "Pending Providers",

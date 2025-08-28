@@ -148,6 +148,26 @@
     "pending_approval": "Pending Approval",
     "approved": "Approved"
   },
+  "messages": {
+    "title": "الرسائل",
+    "all_messages_title": "جميع الرسائل",
+    "description": "الرسائل المتعلقة بملفك الشخصي كمقدم خدمة.",
+    "admin_description": "مراقبة جميع رسائل الاتصال المرسلة عبر المنصة.",
+    "unread_messages": "رسائل غير مقروءة",
+    "sender": "المرسل",
+    "to_provider": "إلى مقدم الخدمة",
+    "subject": "الموضوع",
+    "received": "تاريخ الاستلام",
+    "status": "الحالة",
+    "new": "جديد",
+    "read": "مقروء",
+    "view": "عرض",
+    "reply": "رد",
+    "no_messages": "لم يتم العثور على رسائل.",
+    "loading_messages": "جاري تحميل الرسائل...",
+    "failed_to_load": "فشل في تحميل الرسائل",
+    "network_error": "خطأ في الشبكة. يرجى المحاولة مرة أخرى."
+  },
   "admin": {
     "title": "Admin Panel",
     "pending_providers": "Pending Providers",

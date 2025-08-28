@@ -157,6 +157,26 @@
     "pending_approval": "Wacht op Goedkeuring",
     "approved": "Goedgekeurd"
   },
+  "messages": {
+    "title": "Berichten",
+    "all_messages_title": "Alle Berichten",
+    "description": "Berichten gerelateerd aan uw provider profiel.",
+    "admin_description": "Monitor alle contactberichten verzonden via het platform.",
+    "unread_messages": "ongelezen berichten",
+    "sender": "Afzender",
+    "to_provider": "Naar Provider",
+    "subject": "Onderwerp",
+    "received": "Ontvangen",
+    "status": "Status",
+    "new": "Nieuw",
+    "read": "Gelezen",
+    "view": "Bekijk",
+    "reply": "Beantwoord",
+    "no_messages": "Geen berichten gevonden.",
+    "loading_messages": "Berichten laden...",
+    "failed_to_load": "Laden van berichten mislukt",
+    "network_error": "Netwerkfout. Probeer opnieuw."
+  },
   "admin": {
     "title": "Beheerpaneel",
     "pending_providers": "Wachtende Providers",
