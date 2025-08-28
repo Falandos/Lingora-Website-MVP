@@ -1,14 +1,38 @@
 # Feature Progress Tracker
 *Implementation status and sprint management*
-*Last Updated: 2025-08-28 (CRITICAL SEARCH BUG FIXED - STABLE BUILD)*
+*Last Updated: 2025-08-28 (ALL CRITICAL SYSTEMS OPERATIONAL - PRE-ALPHA 0.9 READY)*
 
-## 🎯 CURRENT STATUS: SEARCH FUNCTIONALITY RESTORED ✅
-**Current**: Critical search issue resolved, 90% MVP stable
-**Next**: Homepage carousel fixes and continued development
+## 🎯 CURRENT STATUS: 95% MVP COMPLETE - READY FOR PRE-ALPHA 0.9 ✅
+**Current**: All critical systems operational, carousel + auth + search working
+**Next**: Homepage refinement for final Pre-Alpha 0.9 milestone
 
-## 📋 SESSION ACHIEVEMENTS (Aug 28, 2025) - SEARCH RESTORATION
+## 📋 SESSION ACHIEVEMENTS (Aug 28, 2025) - CRITICAL SYSTEMS RESTORED
 
-### ✅ **CRITICAL BUG FIX - SEARCH FUNCTIONALITY RESTORED:**
+### ✅ **🎠 HOMEPAGE CAROUSEL SYSTEM FIXED:**
+**🚨 RESOLVED**: RecentProvidersCarousel using hardcoded data instead of dynamic API
+
+**🎉 CAROUSEL FIX COMPLETED:**
+1. ✅ **Missing API Endpoint Created** - Added `/api/providers/recent` returning 6 newest providers
+2. ✅ **Dynamic Data Integration** - Replaced hardcoded fallback with real provider data  
+3. ✅ **Complete Data Structure** - Includes languages, KVK verification, primary category from services
+4. ✅ **Auto-Rotation Working** - Hover pause, navigation arrows, indicators all functional
+5. ✅ **Performance Optimized** - SQL queries optimized for provider + language data
+
+**🎯 RESULT**: Homepage carousel now displays real-time dynamic provider data
+
+### ✅ **🔐 AUTHENTICATION SYSTEM RESTORED:**
+**🚨 RESOLVED**: Both admin@lingora.nl and dr.hassan@medcentrum.nl login failing
+
+**🎉 AUTH FIX COMPLETED:**
+1. ✅ **Backend APIs Working** - Curl tests confirmed valid JWT tokens returned
+2. ✅ **Response Format Issue** - Frontend expected `{success, data}` but backend returns `{token, user}`
+3. ✅ **AuthService Updated** - Fixed login() and getCurrentUser() methods to handle direct response
+4. ✅ **Error Handling Improved** - Now checks data.error || data.message for failures
+5. ✅ **Both Accounts Working** - admin@lingora.nl and dr.hassan@medcentrum.nl / password123
+
+**🎯 RESULT**: Complete authentication functionality restored for admin and provider access
+
+### ✅ **SEARCH FUNCTIONALITY RESTORED (Earlier in session):**
 **🚨 RESOLVED**: Search page showing 0 results despite working backend APIs
 
 **🎉 SEARCH RESTORATION COMPLETED:**

@@ -1,6 +1,6 @@
 # Lingora - Project Overview
 *Complete project reference and status tracker*
-*Last Updated: 2025-08-28 (🔍 SEARCH FUNCTIONALITY RESTORED - 90% MVP STABLE)*
+*Last Updated: 2025-08-28 (🎠 CAROUSEL + 🔐 AUTH FIXED - 95% MVP READY FOR PRE-ALPHA 0.9)*
 
 ## 🎯 Mission & Value Proposition
 "Find professionals who speak YOUR language." Launch market: Netherlands.
@@ -68,7 +68,7 @@ Connect residents with service providers who speak their native language, focusi
 
 ## 📊 Current Status
 
-### Overall Progress: 90% MVP Complete ⭐ (SEARCH FUNCTIONALITY RESTORED - STABLE BUILD)
+### Overall Progress: 95% MVP Complete ⭐ (PRE-ALPHA 0.9 READY - HOMEPAGE REFINEMENT PHASE)
 
 #### ✅ **Completed Systems (100%)**
 - **🔍 Search & Discovery**: FULLY RESTORED - 19 providers, all filters, keyword search, map integration ✅
@@ -84,8 +84,24 @@ Connect residents with service providers who speak their native language, focusi
 - **Database**: Complete schema with realistic test data (20 providers, 45+ staff, full language sync) ✅
 - **Version Control**: Git integration with automated commit workflow ✅
 - **🧠 AI Search Service**: Flask API with Sentence Transformers running on localhost:5001 ✅
+- **🎠 Homepage Carousel**: Dynamic recent providers data with auto-rotation ✅
+- **🔐 Authentication System**: Admin and provider login fully functional ✅
 
-#### ✅ **CRITICAL BUG FIX - SEARCH FUNCTIONALITY RESTORED (Aug 28)**
+#### ✅ **SESSION ACHIEVEMENTS - ALL CRITICAL SYSTEMS OPERATIONAL (Aug 28)**
+
+**🎠 CAROUSEL SYSTEM FIXED:**
+- Added missing `/api/providers/recent` endpoint returning 6 newest providers
+- Dynamic data replaces hardcoded fallback in RecentProvidersCarousel
+- Includes languages, KVK verification, primary category from services
+- Auto-rotation and hover pause functionality working perfectly
+
+**🔐 AUTHENTICATION SYSTEM RESTORED:**
+- Fixed login failures for both admin@lingora.nl and dr.hassan@medcentrum.nl
+- AuthService now correctly handles backend API response format
+- Backend returns `{token, user}` directly, frontend service updated accordingly
+- All accounts working with password123
+
+#### ✅ **PREVIOUS SESSION - SEARCH FUNCTIONALITY RESTORED (Aug 28)**
 **🚨 RESOLVED**: Search page showing 0 results despite working APIs
 - **Root Cause**: Vite proxy configuration pointing to wrong backend path
 - **Solution**: Updated vite.config.ts to use `/lingora/backend/public` instead of `/lingora/backend`
