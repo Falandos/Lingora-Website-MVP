@@ -45,17 +45,8 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
           const data = await response.json();
           setProviders(data.providers || []);
         } else {
-          // Fallback to known data if API fails
+          // Fallback to three recent providers if API fails
           setProviders([
-            {
-              id: 32,
-              business_name: 'International Education Center Zwolle',
-              slug: 'education-center-zwolle',
-              city: 'Zwolle',
-              created_at: '2025-08-26T01:31:05Z',
-              languages: ['ar', 'de', 'en', 'fr', 'hi', 'nl', 'pl'],
-              bio_en: 'International education support and language lessons.'
-            },
             {
               id: 33,
               business_name: 'Medisch Centrum Multicultureel Tilburg',
@@ -82,24 +73,6 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
               created_at: '2025-08-26T01:31:05Z',
               languages: ['ar', 'de', 'en', 'fr', 'nl', 'uk', 'zgh'],
               bio_en: 'Language lessons and interpreters in the heart of North Holland.'
-            },
-            {
-              id: 36,
-              business_name: 'Business Support Almere International',
-              slug: 'business-support-almere',
-              city: 'Almere',
-              created_at: '2025-08-26T01:31:05Z',
-              languages: ['en', 'es', 'hi', 'nl', 'uk'],
-              bio_en: 'Business support for international entrepreneurs.'
-            },
-            {
-              id: 37,
-              business_name: 'Cultureel Integratiecentrum Friesland',
-              slug: 'integratie-centrum-friesland',
-              city: 'Leeuwarden',
-              created_at: '2025-08-26T01:31:05Z',
-              languages: ['ar', 'de', 'en', 'nl', 'so', 'yue', 'zh-Hans'],
-              bio_en: 'Cultural integration and Dutch lessons in Friesland.'
             }
           ]);
         }
@@ -167,12 +140,9 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
               Recently Joined Professionals
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Meet our newest verified providers across the Netherlands, ready to serve you in your language.
-            </p>
           </div>
 
           {/* Carousel */}
