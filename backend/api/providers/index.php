@@ -8,19 +8,39 @@ $providerModel = new Provider();
 switch ($method) {
     case 'GET':
         if ($action === null) {
-            // Get provider list (public view or admin view)
+            // Get provider list (public view)
             $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
             $limit = isset($_GET['limit']) ? min((int)$_GET['limit'], 50) : 20;
             $offset = ($page - 1) * $limit;
             
-            // Force admin view for debugging
-            trigger_error("DEBUG: This should appear in error log!", E_USER_NOTICE);
-            $isAdmin = true; // TEMPORARY: Always return admin data to fix the dashboard issue
+            // Check if request is from admin (with fallback methods)
+            $isAdmin = false;
+            $authToken = null;
+            
+            // Check Authorization header (use getallheaders for reliability)
+            $headers = getallheaders();
+            if (isset($headers['Authorization'])) {
+                $authToken = $headers['Authorization'];
+            }
+            elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+                $authToken = $_SERVER['HTTP_AUTHORIZATION'];
+            }
+            
+            if ($authToken) {
+                try {
+                    // Temporarily set the Authorization header for JWT validation
+                    $_SERVER['HTTP_AUTHORIZATION'] = $authToken;
+                    $user = $jwt->requireAuth();
+                    $isAdmin = $user && $user['role'] === 'admin';
+                } catch (Exception $e) {
+                    $isAdmin = false;
+                }
+            }
             
             if ($isAdmin) {
                 // Admin view - show all providers with admin fields
-                error_log("PROVIDERS API: Taking ADMIN path!");
-                $sql = "SELECT p.*, u.email, u.email_verified, u.created_at as user_created_at
+                $sql = "SELECT p.*, u.email, u.email_verified, u.created_at as user_created_at,
+                        DATEDIFF(p.trial_expires_at, NOW()) as trial_days_remaining
                         FROM providers p
                         LEFT JOIN users u ON p.user_id = u.id
                         ORDER BY 
@@ -33,9 +53,7 @@ switch ($method) {
                             p.created_at DESC
                         LIMIT ? OFFSET ?";
                 
-                error_log("PROVIDERS API: About to execute admin SQL query");
                 $providers = $database->fetchAll($sql, [$limit, $offset]);
-                error_log("PROVIDERS API: Admin query returned " . count($providers) . " results");
                 
                 // Get total count
                 $countSql = "SELECT COUNT(*) as total FROM providers p";
@@ -43,7 +61,6 @@ switch ($method) {
                 
             } else {
                 // Public view - only approved providers
-                error_log("PROVIDERS API: Taking PUBLIC path!");
                 $sql = "SELECT p.id, p.business_name, p.slug, p.city, p.bio_nl, p.bio_en,
                                p.profile_completeness_score, p.latitude, p.longitude,
                                p.gallery, p.created_at
@@ -60,15 +77,7 @@ switch ($method) {
                 $totalResult = $database->fetchOne($countSql);
             }
             
-            error_log("PROVIDERS API: About to send response with " . count($providers) . " providers");
-            error_log("PROVIDERS API: First provider data: " . json_encode($providers[0] ?? 'none'));
             response([
-                'debug' => [
-                    'isAdmin' => $isAdmin,
-                    'providerCount' => count($providers),
-                    'firstProviderKeys' => isset($providers[0]) ? array_keys($providers[0]) : [],
-                    'adminPath' => 'This response came from admin path'
-                ],
                 'providers' => $providers,
                 'pagination' => [
                     'page' => $page,
@@ -78,25 +87,43 @@ switch ($method) {
                 ]
             ]);
             
-        } elseif ($action === 'admin-data') {
-            // Get all providers with admin data (admin only)
-            $user = $jwt->requireAuth('admin');
+        } elseif ($action === 'recent') {
+            // Get recent providers for homepage carousel
+            $limit = isset($_GET['limit']) ? min((int)$_GET['limit'], 10) : 6;
             
-            $sql = "SELECT p.*, u.email, u.email_verified, u.created_at as user_created_at
+            $sql = "SELECT p.id, p.business_name, p.slug, p.city, p.bio_en, p.bio_nl, 
+                           p.created_at, p.profile_completeness_score,
+                           CASE WHEN p.kvk_number IS NOT NULL AND p.btw_number IS NOT NULL THEN 1 ELSE 0 END as kvk_verified
                     FROM providers p
-                    LEFT JOIN users u ON p.user_id = u.id
-                    ORDER BY 
-                        CASE p.status 
-                            WHEN 'pending' THEN 1 
-                            WHEN 'approved' THEN 2 
-                            WHEN 'rejected' THEN 3 
-                            ELSE 4 
-                        END,
-                        p.created_at DESC";
+                    WHERE p.status = 'approved' AND p.subscription_status != 'frozen'
+                    ORDER BY p.created_at DESC, p.profile_completeness_score DESC
+                    LIMIT ?";
             
-            $providers = $database->fetchAll($sql);
+            $providers = $database->fetchAll($sql, [$limit]);
             
-            response($providers);
+            // Get languages and primary category for each provider
+            foreach ($providers as &$provider) {
+                $languagesSql = "SELECT DISTINCT pl.language_code 
+                                FROM provider_languages pl 
+                                WHERE pl.provider_id = ? 
+                                ORDER BY pl.language_code";
+                $languages = $database->fetchAll($languagesSql, [$provider['id']]);
+                $provider['languages'] = array_column($languages, 'language_code');
+                
+                // Get primary category from most common service category
+                $categorySql = "SELECT c.name_en as category_name, COUNT(*) as count
+                               FROM services s 
+                               JOIN categories c ON s.category_id = c.id 
+                               WHERE s.provider_id = ? AND s.is_active = 1
+                               GROUP BY c.id, c.name_en 
+                               ORDER BY count DESC 
+                               LIMIT 1";
+                $categoryResult = $database->fetchOne($categorySql, [$provider['id']]);
+                $provider['primary_category'] = $categoryResult ? $categoryResult['category_name'] : 'Professional Services';
+                $provider['kvk_verified'] = (bool)$provider['kvk_verified'];
+            }
+            
+            response(['providers' => $providers]);
             
         } elseif ($action === 'my') {
             // Get current user's provider profile
@@ -167,31 +194,6 @@ switch ($method) {
                 error_response($e->getMessage(), 400);
             }
             
-        } elseif ($action === 'status' && $id) {
-            // Update provider status (admin only)
-            $user = $jwt->requireAuth('admin');
-            
-            $data = json_decode(file_get_contents('php://input'), true) ?? [];
-            
-            if (!isset($data['status']) || !in_array($data['status'], ['pending', 'approved', 'rejected'])) {
-                error_response('Invalid status value', 400);
-            }
-            
-            try {
-                if ($data['status'] === 'rejected' && isset($data['reason'])) {
-                    $sql = "UPDATE providers SET status = ?, rejection_reason = ?, updated_at = NOW() WHERE id = ?";
-                    $database->query($sql, [$data['status'], $data['reason'], $id]);
-                } else {
-                    $sql = "UPDATE providers SET status = ?, updated_at = NOW() WHERE id = ?";
-                    $database->query($sql, [$data['status'], $id]);
-                }
-                
-                response(['message' => "Provider status updated to {$data['status']} successfully"]);
-                
-            } catch (Exception $e) {
-                error_response($e->getMessage(), 400);
-            }
-            
         } elseif ($action === 'languages') {
             // Update provider languages
             $user = $jwt->requireAuth('provider');
@@ -255,65 +257,8 @@ switch ($method) {
             
             response(['message' => 'Profile submitted for approval successfully']);
             
-        } elseif ($action === 'upload') {
-            // Upload file (image, document, etc.)
-            $user = $jwt->requireAuth('provider');
-            $provider = $providerModel->findByUserId($user['id']);
-            
-            if (!$provider) {
-                error_response('Provider profile not found', 404);
-            }
-            
-            if (!isset($_FILES['file'])) {
-                error_response('File is required', 400);
-            }
-            
-            $file = $_FILES['file'];
-            $field = $_POST['field'] ?? 'gallery';
-            
-            // Validate file
-            $maxSize = 2 * 1024 * 1024; // 2MB
-            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-            
-            if ($file['size'] > $maxSize) {
-                error_response('File too large. Maximum size: 2MB', 400);
-            }
-            
-            if (!in_array($file['type'], $allowedTypes)) {
-                error_response('Invalid file type. Allowed: JPEG, PNG, WebP', 400);
-            }
-            
-            // Create upload directory
-            $uploadDir = __DIR__ . '/../../public/uploads/providers/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            
-            // Generate unique filename
-            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $filename = $provider['id'] . '_' . $field . '_' . time() . '.' . $extension;
-            $filePath = $uploadDir . $filename;
-            
-            if (move_uploaded_file($file['tmp_name'], $filePath)) {
-                $url = '/uploads/providers/' . $filename;
-                
-                // If it's a gallery upload, add to gallery
-                if ($field === 'gallery') {
-                    try {
-                        $gallery = $providerModel->addGalleryImage($provider['id'], $url);
-                        response(['url' => $url, 'gallery' => $gallery]);
-                    } catch (Exception $e) {
-                        error_response($e->getMessage(), 400);
-                    }
-                } else {
-                    response(['url' => $url]);
-                }
-            } else {
-                error_response('Failed to upload file', 500);
-            }
-            
         } elseif ($action === 'gallery') {
-            // Legacy gallery upload (kept for backward compatibility)
+            // Upload gallery image
             $user = $jwt->requireAuth('provider');
             $provider = $providerModel->findByUserId($user['id']);
             
@@ -325,43 +270,9 @@ switch ($method) {
                 error_response('Image file is required', 400);
             }
             
-            // Redirect to new upload endpoint logic
-            $_FILES['file'] = $_FILES['image'];
-            $_POST['field'] = 'gallery';
+            // TODO: Handle file upload
             
-            // Use same upload logic as above but simplified
-            $file = $_FILES['file'];
-            $maxSize = 2 * 1024 * 1024;
-            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-            
-            if ($file['size'] > $maxSize) {
-                error_response('File too large. Maximum size: 2MB', 400);
-            }
-            
-            if (!in_array($file['type'], $allowedTypes)) {
-                error_response('Invalid file type. Allowed: JPEG, PNG, WebP', 400);
-            }
-            
-            $uploadDir = __DIR__ . '/../../public/uploads/providers/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            
-            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $filename = $provider['id'] . '_gallery_' . time() . '.' . $extension;
-            $filePath = $uploadDir . $filename;
-            
-            if (move_uploaded_file($file['tmp_name'], $filePath)) {
-                $url = '/uploads/providers/' . $filename;
-                try {
-                    $gallery = $providerModel->addGalleryImage($provider['id'], $url);
-                    response(['url' => $url, 'gallery' => $gallery]);
-                } catch (Exception $e) {
-                    error_response($e->getMessage(), 400);
-                }
-            } else {
-                error_response('Failed to upload file', 500);
-            }
+            response(['message' => 'Image upload functionality to be implemented']);
             
         } else {
             error_response('Invalid action', 400);
