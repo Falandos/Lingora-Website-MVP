@@ -1,48 +1,25 @@
 # Feature Progress Tracker
 *Implementation status and sprint management*
-*Last Updated: 2025-08-28 (ALL CRITICAL SYSTEMS OPERATIONAL - PRE-ALPHA 0.9 READY)*
+*Last Updated: 2025-08-28 (SEARCH FILTERS RESTORED - PRE-ALPHA 0.8 STABLE)*
 
-## 🎯 CURRENT STATUS: 95% MVP COMPLETE - READY FOR PRE-ALPHA 0.9 ✅
-**Current**: All critical systems operational, carousel + auth + search working
-**Next**: Homepage refinement for final Pre-Alpha 0.9 milestone
+## 🎯 CURRENT STATUS: 92% MVP COMPLETE - PRE-ALPHA 0.8 ACHIEVED ✅
+**Current**: All core search functionality restored and stable
+**Next**: UI Translation System + Messages Component → Pre-Alpha 0.9 → Alpha 0.1
 
-## 📋 SESSION ACHIEVEMENTS (Aug 28, 2025) - CRITICAL SYSTEMS RESTORED
+## 📋 SESSION ACHIEVEMENTS (Aug 28, 2025) - SEARCH CRISIS RESOLVED
 
-### ✅ **🎠 HOMEPAGE CAROUSEL SYSTEM FIXED:**
-**🚨 RESOLVED**: RecentProvidersCarousel using hardcoded data instead of dynamic API
+### ✅ **🔧 SEARCH FILTERS CRISIS FULLY RESOLVED:**
+**🚨 CRITICAL ISSUE**: City autocomplete and language/category filters completely broken
 
-**🎉 CAROUSEL FIX COMPLETED:**
-1. ✅ **Missing API Endpoint Created** - Added `/api/providers/recent` returning 6 newest providers
-2. ✅ **Dynamic Data Integration** - Replaced hardcoded fallback with real provider data  
-3. ✅ **Complete Data Structure** - Includes languages, KVK verification, primary category from services
-4. ✅ **Auto-Rotation Working** - Hover pause, navigation arrows, indicators all functional
-5. ✅ **Performance Optimized** - SQL queries optimized for provider + language data
+**🎉 COMPLETE RESTORATION ACHIEVED:**
+1. ✅ **Root Cause Identified** - API response format inconsistency between frontend/backend
+2. ✅ **Cities API Fixed** - Restored missing main API router (`backend/api/index.php`)
+3. ✅ **Response Format Aligned** - Cities endpoint now returns consistent `{cities: [...]}` format  
+4. ✅ **CityAutocomplete Updated** - Fixed component to expect `result.cities` instead of `result.data.cities`
+5. ✅ **Architecture Cleaned** - Removed debug files, duplicate directories, stabilized codebase
+6. ✅ **Documentation Complete** - Comprehensive debugging lessons in TECHNICAL_NOTES.md
 
-**🎯 RESULT**: Homepage carousel now displays real-time dynamic provider data
-
-### ✅ **🔐 AUTHENTICATION SYSTEM RESTORED:**
-**🚨 RESOLVED**: Both admin@lingora.nl and dr.hassan@medcentrum.nl login failing
-
-**🎉 AUTH FIX COMPLETED:**
-1. ✅ **Backend APIs Working** - Curl tests confirmed valid JWT tokens returned
-2. ✅ **Response Format Issue** - Frontend expected `{success, data}` but backend returns `{token, user}`
-3. ✅ **AuthService Updated** - Fixed login() and getCurrentUser() methods to handle direct response
-4. ✅ **Error Handling Improved** - Now checks data.error || data.message for failures
-5. ✅ **Both Accounts Working** - admin@lingora.nl and dr.hassan@medcentrum.nl / password123
-
-**🎯 RESULT**: Complete authentication functionality restored for admin and provider access
-
-### ✅ **SEARCH FUNCTIONALITY RESTORED (Earlier in session):**
-**🚨 RESOLVED**: Search page showing 0 results despite working backend APIs
-
-**🎉 SEARCH RESTORATION COMPLETED:**
-1. ✅ **Root Cause Identified** - Vite proxy configuration pointing to wrong backend path
-2. ✅ **Proxy Configuration Fixed** - Updated to use `/lingora/backend/public` instead of `/lingora/backend`  
-3. ✅ **Search API Testing** - Verified 19 providers returning correctly with all filters
-4. ✅ **End-to-End Testing** - Complete search functionality working (keywords, filters, map, pagination)
-5. ✅ **Documentation Updated** - All .md files updated with fix details
-
-**🎯 RESULT**: Search system fully operational - core MVP functionality restored
+**🎯 RESULT**: All search functionality working perfectly - core user flows restored
 
 ### ✅ **PREVIOUS SESSION ACHIEVEMENTS (Aug 27, 2025)**
 

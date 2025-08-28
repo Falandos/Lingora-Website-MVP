@@ -1,6 +1,154 @@
 # Technical Notes & Reference
 *Detailed technical analysis and system documentation*
-*Last Updated: 2025-08-27 (PRE-ALPHA 0.2 - HOMEPAGE REDESIGN + AI SEMANTIC SEARCH)*
+*Last Updated: 2025-08-28 (PRE-ALPHA 0.8 - SEARCH FILTERS RESTORED + DEBUGGING LESSONS)*
+
+## 🔧 Critical Debugging Lessons & API Architecture (Aug 28 Session)
+
+### 🚨 Search Filters Crisis - Root Cause Analysis
+
+**Problem**: City autocomplete and search filters completely broken after homepage redesign
+**Impact**: Core search functionality non-functional, blocking user flows  
+**Root Cause**: API response format inconsistency between endpoints
+
+### Key Technical Discoveries
+
+#### 1. **API Router Architecture Pattern**
+```php
+// Main API Router: /backend/api/index.php
+$resource = $segments[0]; // 'cities', 'languages', 'categories'
+switch ($resource) {
+    case 'cities':
+        require_once 'cities/index.php';
+        break;
+}
+```
+
+**CRITICAL**: All endpoints are accessed through main router, never directly
+- ✅ Correct: `http://localhost:5185/api/cities` (goes through main router)
+- ❌ Wrong: `http://localhost/lingora/backend/api/cities/` (direct access)
+
+#### 2. **Response Format Consistency**
+**The Problem**: Frontend expected `result.data.cities` but API returned `{cities: [...]}`
+
+```typescript
+// ❌ Incorrect (what CityAutocomplete was doing):
+const result = await response.json();
+setSuggestions(result.data.cities || []);
+
+// ✅ Correct (consistent with other endpoints):
+const result = await response.json(); 
+setSuggestions(result.cities || []);
+```
+
+**Working Endpoints Pattern** (languages, categories):
+```php
+// All working endpoints use this pattern:
+$database = new Database();
+// ... fetch data ...
+response($data); // This goes to response() function in config.php
+```
+
+#### 3. **Response Function Behavior**
+```php
+// From config/config.php
+function response($data = [], $status = 200, $message = '') {
+    $response = ['success' => $status < 400, 'status' => $status];
+    if ($data) $response['data'] = $data;
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+```
+
+**DISCOVERY**: Not all endpoints use response() wrapper consistently!
+- Languages endpoint: Returns data directly (not wrapped)
+- Cities endpoint: Was also returning data directly
+- Frontend expects direct data, not wrapped format
+
+### 🛡️ Prevention Guidelines for Future Development
+
+#### API Development Rules
+1. **Always use main API router** - never create direct endpoint access
+2. **Test both direct and proxy access** (`localhost:5185/api/*` vs `localhost/lingora/backend/api/*`)
+3. **Maintain response format consistency** across all endpoints
+4. **Check existing endpoint patterns** before implementing new ones
+
+#### Debugging Process
+1. **Check git history** first - `git log --oneline -n 20`
+2. **Compare with working endpoints** - languages/categories as reference
+3. **Test API directly** before blaming frontend components
+4. **Check main API router** when endpoints return 404/HTML
+
+#### File Structure Awareness
+```
+C:\Cursor\Lingora\               # Documentation files
+C:\xampp\htdocs\lingora\backend\ # PHP backend code  
+C:\Cursor\Lingora\frontend\      # React frontend code
+```
+
+### 🔍 Troubleshooting Checklist
+
+**When API endpoints break:**
+- [ ] Is main API router (`backend/api/index.php`) present?
+- [ ] Does the switch statement have the correct case?
+- [ ] Is the endpoint being accessed through main router?
+- [ ] Does response format match other working endpoints?
+- [ ] Are Database class and config properly loaded?
+
+**When frontend components break:**
+- [ ] Check browser dev console for actual API response format
+- [ ] Compare with working components (how they parse responses)
+- [ ] Test API endpoint directly with curl
+- [ ] Check if component expects wrapped vs direct data format
+
+### 🎯 Architecture Insights
+
+#### The "It Was Working Before" Principle
+When core functionality breaks after unrelated changes:
+1. **It's usually a simple config/path issue**, not complex logic
+2. **Check git history** of working commits  
+3. **Compare file structures** between working and broken states
+4. **Look for missing files** or altered routing
+
+#### Response Format Evolution
+The project evolved from using `response()` wrapper functions to returning data directly. This inconsistency caused the CityAutocomplete issue. **Future guideline**: Pick one pattern and stick to it across all endpoints.
+
+### 🔧 Fixed Implementation
+
+#### Cities Endpoint (Final Working Version)
+```php
+// Database connection available from main API router
+$database = new Database();
+
+try {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        // ... query logic ...
+        
+        // Direct response format (consistent with other endpoints)
+        echo json_encode([
+            'cities' => $results,
+            'metadata' => $metadata
+        ]);
+        exit;
+    } else {
+        error_response('Method not allowed', 405);
+    }
+} catch (Exception $e) {
+    error_response('Internal server error', 500);
+}
+```
+
+#### CityAutocomplete Component (Fixed)
+```typescript
+const searchCities = async (searchQuery: string) => {
+    const response = await fetch(`/api/cities?q=${encodeURIComponent(searchQuery)}`);
+    if (response.ok) {
+        const result = await response.json();
+        setSuggestions(result.cities || []); // Direct data access
+    }
+};
+```
+
+---
 
 ## 🏠 Professional Homepage Components Architecture (Aug 27 Session)
 

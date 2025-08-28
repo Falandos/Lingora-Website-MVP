@@ -62,8 +62,8 @@ const CityAutocomplete = ({
       
       if (response.ok) {
         const result = await response.json();
-        setSuggestions(result.data.cities || []);
-        setIsOpen(result.data.cities?.length > 0);
+        setSuggestions(result.cities || []);
+        setIsOpen(result.cities?.length > 0);
         setSelectedIndex(-1);
       }
     } catch (error) {
@@ -140,7 +140,7 @@ const CityAutocomplete = ({
           
           if (response.ok) {
             const result = await response.json();
-            const cities = result.data.cities || [];
+            const cities = result.cities || [];
             
             // Calculate distances and find closest
             let closestCity = null;

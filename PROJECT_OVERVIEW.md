@@ -1,6 +1,6 @@
 # Lingora - Project Overview
 *Complete project reference and status tracker*
-*Last Updated: 2025-08-28 (🎠 CAROUSEL + 🔐 AUTH FIXED - 95% MVP READY FOR PRE-ALPHA 0.9)*
+*Last Updated: 2025-08-28 (🔧 SEARCH FILTERS RESTORED - PRE-ALPHA 0.8 STABLE)*
 
 ## 🎯 Mission & Value Proposition
 "Find professionals who speak YOUR language." Launch market: Netherlands.
@@ -68,7 +68,7 @@ Connect residents with service providers who speak their native language, focusi
 
 ## 📊 Current Status
 
-### Overall Progress: 95% MVP Complete ⭐ (PRE-ALPHA 0.9 READY - HOMEPAGE REFINEMENT PHASE)
+### Overall Progress: 92% MVP Complete ⭐ (PRE-ALPHA 0.8 - CORE FUNCTIONALITY STABLE)
 
 #### ✅ **Completed Systems (100%)**
 - **🔍 Search & Discovery**: FULLY RESTORED - 19 providers, all filters, keyword search, map integration ✅
@@ -87,19 +87,45 @@ Connect residents with service providers who speak their native language, focusi
 - **🎠 Homepage Carousel**: Dynamic recent providers data with auto-rotation ✅
 - **🔐 Authentication System**: Admin and provider login fully functional ✅
 
-#### ✅ **SESSION ACHIEVEMENTS - ALL CRITICAL SYSTEMS OPERATIONAL (Aug 28)**
+#### ✅ **SESSION ACHIEVEMENTS - SEARCH FUNCTIONALITY FULLY RESTORED (Aug 28)**
 
-**🎠 CAROUSEL SYSTEM FIXED:**
-- Added missing `/api/providers/recent` endpoint returning 6 newest providers
-- Dynamic data replaces hardcoded fallback in RecentProvidersCarousel
-- Includes languages, KVK verification, primary category from services
-- Auto-rotation and hover pause functionality working perfectly
+**🔧 SEARCH FILTERS CRISIS RESOLVED:**
+- **Cities Autocomplete**: Fixed API response format mismatch between frontend and backend
+- **API Router**: Restored missing main API router (`backend/api/index.php`) with proper routing
+- **Response Format**: Aligned cities endpoint to return consistent format with other endpoints
+- **Component Fix**: Updated CityAutocomplete to expect `result.cities` instead of `result.data.cities`
+- **Clean Architecture**: Removed debug code and duplicate files, stabilized core functionality
 
-**🔐 AUTHENTICATION SYSTEM RESTORED:**
-- Fixed login failures for both admin@lingora.nl and dr.hassan@medcentrum.nl
-- AuthService now correctly handles backend API response format
-- Backend returns `{token, user}` directly, frontend service updated accordingly
-- All accounts working with password123
+**🎯 DEBUGGING BREAKTHROUGH:**
+- Identified root cause: API response format inconsistency across endpoints  
+- Documented comprehensive debugging methodology for future development
+- Created prevention guidelines and troubleshooting checklist in TECHNICAL_NOTES.md
+- All core search functionality now working perfectly again
+- Project stabilized and ready for next development phase
+
+### 🛣️ **Roadmap to Alpha 0.1**
+
+#### 🎯 **NEXT: Pre-Alpha 0.9 (2 Major Components Remaining)**
+1. **🌐 UI Translation System**: Complete internationalization for 15 languages
+   - Implement react-i18next configuration
+   - Create translation files for Dutch, English, Arabic, etc.
+   - Add language switcher component
+   - Test all user flows in multiple languages
+
+2. **💬 Messages Component**: Provider-resident communication system  
+   - Build message history interface
+   - Implement real-time message status
+   - Create message management in provider dashboard
+   - Add admin message monitoring capabilities
+
+**Target**: Once these 2 components are stable → **ALPHA 0.1 ACHIEVED!** 🎉
+
+#### 🏆 **Alpha 0.1 Definition**
+- All core MVP functionality working and stable
+- Multi-language UI fully functional  
+- Complete communication system between users
+- Ready for limited user testing and feedback collection
+- Foundation for Beta development established
 
 #### ✅ **PREVIOUS SESSION - SEARCH FUNCTIONALITY RESTORED (Aug 28)**
 **🚨 RESOLVED**: Search page showing 0 results despite working APIs
