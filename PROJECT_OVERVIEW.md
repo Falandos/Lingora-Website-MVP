@@ -1,6 +1,6 @@
 # Lingora - Project Overview
 *Complete project reference and status tracker*
-*Last Updated: 2025-08-27 (🧠 AI SEMANTIC SEARCH BREAKTHROUGH - 95% MVP ACHIEVED)*
+*Last Updated: 2025-08-28 (🔍 SEARCH FUNCTIONALITY RESTORED - 90% MVP STABLE)*
 
 ## 🎯 Mission & Value Proposition
 "Find professionals who speak YOUR language." Launch market: Netherlands.
@@ -68,21 +68,29 @@ Connect residents with service providers who speak their native language, focusi
 
 ## 📊 Current Status
 
-### Overall Progress: 75% MVP Complete ⭐ (PRE-ALPHA 0.2 - HOMEPAGE STREAMLINING PHASE)
+### Overall Progress: 90% MVP Complete ⭐ (SEARCH FUNCTIONALITY RESTORED - STABLE BUILD)
 
 #### ✅ **Completed Systems (100%)**
-- **Search & Discovery**: Full search with filters, map integration, distance calculation, language flags  
-- **Geographic Features**: 79 Dutch cities database, autocomplete, browser geolocation
-- **Map Integration**: User location marker, radius visualization, professional popups  
-- **Authentication**: JWT-based auth for providers/admin
-- **Provider Pages**: COMPLETE - Clean, whimsical design with animations, interactive elements, space optimization
-- **Contact System**: Working contact forms with email relay and admin monitoring
-- **Provider Dashboard**: Profile management, service management, staff management (WORKING PERFECTLY)
-- **Admin Dashboard**: COMPLETE - Enterprise-grade management with notes, activity logs, smart filtering
-- **Admin Notes System**: Complete audit trail with categorized notes and timestamps
-- **Activity Log System**: Automatic tracking of all admin actions with before/after values
-- **Database**: Complete schema with realistic test data (20 providers, 45+ staff, full language sync)
-- **Version Control**: Git integration with automated commit workflow
+- **🔍 Search & Discovery**: FULLY RESTORED - 19 providers, all filters, keyword search, map integration ✅
+- **Geographic Features**: 79 Dutch cities database, autocomplete, browser geolocation ✅
+- **Map Integration**: User location marker, radius visualization, professional popups ✅
+- **Authentication**: JWT-based auth for providers/admin ✅
+- **Provider Pages**: Clean, whimsical design with animations, interactive elements ✅
+- **Contact System**: Working contact forms with email relay and admin monitoring ✅
+- **Provider Dashboard**: Profile management, service management, staff management ✅
+- **Admin Dashboard**: Enterprise-grade management with notes, activity logs, smart filtering ✅
+- **Admin Notes System**: Complete audit trail with categorized notes and timestamps ✅
+- **Activity Log System**: Automatic tracking of all admin actions with before/after values ✅
+- **Database**: Complete schema with realistic test data (20 providers, 45+ staff, full language sync) ✅
+- **Version Control**: Git integration with automated commit workflow ✅
+- **🧠 AI Search Service**: Flask API with Sentence Transformers running on localhost:5001 ✅
+
+#### ✅ **CRITICAL BUG FIX - SEARCH FUNCTIONALITY RESTORED (Aug 28)**
+**🚨 RESOLVED**: Search page showing 0 results despite working APIs
+- **Root Cause**: Vite proxy configuration pointing to wrong backend path
+- **Solution**: Updated vite.config.ts to use `/lingora/backend/public` instead of `/lingora/backend`
+- **Status**: Search now returns 19 providers, all filters operational, full functionality restored
+- **Impact**: Core MVP feature restored, system now stable for continued development
 
 #### ✅ **PRE-ALPHA 0.2 MILESTONE ACHIEVEMENTS (Aug 27)**
 - **🏠 Complete Homepage Redesign**: Professional, modern landing page with real statistics
