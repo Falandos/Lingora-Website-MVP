@@ -134,7 +134,7 @@ export const DiscoverSection = ({ className = '' }: DiscoverSectionProps) => {
               onClick={handleTitleClick}
               title={easterEggClicks > 0 ? `${5 - easterEggClicks} more clicks for magic ✨` : 'Click me multiple times for a surprise!'}
             >
-              {magicMode ? '✨ Discover the Magic of Lingora ✨' : 'Discover Lingora'}
+              {magicMode ? t('discover.title_magic') : t('discover.title')}
               {easterEggClicks > 0 && easterEggClicks < 5 && (
                 <span className="inline-block ml-2 animate-bounce">
                   {'✨'.repeat(easterEggClicks)}
@@ -143,8 +143,8 @@ export const DiscoverSection = ({ className = '' }: DiscoverSectionProps) => {
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               {magicMode 
-                ? 'Where language barriers vanish and connections flourish! 🌟' 
-                : 'Experience the future of multilingual service discovery'
+                ? t('discover.subtitle_magic') 
+                : t('discover.subtitle')
               }
             </p>
             

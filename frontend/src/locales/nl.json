@@ -91,9 +91,15 @@
     "services": "Diensten"
   },
   "carousel": {
-    "recently_joined": "Recent Aangesloten Professionals"
+    "recently_joined": "Recent Aangesloten Professionals",
+    "verified_businesses": "Geverifieerde bedrijven klaar om u in uw taal te helpen",
+    "view_all_providers": "Bekijk Alle Aanbieders"
   },
   "discover": {
+    "title": "Ontdek Lingora",
+    "title_magic": "✨ Ontdek de Magie van Lingora ✨",
+    "subtitle": "Ervaar de toekomst van meertalige dienstverlening",
+    "subtitle_magic": "Waar taalbarrières verdwijnen en verbindingen bloeien! 🌟",
     "try_your_search": "Probeer Nu Je Eigen Zoekopdracht",
     "search_tagline": "Zoek in elke taal • Onmiddellijke resultaten • Geen registratie vereist",
     "examples_title": "Echte Zoekvoorbeelden:",
@@ -197,6 +203,21 @@
     "cookies": "Cookie Beleid",
     "impressum": "Impressum",
     "contact": "Contact"
+  },
+  "cta": {
+    "ready_title": "Klaar om te Beginnen?",
+    "kvk_verified": "KVK Geverifieerd",
+    "gdpr_compliant": "GDPR Conform",
+    "ai_powered": "AI-Ondersteund",
+    "always_free": "Altijd Gratis",
+    "looking_for_services": "Op zoek naar Professionele Diensten?",
+    "find_professionals": "Vind zorgverleners, juridische, financiële en educatieve professionals die jouw taal spreken.",
+    "start_search": "Start je Zoektocht",
+    "free_features": "✓ Voor altijd gratis  ✓ 15+ talen  ✓ Geverifieerde aanbieders",
+    "are_you_professional": "Ben je een Professional?",
+    "join_platform": "Sluit je aan bij ons platform en maak contact met internationale klanten die jouw talen spreken.",
+    "list_business": "Registreer je Bedrijf",
+    "trial_features": "✓ 3 maanden gratis proefperiode  ✓ Premium functies  ✓ Verificatie badge"
   },
   "legal": {
     "terms_title": "Servicevoorwaarden",

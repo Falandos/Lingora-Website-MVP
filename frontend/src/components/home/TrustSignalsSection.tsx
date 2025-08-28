@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
 interface TrustSignalsSectionProps {
@@ -7,6 +8,7 @@ interface TrustSignalsSectionProps {
 
 export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <section className={`py-16 bg-primary-50 ${className}`}>
@@ -16,7 +18,7 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
           {/* Compact Trust Header */}
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Ready to Get Started?
+              {t('cta.ready_title')}
             </h2>
             
             {/* Inline Trust Badges */}
@@ -27,7 +29,7 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
                   </svg>
                 </div>
-                <span className="font-medium">KVK Verified</span>
+                <span className="font-medium">{t('cta.kvk_verified')}</span>
               </div>
               
               <div className="flex items-center gap-2">
@@ -36,7 +38,7 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <span className="font-medium">GDPR Compliant</span>
+                <span className="font-medium">{t('cta.gdpr_compliant')}</span>
               </div>
               
               <div className="flex items-center gap-2">
@@ -45,7 +47,7 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <span className="font-medium">AI-Powered</span>
+                <span className="font-medium">{t('cta.ai_powered')}</span>
               </div>
               
               <div className="flex items-center gap-2">
@@ -54,7 +56,7 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2" />
                   </svg>
                 </div>
-                <span className="font-medium">Always Free</span>
+                <span className="font-medium">{t('cta.always_free')}</span>
               </div>
             </div>
           </div>
@@ -69,20 +71,20 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Looking for Professional Services?
+                {t('cta.looking_for_services')}
               </h3>
               <p className="text-gray-600 mb-6">
-                Find healthcare, legal, financial, and educational professionals who speak your language.
+                {t('cta.find_professionals')}
               </p>
               <Button
                 onClick={() => navigate('/search')}
                 size="lg"
                 className="w-full mb-4"
               >
-                Start Your Search
+                {t('cta.start_search')}
               </Button>
               <p className="text-sm text-gray-500">
-                ✓ Free forever  ✓ 15+ languages  ✓ Verified providers
+                {t('cta.free_features')}
               </p>
             </div>
 
@@ -94,10 +96,10 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Are You a Professional?
+                {t('cta.are_you_professional')}
               </h3>
               <p className="text-gray-600 mb-6">
-                Join our platform and connect with international clients who speak your languages.
+                {t('cta.join_platform')}
               </p>
               <Button
                 onClick={() => navigate('/register')}
@@ -105,10 +107,10 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
                 variant="outline"
                 className="w-full mb-4 border-primary-600 text-primary-600 hover:bg-primary-50"
               >
-                List Your Business
+                {t('cta.list_business')}
               </Button>
               <p className="text-sm text-gray-500">
-                ✓ 3-month free trial  ✓ Easy setup  ✓ Verified clients
+                {t('cta.trial_features')}
               </p>
             </div>
           </div>
@@ -118,19 +120,19 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
             <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-primary-600">19</span>
-                <span>Active Businesses</span>
+                <span>{t('stats.active_businesses')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-blue-600">54</span>
-                <span>Professional Staff</span>
+                <span>{t('stats.professional_staff')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-green-600">15+</span>
-                <span>Languages</span>
+                <span>{t('stats.languages')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-purple-600">44</span>
-                <span>Services Available</span>
+                <span>{t('stats.services')}</span>
               </div>
             </div>
           </div>

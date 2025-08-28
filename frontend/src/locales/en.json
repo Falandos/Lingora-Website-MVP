@@ -91,9 +91,15 @@
     "services": "Services"
   },
   "carousel": {
-    "recently_joined": "Recently Joined Professionals"
+    "recently_joined": "Recently Joined Professionals",
+    "verified_businesses": "Verified businesses ready to serve you in your language",
+    "view_all_providers": "View All Providers"
   },
   "discover": {
+    "title": "Discover Lingora",
+    "title_magic": "✨ Discover the Magic of Lingora ✨",
+    "subtitle": "Experience the future of multilingual service discovery",
+    "subtitle_magic": "Where language barriers vanish and connections flourish! 🌟",
     "try_your_search": "Try Your Own Search Now",
     "search_tagline": "Search in any language • Get instant results • No registration needed",
     "examples_title": "Real Search Examples:",
@@ -197,6 +203,21 @@
     "cookies": "Cookie Policy",
     "impressum": "Impressum",
     "contact": "Contact Us"
+  },
+  "cta": {
+    "ready_title": "Ready to Get Started?",
+    "kvk_verified": "KVK Verified",
+    "gdpr_compliant": "GDPR Compliant",
+    "ai_powered": "AI-Powered",
+    "always_free": "Always Free",
+    "looking_for_services": "Looking for Professional Services?",
+    "find_professionals": "Find healthcare, legal, financial, and educational professionals who speak your language.",
+    "start_search": "Start Your Search",
+    "free_features": "✓ Free forever  ✓ 15+ languages  ✓ Verified providers",
+    "are_you_professional": "Are You a Professional?",
+    "join_platform": "Join our platform and connect with international clients who speak your languages.",
+    "list_business": "List Your Business",
+    "trial_features": "✓ 3-month free trial  ✓ Premium features  ✓ Verified badge"
   },
   "legal": {
     "terms_title": "Terms of Service",

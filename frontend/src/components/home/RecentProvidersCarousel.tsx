@@ -188,7 +188,7 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
               {t('carousel.recently_joined')}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Verified businesses ready to serve you in your language
+              {t('carousel.verified_businesses')}
             </p>
           </div>
 
@@ -325,7 +325,7 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
               variant="outline"
               className="px-8"
             >
-              View All Providers
+              {t('carousel.view_all_providers')}
             </Button>
           </div>
         </div>
