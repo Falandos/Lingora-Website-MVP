@@ -1,364 +1,236 @@
-# CLAUDE.md - Documentation System Guide
-*Instructions for using Lingora's consolidated documentation*
-*Last Updated: 2025-08-27*
+# CLAUDE.md - Lingora Development System Guide
+*Primary instruction file for AI-assisted development with agent system*
+*Last Updated: 2024-12-19*
 
-## 📚 New Documentation Structure
+## 🤖 Agent-Based Development System
 
-**IMPORTANT**: We've consolidated 20+ scattered .md files into 6 organized documents. Always use this structured approach:
-
-### 🗂️ The 6 Core Documents
-
-1. **PROJECT_OVERVIEW.md** - Start here for project status and MVP requirements
-2. **DEVELOPMENT_GUIDE.md** - Setup, architecture, and development workflow  
-3. **FEATURE_PROGRESS.md** - Implementation tracking and sprint management
-4. **BUG_MANAGEMENT.md** - Issue tracking and fix procedures
-5. **TECHNICAL_NOTES.md** - Detailed technical reference and troubleshooting
-6. **HANDOVERS.md** - Unified session transfer documentation (replaces all individual handover files)
+### Core Principle: PM-First Workflow
+**The PM agent is the central brain. It tracks EVERYTHING and controls git commits.**
+**No code changes happen without PM awareness. No commits happen without PM approval.**
 
 ---
 
-## 🔄 Documentation Workflow (CRITICAL)
+## 📋 Available Agents
 
-### After Each Development Session:
-1. **Update Status**: Modify `FEATURE_PROGRESS.md` with completed tasks
-2. **Log Issues**: Add any discovered bugs to `BUG_MANAGEMENT.md`
-3. **Update Overview**: Refresh `PROJECT_OVERVIEW.md` if major milestones reached
-4. **Technical Changes**: Document architectural changes in `TECHNICAL_NOTES.md`
-5. **Session Handover**: Update `HANDOVERS.md` with current session status and next priorities
-6. **🔄 Git Commit & Push**: ALWAYS follow `GIT_WORKFLOW.md` procedures for committing and pushing changes
+### 1. **project-manager (PM)** - Central Coordinator
+- **Instructions**: `/agents/pm-agent-instructions.md`
+- **Role**: Tracks all work, maintains documentation, controls git commits
+- **Usage**: "PM agent, [status/update/test results/commit]"
+- **Maintains**: 
+  - `/active/project-status.md` (sprint progress)
+  - `/active/work-in-progress.md` (uncommitted changes)
+  - `/agents/documentation-index.md` (file locations)
+  - `/agents/agent-registry.md` (agent catalog)
+- **Model**: Claude Opus recommended (complex coordination)
 
-### For Handovers Between Sessions:
-1. **Start**: Read `HANDOVERS.md` for latest session status and immediate next steps
-2. **Check Overview**: Review `PROJECT_OVERVIEW.md` for overall project status  
-3. **Check Progress**: Review `FEATURE_PROGRESS.md` for active sprint
-4. **Review Issues**: Check `BUG_MANAGEMENT.md` for critical problems
-5. **Setup**: Use `DEVELOPMENT_GUIDE.md` for technical context
-
-### When Starting New Features:
-1. **Plan**: Add feature to `FEATURE_PROGRESS.md` backlog
-2. **Implement**: Follow patterns in `DEVELOPMENT_GUIDE.md`
-3. **Test**: Use testing procedures in `BUG_MANAGEMENT.md`
-4. **Document**: Update technical details in `TECHNICAL_NOTES.md`
+### 2. **github-repository-manager** - Git Operations
+- **Instructions**: `/agents/github-agent-instructions.md`
+- **Role**: Executes git operations ONLY when PM agent triggers
+- **Usage**: Called by PM agent after verification
+- **Never**: Called directly by user
 
 ---
 
-## 🎯 Project Context Summary
+## 🔄 MANDATORY Development Workflow
 
-### Mission & Value Prop
-"Find professionals who speak YOUR language." Launch market: Netherlands.
+### Every Session MUST Follow This Flow:
 
-### Current Status: ~85% MVP Complete ✅
-- **Core Systems**: Search, auth, contact system, dashboards - ALL WORKING
-- **Critical Fixes**: All major bugs from handover document - RESOLVED
-- **Next Phase**: Complete staff-service association and provider forms
+START SESSION
+"PM agent, what's the current status?"
+→ PM provides context, uncommitted work, priorities
+MAKE CHANGES
+After EACH change: "PM agent, I [changed X in location Y]"
+→ PM logs in work-in-progress.md
+TEST MANUALLY
+"PM agent, test results: [pass/fail] for [component] - [details]"
+→ PM updates test status
+REQUEST COMMIT (only if ready)
+"PM agent, [feature] tested and working, ready for commit"
+→ PM verifies criteria → triggers github-repository-manager
+END SESSION
+"PM agent, ending session, update status"
+→ PM saves state for next session
 
-### Quick Access for Development:
-- **Admin Login**: admin@lingora.nl / password123
-- **Provider Login**: dr.hassan@medcentrum.nl / password123
-- **Frontend**: http://localhost:5174 
-- **Backend**: XAMPP Apache + MySQL
-
----
-
-## 🔑 Project Location Reminder (CRITICAL)
-
-**PRIMARY PROJECT LOCATION**: `C:\Cursor\Lingora\`
-- **Documentation Files**: All .md files are in `C:\Cursor\Lingora\`
-- **Backend Code**: `C:\xampp\htdocs\lingora\backend\` 
-- **Frontend Code**: `C:\Cursor\Lingora\frontend\`
-- **AI Services**: `C:\xampp\htdocs\lingora\backend\ai_services\`
-
-**IMPORTANT**: Always check `C:\Cursor\Lingora\` FIRST for documentation files, not `C:\xampp\htdocs\lingora\`. The xampp location only contains the backend PHP code and databases.
-
-## ⚠️ Documentation Rules (MANDATORY)
-
-### DO NOT:
-- ❌ Create new .md files without consolidating into the 6 core documents
-- ❌ Create new handover files (use `HANDOVERS.md` instead)
-- ❌ Leave features uncommitted without updating `FEATURE_PROGRESS.md`
-- ❌ Fix bugs without logging in `BUG_MANAGEMENT.md`  
-- ❌ Make architectural changes without documenting in `TECHNICAL_NOTES.md`
-- ❌ End sessions without updating `HANDOVERS.md` with current status
-- ❌ Look in `C:\xampp\htdocs\lingora\` for documentation files (they're in `C:\Cursor\Lingora\`)
-
-### ALWAYS DO:
-- ✅ Update relevant documentation after each coding session
-- ✅ Mark tasks as completed in `FEATURE_PROGRESS.md`
-- ✅ Add new bugs/issues to `BUG_MANAGEMENT.md` immediately
-- ✅ Keep `PROJECT_OVERVIEW.md` current with overall project status
-- ✅ Update `HANDOVERS.md` at end of each session with current status
-- ✅ Use consistent formatting and update "Last Updated" dates
-- ✅ **CRITICAL**: Follow `GIT_WORKFLOW.md` for all Git operations (commit & push)
-- ✅ **Git Repository**: Always use proper authentication and push procedures from workflow guide
 
 ---
 
-## 🚀 Quick Start for Any Developer
+## ⚠️ CRITICAL RULES
 
-### First Time Setup:
-1. Read `HANDOVERS.md` - Get immediate context and current session status
-2. Read `PROJECT_OVERVIEW.md` - Understand project scope and current status
-3. Follow `DEVELOPMENT_GUIDE.md` - Get environment running
-4. Check `FEATURE_PROGRESS.md` - See what's in current sprint
-5. Review `BUG_MANAGEMENT.md` - Understand known issues
+### ALWAYS (No Exceptions):
+- ✅ Start EVERY session with PM status check
+- ✅ Report EVERY change to PM immediately
+- ✅ Test manually before declaring "done"
+- ✅ Give PM explicit test results
+- ✅ Let PM decide when to commit
+- ✅ End session with PM status update
 
-### Before Coding:
-1. Update your target feature status to "in_progress" in `FEATURE_PROGRESS.md`
-2. Check `BUG_MANAGEMENT.md` for related issues
-3. Reference `TECHNICAL_NOTES.md` for architecture patterns
-
-### After Coding:
-1. Mark feature "completed" in `FEATURE_PROGRESS.md`
-2. Add any discovered issues to `BUG_MANAGEMENT.md`
-3. Update `PROJECT_OVERVIEW.md` if significant milestone reached
-4. Document technical decisions in `TECHNICAL_NOTES.md`
-5. Update `HANDOVERS.md` with session results and next priorities
+### NEVER (Will Break System):
+- ❌ Make changes without telling PM
+- ❌ Call github-repository-manager directly
+- ❌ Say "done" without testing
+- ❌ Commit without PM approval
+- ❌ Create new .md files without PM tracking
+- ❌ Skip session start/end with PM
 
 ---
 
-## 📋 Current Sprint Context
+## 📊 PM Agent Tracking System
 
-### MVP Status: 85% Complete
-**✅ WORKING**: Search, authentication, contact system, provider dashboards, admin dashboards, geographic radius search, contact modals with real data
-
-**🚧 IN PROGRESS**: Staff-service association, UI polish (language flags), provider profile forms
-
-**📅 NEXT**: Complete provider management, admin approval workflow, subscription UI
-
-### Today's Priority:
-1. Connect staff members to specific services (database design + UI)
-2. Replace CEFR levels with language flags in search results
-3. Remove service mode from filters (display-only)
+The PM maintains real-time project awareness through:
+- **/active/work-in-progress.md** - Current session changes and test status
+- **/active/project-status.md** - Sprint progress and priorities
+- **/agents/documentation-index.md** - Complete file map
+- **/agents/agent-registry.md** - Available agents and roles
 
 ---
 
-## 🛟 Emergency Reference
+## 🎯 Quick Commands
+
+```bash
+# Session Start (MANDATORY)
+"PM agent, provide current status and priorities"
+
+# After Changes (MANDATORY)
+"PM agent, updated [component]: [what changed]"
 
-If documentation is unclear or missing:
-1. **Technical Issues**: Check `TECHNICAL_NOTES.md` troubleshooting section
-2. **Setup Problems**: Follow `DEVELOPMENT_GUIDE.md` step-by-step
-3. **Bug Reproduction**: Use templates in `BUG_MANAGEMENT.md`
-4. **Feature Status**: Always check `FEATURE_PROGRESS.md` first
+# After Testing (MANDATORY)
+"PM agent, test results for [component]: [pass/fail] - [details]"
+
+# Ready to Commit
+"PM agent, [changes] tested and stable. Ready for commit?"
+
+# Session End (MANDATORY)
+"PM agent, ending session. Update status."
+
+# Finding Things
+"PM agent, where is [feature/doc/code]?"
 
-**Remember**: This consolidated system prevents information fragmentation and ensures continuity across development sessions.
+# Check Uncommitted Work
+"PM agent, what's pending commit?"
 
-## 📋 Handover System
+🚦 Commit Control Protocol
+PM agent ONLY triggers commits when ALL criteria met:
 
-**CRITICAL**: Use `HANDOVERS.md` for all session transfers instead of creating new handover files. This unified system:
-- Archives all historical handovers for reference
-- Maintains current session status at the top
-- Prevents handover file proliferation 
-- Ensures continuity between development sessions
+✅ Changes tracked in /active/work-in-progress.md
+✅ Manual testing completed
+✅ User confirms "working"
+✅ No breaking changes
+✅ Documentation updated
 
-**Handover Workflow:**
-1. **Start Session**: Check `HANDOVERS.md` for latest status and priorities
-2. **During Session**: Update current session section with progress
-3. **End Session**: Archive completed session, update current status for next developer
-4. **Never**: Create files like `HANDOVER_NEW.md`, `SESSION_HANDOVER.md`, etc.
+Any criterion fails → No commit, just track
 
----
+📚 Documentation Structure (Final Clean Organization)
+Current Structure:
 
-# Original MVP Technical Context (For Reference Only)
+**Root Directory (Core References Only):**
+- CLAUDE.md - This file - Primary development instructions
+- Whimsical.md - UI delight and animation guidelines  
+- PITCH.md - Platform capabilities overview
 
-Mission / Value Prop
-"Find professionals who speak YOUR language." Launch market: Netherlands.
+**Agent Instructions:**
+- /agents/pm-agent-instructions.md - Project Manager agent
+- /agents/github-agent-instructions.md - Git operations agent
+- /agents/agent-registry.md - Agent catalog
+- /agents/documentation-index.md - Master file index
 
-1) Scope (In-MVP)
+**Active Work:**
+- /active/project-status.md - Current sprint status
+- /active/work-in-progress.md - Session tracking
 
-User roles
+**Archived (timestamped - August 29, 2025):**
+- /archive/PROJECT_OVERVIEW-2025-08-29.md - Project scope and MVP requirements
+- /archive/DEVELOPMENT_GUIDE-2025-08-29.md - Setup and architecture
+- /archive/TECHNICAL_NOTES-2025-08-29.md - Technical reference  
+- /archive/UX_UI_ANALYSIS-2025-08-29.md - User experience insights
+- /archive/CODE_QUALITY_ANALYSIS-2025-08-29.md - Code quality standards
+- /archive/FEATURE_PROGRESS-2025-08-29.md - Historical sprint tracking
+- /archive/BUG_MANAGEMENT-2025-08-29.md - Historical issue tracking  
+- /archive/HANDOVERS-2025-08-29.md - Historical session transfers
+- /archive/TRANSLATION_*-2025-08-29.md - Translation documentation
 
-Resident/Seeker: Search, filter, view provider pages, send contact messages. No account required. (Favorites post-MVP.)
+🎯 Lingora Project Context
+Mission
+"Find professionals who speak YOUR language" - Netherlands market
+Current Status (Updated August 29, 2025)
 
-Provider/Professional: Register/login, create/edit profile, add service listings, add staff members, optional opening hours; visible only after admin approval (KVK & BTW).
+Progress: 95% MVP Complete - ALPHA 0.1 ACHIEVED!
+Working: All core systems operational (search, auth, contact, dashboards, AI search, translations)
+Achievement: Complete homepage translation system with react-i18next
+Next Phase: Quality of life improvements, additional languages, bug fixes
 
-Admin: Approve/reject providers, edit listings, manage categories/languages/pages, view contact logs.
+Development Access
 
-Discovery
+Frontend: http://localhost:5174
+Backend: http://localhost/lingora/backend/public
+Admin: admin@lingora.nl / password123
+Provider: dr.hassan@medcentrum.nl / password123
 
-List + Map view (OSM) results.
+Project Locations
 
-Filters: Language(s), Category, City + Radius, Mode (In-person/Online).
+Documentation: C:\Cursor\Lingora\
+Frontend Code: C:\Cursor\Lingora\frontend\
+Backend Code: C:\xampp\htdocs\lingora\backend\
 
-Keyword search bar (Google-style). (LLM intent parsing is post-MVP exploration.)
 
-Sorting: Best match; Distance. (No ratings in MVP.)
+🔴 Emergency Procedures
+PM Agent Not Responding:
+bash# Reload instructions
+"PM agent, reload from pm-agent-instructions.md"
 
-Provider public page
+# Status check
+"PM agent, are you tracking /active/work-in-progress.md?"
 
-Business name, city, bio (multilingual), services (title, description, price range, mode), staff cards (name/role/languages; contact click-to-reveal), optional opening hours, gallery (max 6 images).
+# Manual verification
+- Check /active/work-in-progress.md exists
+- Verify /agents/pm-agent-instructions.md present
+- Restart if needed
+Urgent Commit Needed:
+bash# Still use PM, but expedite:
+"PM agent, URGENT: [change] tested and critical. Fast-track commit."
 
-Contact & messaging
+📈 System Metrics
+PM tracks effectiveness through:
 
-Contact form → email relay to provider; Admin BCC on all messages; Auto-reply to resident.
+Changes tracked per session
+Commits approved vs rejected
+Time from change to commit
+Documentation updates
+Session continuity
 
-Provider/public email/phone/links are hidden until clicked (anti-scrape).
+Request: "PM agent, show metrics"
 
-Moderation & trust
+🚀 Agent Development Roadmap
+✅ Completed
 
-Manual verification of KVK & BTW by Admin before publish.
+github-repository-manager (Git operations)
+project-manager (Organization)
 
-Report listing (abuse) to Admin queue.
+📅 Planned
 
-Trials & monetization
+code-auditor (Bug finding)
+solution-architect (Fix design)
+developer (Implementation)
+product-owner (Product consistency)
 
-Free trial = 3 months per provider account. After expiry, account frozen (listings hidden) until paid plan (€9.99/mo or €99.99/yr).
 
-Anti-abuse: one trial per KVK/BTW (persist identifier).
+🔧 Adding New Agents
 
-Actual payment processing may be stubbed for MVP; freeze/unfreeze logic must work.
+Create agent: /agent [description]
+Create instructions: [agent-name]-instructions.md
+Register: "PM agent, register new agent: [name]"
+PM updates /agents/agent-registry.md
 
-Internationalization
 
-UI languages at launch: Dutch, English, German, Arabic, Amazigh (Berber), Ukrainian, Polish, Chinese (Mandarin & Cantonese), Spanish, Hindi, Turkish, French, Tigrinya (Eritrees), Somali.
+⚠️ Important Notes
+From Previous System
 
-Providers mark spoken languages (+ CEFR level A1–C2) for filtering.
+Consolidated documentation approach being maintained
+Git workflow procedures preserved
+Session handover system integrated into PM workflow
+All technical context preserved in PROJECT_OVERVIEW.md
 
-Legal & privacy (GDPR)
+Key Change
 
-Cookie banner (informational), contact consent checkbox.
-
-Auto-purge unverified provider accounts after 30 days.
-
-Takedown SLA for flagged content: 72h.
-
-Publish Terms/Privacy/Cookies/Impressum (texts to be provided/generated).
-
-Non-functional (targets)
-
-Fast first render on 4G; accessible basics (WCAG AA labels/contrast/keyboard).
-
-SEO-ready: unique slugs, meta tags, sitemap.xml, robots.txt, hreflang for all UI locales.
-
-Basic analytics (privacy-friendly, free).
-
-Spam/abuse controls: CAPTCHA on auth/contact, IP rate-limits.
-
-2) Out of Scope (Post-MVP)
-
-Reviews & ratings (and any rating filters/sorts).
-
-Availability bookings / calendar reservations.
-
-Payments integration (Stripe, etc.) beyond enabling freeze/unfreeze.
-
-SMS/WhatsApp relay (links allowed, still click-to-reveal).
-
-Bulk provider import (CSV).
-
-3) Key User Flows (Happy Paths)
-
-Resident: discover → contact
-
-Land on home → set language + category + city/radius (and mode).
-
-See list + map; open provider page.
-
-Submit contact form (name, email, preferred language, message, consent) → provider receives email; admin BCC; resident gets auto-reply.
-
-Provider: register → publish
-
-Register + verify email → access provider dashboard.
-
-Complete profile (business + address + languages + optional hours + gallery).
-
-Add service listings (title/desc/prices/mode) and staff members (name/role/languages; contact fields).
-
-Submit for Admin approval (KVK & BTW required).
-
-Once approved, provider becomes searchable/public (unless trial expired → frozen).
-
-Admin: moderate → manage
-
-Review pending providers (KVK/BTW check) → Approve/Reject (with reason).
-
-Edit/takedown content; manage categories/languages/pages; view contact logs.
-
-Respond to reports within SLA.
-
-4) Entities (What we store conceptually)
-
-User (auth, role: provider/admin).
-
-Provider (business profile; address + geolocation; bio (multilingual); KVK, BTW; approval status; trial/subscription status; opening hours; gallery).
-
-Service (provider FK; category; title; description (multilingual); price range; mode; linked contact staff).
-
-Staff (provider FK; name; role; languages; contact fields (revealed on click); photo).
-
-Category (taxonomy; multilingual label).
-
-ProviderLanguage (provider ↔ language code + CEFR level).
-
-Message (resident → provider contact log; includes preferred language).
-
-Report (abuse/takedown).
-
-Language (catalog for filters & labels).
-
-Settings (site & templates), Pages (Terms/Privacy/Cookies).
-
-5) Search & Ranking (Behavioral Requirements)
-
-Filters: Language(s), Category, City + Radius (default 25 km), Mode (In-person/Online).
-
-Keyword search: matches provider/service text.
-
-Sort: Best match by profile completeness + recency; Distance (when radius is set).
-
-Map behavior: show results in current bounds; clicking marker opens provider card.
-
-No ratings in MVP → no rating filter/sort.
-
-6) Publishing Rules & Visibility
-
-Provider pages/listings are publicly visible only when:
-
-Email verified and Admin approved (KVK & BTW).
-
-Account not frozen (trial active or subscription active).
-
-Frozen or unapproved providers are not discoverable and show a neutral “temporarily unavailable” message if a direct link exists.
-
-7) Compliance & Anti-abuse Requirements
-
-Click-to-reveal for email/phone/links on public pages; log reveals.
-
-CAPTCHA on contact and auth; rate-limit per IP + endpoint.
-
-Store KVK/BTW to prevent multiple trials for the same business.
-
-Data retention for unverified accounts (30 days); deletion on request.
-
-8) Acceptance Criteria (Go/No-Go)
-
-Residents can filter by language + category + city/radius and see relevant providers on list + map.
-
-Provider public page shows bio (localized), services, staff, optional opening hours, and gallery (≤6).
-
-Resident can contact provider via form; provider gets email; admin BCC; resident receives auto-reply.
-
-Providers can register, complete profile, add services/staff, and submit for approval; Admin can approve/reject; approved providers become searchable.
-
-Trial logic: new providers visible during 3-month trial; after expiry, visibility is suspended (frozen) until subscription is activated.
-
-Security & compliance: CAPTCHA & rate-limit active; consent captured; cookie banner shown; legal pages published; unverified purged after 30 days.
-
-SEO: unique slugs, meta tags present, sitemap/robots, and hreflang for all UI locales.
-
-9) Assumptions & Notes
-
-KVK & BTW both required before publish (edge cases like private tutors without BTW are out of scope for MVP).
-
-Analytics uses a free, privacy-friendly tool; no user-level profiling.
-
-LLM-powered search understanding is post-MVP (keep classic keyword + filters now).
-
-Glossary
-
-Provider: business or professional offering services.
-
-Service listing: a specific offering under a provider (e.g., “Haircut”, “Therapy session”).
-
-Staff: individual team member/contact linked to a provider.
-
-Frozen: provider not publicly visible due to expired trial/no subscription.
+PM agent now controls all documentation updates
+No direct file modifications without PM tracking
+Git commits only through PM verification
