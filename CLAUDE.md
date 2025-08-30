@@ -1,6 +1,6 @@
 # CLAUDE.md - Lingora Development System Guide
 *Primary instruction file for AI-assisted development with agent system*
-*Last Updated: 2024-12-19*
+*Last Updated: 30-08-2025*
 
 ## 🤖 Agent-Based Development System
 
@@ -13,7 +13,7 @@
 ## 📋 Available Agents
 
 ### 1. **project-manager (PM)** - Central Coordinator
-- **Instructions**: `/agents/pm-agent-instructions.md`
+- **Instructions**: `C:/Cursor/.claude/agents/pm-agent-instructions.md`
 - **Role**: Tracks all work, maintains documentation, controls git commits
 - **Usage**: "PM agent, [status/update/test results/commit]"
 - **Maintains**: 
@@ -24,7 +24,7 @@
 - **Model**: Claude Opus recommended (complex coordination)
 
 ### 2. **github-repository-manager** - Git Operations
-- **Instructions**: `/agents/github-agent-instructions.md`
+- **Instructions**: `C:/Cursor/.claude/agents/github-agent-instructions.md`
 - **Role**: Executes git operations ONLY when PM agent triggers
 - **Usage**: Called by PM agent after verification
 - **Never**: Called directly by user
@@ -76,11 +76,12 @@ END SESSION
 
 ## 📊 PM Agent Tracking System
 
-The PM maintains real-time project awareness through:
+The PM maintains real-time project awareness through the **5-Document Active Development Structure**:
+- **/active/project-status.md** - Sprint progress and milestone tracking
 - **/active/work-in-progress.md** - Current session changes and test status
-- **/active/project-status.md** - Sprint progress and priorities
-- **/agents/documentation-index.md** - Complete file map
-- **/agents/agent-registry.md** - Available agents and roles
+- **/active/bugs-and-issues.md** - Active development issues and enhancement opportunities
+- **/active/technical-development.md** - Architecture decisions and implementation patterns
+- **/active/session-handovers.md** - Development continuity and session context
 
 ---
 
@@ -119,8 +120,8 @@ PM agent ONLY triggers commits when ALL criteria met:
 
 Any criterion fails → No commit, just track
 
-📚 Documentation Structure (Final Clean Organization)
-Current Structure:
+📚 Documentation Structure (Optimized 5-Document System)
+**Current Structure - August 30, 2025:**
 
 **Root Directory (Core References Only):**
 - CLAUDE.md - This file - Primary development instructions
@@ -133,20 +134,21 @@ Current Structure:
 - /agents/agent-registry.md - Agent catalog
 - /agents/documentation-index.md - Master file index
 
-**Active Work:**
-- /active/project-status.md - Current sprint status
-- /active/work-in-progress.md - Session tracking
+**Active Development (5-Document Structure):**
+- /active/project-status.md - Sprint progress and milestone tracking
+- /active/work-in-progress.md - Current session changes and test status
+- /active/bugs-and-issues.md - Active development issues and enhancement tracking
+- /active/technical-development.md - Architecture patterns and debugging insights
+- /active/session-handovers.md - Development continuity and session transitions
 
-**Archived (timestamped - August 29, 2025):**
+**Archived (Historical Reference):**
+- /archive/*-2025-08-29.md - All historical documentation timestamped and preserved
 - /archive/PROJECT_OVERVIEW-2025-08-29.md - Project scope and MVP requirements
 - /archive/DEVELOPMENT_GUIDE-2025-08-29.md - Setup and architecture
 - /archive/TECHNICAL_NOTES-2025-08-29.md - Technical reference  
-- /archive/UX_UI_ANALYSIS-2025-08-29.md - User experience insights
-- /archive/CODE_QUALITY_ANALYSIS-2025-08-29.md - Code quality standards
-- /archive/FEATURE_PROGRESS-2025-08-29.md - Historical sprint tracking
 - /archive/BUG_MANAGEMENT-2025-08-29.md - Historical issue tracking  
 - /archive/HANDOVERS-2025-08-29.md - Historical session transfers
-- /archive/TRANSLATION_*-2025-08-29.md - Translation documentation
+- /archive/TRANSLATION_*-2025-08-29.md - Translation system documentation
 
 🎯 Lingora Project Context
 Mission
