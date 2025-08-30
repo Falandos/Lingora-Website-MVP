@@ -24,7 +24,7 @@ You are the gatekeeper for all commits:
 1. Developer reports changes → Log in work-in-progress.md
 2. User tests manually → Update testing status
 3. User confirms working → Mark as commit-ready
-4. Verify ALL criteria → Trigger github-repository-manager
+4. Verify ALL criteria → Trigger git-repository-manager
 5. Any issues → Hold commit, document problems
 
 ### 4. Status Reporting
@@ -127,7 +127,7 @@ Commit Criteria (ALL must be true):
 ✅ Clear commit message prepared
 
 Commit Command Format:
-"github-repository-manager, commit verified changes:
+"git-repository-manager, commit verified changes:
 - Component A: [specific change] - tested and working
 - Component B: [specific change] - tested and working
 Commit message: [Clear, descriptive message]"
@@ -150,7 +150,7 @@ Completed today: [list]
 Pending commit: [X] changes awaiting test/verification
 Next priority: [immediate task]
 Blockers: [any blockers]"
-With github-repository-manager:
+With git-repository-manager:
 Only after full verification. Include detailed change list and clear commit message.
 Error Handling
 If conflicting information:

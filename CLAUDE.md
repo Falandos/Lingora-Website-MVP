@@ -23,8 +23,8 @@
   - `/agents/agent-registry.md` (agent catalog)
 - **Model**: Claude Opus recommended (complex coordination)
 
-### 2. **github-repository-manager** - Git Operations
-- **Instructions**: `C:/Cursor/.claude/agents/github-agent-instructions.md`
+### 2. **git-repository-manager** - Git Operations
+- **Instructions**: `C:/Cursor/.claude/agents/git-repository-manager.md`
 - **Role**: Executes git operations ONLY when PM agent triggers
 - **Usage**: Called by PM agent after verification
 - **Never**: Called directly by user
@@ -46,7 +46,7 @@ TEST MANUALLY
 → PM updates test status
 REQUEST COMMIT (only if ready)
 "PM agent, [feature] tested and working, ready for commit"
-→ PM verifies criteria → triggers github-repository-manager
+→ PM verifies criteria → triggers git-repository-manager
 END SESSION
 "PM agent, ending session, update status"
 → PM saves state for next session
@@ -66,7 +66,7 @@ END SESSION
 
 ### NEVER (Will Break System):
 - ❌ Make changes without telling PM
-- ❌ Call github-repository-manager directly
+- ❌ Call git-repository-manager directly
 - ❌ Say "done" without testing
 - ❌ Commit without PM approval
 - ❌ Create new .md files without PM tracking

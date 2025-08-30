@@ -40,9 +40,9 @@ PM: [Acknowledges, updates tracking, provides status/routes request/controls com
 
 ---
 
-### 2. **github-repository-manager** - Git Operations Specialist  
+### 2. **git-repository-manager** - Git Operations Specialist  
 **Status**: ✅ Active  
-**Instructions**: `/agents/github-agent-instructions.md` (formerly GIT_WORKFLOW.md)  
+**Instructions**: `C:/Cursor/.claude/agents/git-repository-manager.md` (formerly GIT_WORKFLOW.md)  
 **Model Recommendation**: Any model (straightforward command execution)
 
 #### **Primary Role**
@@ -62,7 +62,7 @@ Execute git operations ONLY when triggered by project-manager agent after full v
 
 #### **Usage Pattern**
 ```
-PM Agent: "github-repository-manager, commit verified changes: [detailed list]"
+PM Agent: "git-repository-manager, commit verified changes: [detailed list]"
 Git Agent: [Executes git operations, reports results]
 ```
 
@@ -83,7 +83,7 @@ Git Agent: [Executes git operations, reports results]
 3. User tests → Reports results to PM Agent
 4. PM Agent → Updates test status, verifies criteria
 5. User requests commit → PM Agent verifies ALL criteria
-6. PM Agent → Triggers github-repository-manager (if approved)
+6. PM Agent → Triggers git-repository-manager (if approved)
 7. Git Agent → Executes commit, reports success
 8. PM Agent → Updates tracking files, confirms completion
 ```
