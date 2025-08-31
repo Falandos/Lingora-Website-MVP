@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Language {
   code: string;
@@ -34,27 +34,98 @@ export interface UseLanguageRotationReturn {
   setIsPaused: (paused: boolean) => void;
 }
 
-export const useLanguageRotation = (interval: number = 2500): UseLanguageRotationReturn => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
+// Global singleton state for synchronized rotation
+class LanguageRotationManager {
+  private currentIndex: number = 0;
+  private isVisible: boolean = true;
+  private isPaused: boolean = false;
+  private subscribers: Set<() => void> = new Set();
+  private timer: NodeJS.Timeout | null = null;
+  private interval: number = 4500;
 
-  useEffect(() => {
-    if (isPaused) return;
+  subscribe(callback: () => void) {
+    this.subscribers.add(callback);
+    
+    // Start timer if this is the first subscriber
+    if (this.subscribers.size === 1) {
+      this.startTimer();
+    }
+    
+    return () => {
+      this.subscribers.delete(callback);
+      // Stop timer if no more subscribers
+      if (this.subscribers.size === 0) {
+        this.stopTimer();
+      }
+    };
+  }
 
-    const timer = setInterval(() => {
-      setIsVisible(false);
+  private startTimer() {
+    if (this.timer) return;
+    
+    this.timer = setInterval(() => {
+      if (this.isPaused) return;
+      
+      this.isVisible = false;
+      this.notifySubscribers();
       
       setTimeout(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % languages.length);
-        setIsVisible(true);
+        this.currentIndex = (this.currentIndex + 1) % languages.length;
+        this.isVisible = true;
+        this.notifySubscribers();
       }, 200); // Quick fade out, then fade in
       
-    }, interval);
+    }, this.interval);
+  }
 
-    return () => clearInterval(timer);
-  }, [interval, isPaused]);
+  private stopTimer() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
 
+  private notifySubscribers() {
+    this.subscribers.forEach(callback => callback());
+  }
+
+  getCurrentIndex() {
+    return this.currentIndex;
+  }
+
+  getIsVisible() {
+    return this.isVisible;
+  }
+
+  getIsPaused() {
+    return this.isPaused;
+  }
+
+  setIsPaused(paused: boolean) {
+    this.isPaused = paused;
+    this.notifySubscribers();
+  }
+}
+
+// Global instance
+const rotationManager = new LanguageRotationManager();
+
+export const useLanguageRotation = (_interval: number = 2500): UseLanguageRotationReturn => {
+  const [, forceUpdate] = useState(0);
+
+  // Force re-render when state changes
+  const updateComponent = useCallback(() => {
+    forceUpdate(prev => prev + 1);
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = rotationManager.subscribe(updateComponent);
+    return unsubscribe;
+  }, [updateComponent]);
+
+  const currentIndex = rotationManager.getCurrentIndex();
+  const isVisible = rotationManager.getIsVisible();
+  const isPaused = rotationManager.getIsPaused();
   const currentLanguage = languages[currentIndex];
 
   return {
@@ -62,7 +133,7 @@ export const useLanguageRotation = (interval: number = 2500): UseLanguageRotatio
     currentIndex,
     isVisible,
     isPaused,
-    setIsPaused
+    setIsPaused: (paused: boolean) => rotationManager.setIsPaused(paused)
   };
 };
 

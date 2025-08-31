@@ -5,6 +5,17 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 
+// Get flag URL for language code (same as RecentProvidersCarousel)
+const getFlagUrl = (langCode: string) => {
+  const countryCodeMap: Record<string, string> = {
+    'nl': 'nl', 'en': 'gb', 'de': 'de', 'ar': 'sa', 'zgh': 'ma',
+    'uk': 'ua', 'pl': 'pl', 'zh-Hans': 'cn', 'yue': 'hk', 'es': 'es',
+    'hi': 'in', 'tr': 'tr', 'fr': 'fr', 'ti': 'er', 'so': 'so'
+  };
+  const countryCode = countryCodeMap[langCode] || 'un';
+  return `https://flagcdn.com/16x12/${countryCode}.png`;
+};
+
 interface StickySearchBarProps {
   className?: string;
 }
@@ -26,10 +37,10 @@ export const StickySearchBar = ({ className = '' }: StickySearchBarProps) => {
   };
 
   const supportedLanguages = [
-    { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-    { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+    { code: 'nl', name: 'Nederlands', countryCode: 'NL' },
+    { code: 'en', name: 'English', countryCode: 'GB' },
+    { code: 'de', name: 'Deutsch', countryCode: 'DE' },
+    { code: 'ar', name: 'العربية', countryCode: 'SA' },
   ];
 
   const currentLanguage = supportedLanguages.find(lang => lang.code === i18n.language) || supportedLanguages[0];
@@ -74,8 +85,13 @@ export const StickySearchBar = ({ className = '' }: StickySearchBarProps) => {
               {/* Language Selector */}
               <div className="relative group">
                 <button className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200">
-                  <span className="text-sm">{currentLanguage.flag}</span>
-                  <span className="text-xs font-medium">{currentLanguage.code.toUpperCase()}</span>
+                  <img 
+                    src={getFlagUrl(currentLanguage.code)} 
+                    alt={`${currentLanguage.countryCode} flag`} 
+                    className="w-4 h-3 rounded-sm" 
+                    loading="lazy" 
+                  />
+                  <span className="text-xs font-medium">{currentLanguage.countryCode}</span>
                   <svg className="w-3 h-3 transition-transform duration-200 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -95,7 +111,12 @@ export const StickySearchBar = ({ className = '' }: StickySearchBarProps) => {
                             : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        <span>{lang.flag}</span>
+                        <img 
+                          src={getFlagUrl(lang.code)} 
+                          alt={`${lang.countryCode} flag`} 
+                          className="w-3 h-2 rounded-sm" 
+                          loading="lazy" 
+                        />
                         <span>{lang.name}</span>
                         {i18n.language === lang.code && (
                           <Badge variant="primary" size="sm">Active</Badge>

@@ -41,7 +41,7 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   
   // Use shared language rotation (same timing as header)
-  const { currentLanguage } = useLanguageRotation(2500);
+  const { currentLanguage, isVisible } = useLanguageRotation(4500);
 
 
   // Language-specific placeholder examples mapping
@@ -169,7 +169,7 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
         `}>
           <div className="flex flex-col lg:flex-row">
             {/* Search Input Section */}
-            <div className="flex items-center flex-1">
+            <div className="flex items-center flex-1 relative">
               <div className="pl-6">
                 <svg 
                   className={`w-6 h-6 transition-colors duration-300 ${
@@ -190,7 +190,7 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
               
               <input
                 type="text"
-                placeholder={getPlaceholderForLanguage(currentLanguage.code)}
+                placeholder="" /* Remove static placeholder */
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -198,9 +198,25 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
                 onBlur={() => setIsFocused(false)}
                 className="
                   flex-1 px-6 py-5 text-lg bg-transparent border-0 outline-none 
-                  placeholder-gray-400 text-gray-900 transition-all duration-500
+                  text-gray-900 transition-all duration-500 relative z-10
                 "
               />
+              
+              {/* Animated Placeholder Overlay */}
+              {!searchQuery && !isFocused && (
+                <div 
+                  className={`
+                    absolute left-[72px] top-1/2 -translate-y-1/2 pointer-events-none
+                    text-lg text-gray-400 transition-all duration-500 ease-in-out
+                    ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-40 -translate-y-1'}
+                  `}
+                  style={{
+                    transform: `translateY(${isVisible ? '-50%' : 'calc(-50% - 4px)'})`
+                  }}
+                >
+                  {getPlaceholderForLanguage(currentLanguage.code)}
+                </div>
+              )}
             </div>
 
             {/* Compact Location Button */}
