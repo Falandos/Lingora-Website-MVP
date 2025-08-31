@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 import { Card, CardBody } from '../ui/Card';
+import BusinessIcon from '../ui/BusinessIcon';
 
 // Get flag URL for language code (reusing from ProviderCard)
 const getFlagUrl = (langCode: string) => {
@@ -15,15 +16,6 @@ const getFlagUrl = (langCode: string) => {
   return `https://flagcdn.com/24x18/${countryCode}.png`;
 };
 
-// Generate business initials from business name
-const getBusinessInitials = (businessName: string) => {
-  return businessName
-    .split(' ')
-    .filter(word => word.length > 0)
-    .map(word => word.charAt(0).toUpperCase())
-    .slice(0, 2)
-    .join('');
-};
 
 // Get category icon and styling
 const getCategoryInfo = (category?: string) => {
@@ -219,7 +211,7 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
                 {providers.map((provider) => (
                   <div
                     key={provider.id}
-                    className="flex-shrink-0 w-full md:w-1/3 px-3"
+                    className="flex-shrink-0 w-full md:w-1/3 px-3 flex justify-center"
                   >
                     <Card
                       variant="hover"
@@ -227,25 +219,33 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
                       onClick={() => handleProviderClick(provider.slug)}
                     >
                       <CardBody className="p-6 flex flex-col h-full">
-                        {/* Logo/Initials and Category Header */}
+                        {/* Logo/Icon and Category Header */}
                         <div className="flex items-center gap-4 mb-4">
-                          {/* Logo or Initials */}
+                          {/* Logo or Business Icon */}
                           <div className="flex-shrink-0">
                             {provider.logo_url ? (
-                              <img 
-                                src={provider.logo_url} 
-                                alt={`${provider.business_name} logo`}
-                                className="w-12 h-12 rounded-full object-cover border border-gray-200"
-                                onError={(e) => {
-                                  // Fallback to initials if logo fails to load
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  target.nextElementSibling?.classList.remove('hidden');
-                                }}
-                              />
+                              <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200">
+                                <img 
+                                  src={provider.logo_url} 
+                                  alt={`${provider.business_name} logo`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    // Fallback to business icon if logo fails to load
+                                    const target = e.target as HTMLImageElement;
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      parent.style.display = 'none';
+                                      const fallbackDiv = parent.nextElementSibling as HTMLElement;
+                                      if (fallbackDiv) {
+                                        fallbackDiv.style.display = 'flex';
+                                      }
+                                    }
+                                  }}
+                                />
+                              </div>
                             ) : null}
-                            <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-sm ${provider.logo_url ? 'hidden' : ''}`}>
-                              {getBusinessInitials(provider.business_name)}
+                            <div className={`${provider.logo_url ? 'hidden' : 'flex'}`} style={{ display: provider.logo_url ? 'none' : 'flex' }}>
+                              <BusinessIcon size="md" />
                             </div>
                           </div>
 
@@ -276,7 +276,7 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
                         {/* Language Flags - Clean Row, No Label */}
                         <div className="flex-grow flex flex-col justify-end">
                           <div className="flex flex-wrap gap-2 justify-center">
-                            {provider.languages.slice(0, 6).map((langCode) => (
+                            {provider.languages.slice(0, 3).map((langCode) => (
                               <img
                                 key={langCode}
                                 src={getFlagUrl(langCode)}
@@ -285,9 +285,9 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
                                 loading="lazy"
                               />
                             ))}
-                            {provider.languages.length > 6 && (
+                            {provider.languages.length > 3 && (
                               <div className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded-full font-medium">
-                                +{provider.languages.length - 6}
+                                +{provider.languages.length - 3}
                               </div>
                             )}
                           </div>

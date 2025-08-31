@@ -16,6 +16,8 @@ import LocationEditModal from '../components/provider/LocationEditModal';
 import SocialLinksModal from '../components/provider/SocialLinksModal';
 import OpeningHoursEditModal from '../components/provider/OpeningHoursEditModal';
 import GalleryManagementModal from '../components/provider/GalleryManagementModal';
+import LogoUploadModal from '../components/provider/LogoUploadModal';
+import BusinessIcon from '../components/ui/BusinessIcon';
 
 interface Provider {
   id: number;
@@ -72,6 +74,7 @@ const ProviderPage = () => {
   const [socialLinksModalOpen, setSocialLinksModalOpen] = useState(false);
   const [openingHoursModalOpen, setOpeningHoursModalOpen] = useState(false);
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+  const [logoModalOpen, setLogoModalOpen] = useState(false);
   const [revealedContacts, setRevealedContacts] = useState<Record<number, { email?: boolean; phone?: boolean }>>({});
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
@@ -578,6 +581,28 @@ const ProviderPage = () => {
     }
   };
 
+  const handleLogoSave = async (logoUrl: string): Promise<boolean> => {
+    try {
+      console.log('Saving logo URL:', logoUrl);
+      
+      // Update the providerData state immediately for instant feedback
+      setProviderData((prev: any) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          logo_url: logoUrl
+        };
+      });
+      
+      console.log('Backend logo save complete');
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to save logo:', error);
+      return false;
+    }
+  };
+
   // 🎨 Loading messages for whimsical experience
   const loadingMessages = [
     "🔍 Finding amazing professionals who speak your language...",
@@ -685,15 +710,58 @@ const ProviderPage = () => {
             <span className="text-gray-900 font-medium">{provider.name}</span>
           </div>
           
-          {/* Business Title */}
-          <div className="mb-6 edit-section">
-            <EditableText
-              value={providerData?.business_name || provider.name}
-              field="business_name"
-              placeholder="Enter business name..."
-              maxLength={100}
-              displayClassName="text-4xl md:text-5xl font-bold text-gray-900 leading-tight"
-            />
+          {/* Logo and Business Title */}
+          <div className="mb-6 flex items-start gap-6">
+            {/* Business Logo */}
+            <div className="flex-shrink-0 relative group">
+              {providerData?.logo_url ? (
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden ring-4 ring-white shadow-lg">
+                  <img 
+                    src={providerData.logo_url}
+                    alt={`${providerData.business_name || provider.name} logo`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.style.display = 'none';
+                        const fallbackDiv = parent.nextElementSibling as HTMLElement;
+                        if (fallbackDiv) {
+                          fallbackDiv.style.display = 'flex';
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
+              <div className={`${providerData?.logo_url ? 'hidden' : 'flex'}`} style={{ display: providerData?.logo_url ? 'none' : 'flex' }}>
+                <BusinessIcon size="lg" className="w-20 h-20 md:w-24 md:h-24" />
+              </div>
+              
+              {/* Edit Logo Button */}
+              {canEdit && isEditMode && (
+                <button
+                  onClick={() => setLogoModalOpen(true)}
+                  className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all duration-200 flex items-center justify-center group-hover:scale-110"
+                  title="Edit Logo"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            
+            {/* Business Title */}
+            <div className="flex-1 edit-section">
+              <EditableText
+                value={providerData?.business_name || provider.name}
+                field="business_name"
+                placeholder="Enter business name..."
+                maxLength={100}
+                displayClassName="text-4xl md:text-5xl font-bold text-gray-900 leading-tight"
+              />
+            </div>
           </div>
         </div>
 
@@ -1287,6 +1355,17 @@ const ProviderPage = () => {
           onClose={() => setGalleryModalOpen(false)}
           media={provider.media || []}
           onSave={handleGallerySave}
+        />
+      )}
+
+      {/* Logo Upload Modal */}
+      {providerData && (
+        <LogoUploadModal
+          isOpen={logoModalOpen}
+          onClose={() => setLogoModalOpen(false)}
+          currentLogoUrl={providerData.logo_url}
+          businessName={providerData.business_name || ''}
+          onSave={handleLogoSave}
         />
       )}
 

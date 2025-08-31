@@ -73,7 +73,7 @@ class LanguageRotationManager {
         this.currentIndex = (this.currentIndex + 1) % languages.length;
         this.isVisible = true;
         this.notifySubscribers();
-      }, 200); // Quick fade out, then fade in
+      }, 150); // Smooth fade transition
       
     }, this.interval);
   }

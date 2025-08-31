@@ -207,14 +207,16 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
                 <div 
                   className={`
                     absolute left-[72px] top-1/2 -translate-y-1/2 pointer-events-none
-                    text-lg text-gray-400 transition-all duration-500 ease-in-out
-                    ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-40 -translate-y-1'}
+                    text-lg text-gray-400 transition-all duration-300 ease-in-out
+                    min-h-[28px] flex items-center
+                    ${isVisible ? 'opacity-100' : 'opacity-0'}
                   `}
                   style={{
-                    transform: `translateY(${isVisible ? '-50%' : 'calc(-50% - 4px)'})`
+                    transform: 'translateY(-50%)',
+                    lineHeight: '1.2'
                   }}
                 >
-                  {getPlaceholderForLanguage(currentLanguage.code)}
+                  <span className="block">{getPlaceholderForLanguage(currentLanguage.code)}</span>
                 </div>
               )}
             </div>

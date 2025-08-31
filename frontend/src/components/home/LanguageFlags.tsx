@@ -90,8 +90,8 @@ export const LanguageFlags = ({ className = '', animated = true }: LanguageFlags
       </div>
 
       {/* Animated carousel for mobile/tablet */}
-      <div className="md:hidden flex items-center gap-3">
-        <div className="flex items-center gap-1 overflow-hidden">
+      <div className="md:hidden flex items-center justify-center gap-3">
+        <div className="flex items-center gap-1 overflow-hidden justify-center">
           {languages.slice(currentIndex, currentIndex + 4).concat(
             currentIndex + 4 > languages.length 
               ? languages.slice(0, (currentIndex + 4) - languages.length)
@@ -99,9 +99,8 @@ export const LanguageFlags = ({ className = '', animated = true }: LanguageFlags
           ).map((lang, index) => (
             <div
               key={`${lang.code}-${currentIndex}`}
-              className="inline-block transition-all duration-500 ease-in-out transform"
+              className="inline-block transition-all duration-500 ease-in-out"
               style={{ 
-                transform: `translateX(${index * -100}%)`,
                 animation: animated ? 'slideIn 0.5s ease-out' : 'none'
               }}
             >

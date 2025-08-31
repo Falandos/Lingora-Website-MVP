@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardBody } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import BusinessIcon from '../ui/BusinessIcon';
 import BasicContactModal from './BasicContactModal';
 
 interface Language {
@@ -37,6 +38,7 @@ interface ProviderCardProps {
   city: string;
   bio_nl?: string;
   bio_en?: string;
+  logo_url?: string;
   latitude?: number;
   longitude?: number;
   gallery: string[];
@@ -54,6 +56,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
   city,
   bio_nl,
   bio_en,
+  logo_url,
   gallery,
   languages,
   services,
@@ -65,8 +68,8 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
   const [showContactModal, setShowContactModal] = useState(false);
 
   const bio = currentLanguage === 'nl' ? bio_nl : bio_en;
-  const displayLanguages = languages; // Show all languages without truncation
-  const remainingLanguages = 0; // No truncation needed
+  const displayLanguages = languages.slice(0, 3); // Show max 3 languages
+  const remainingLanguages = Math.max(0, languages.length - 3); // Count remaining languages
 
   // Determine flag styling based on active language filters
   const getFlagClassName = (langCode: string) => {
@@ -109,21 +112,32 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
             </div>
           </div>
           
-          {/* Gallery Preview */}
-          {gallery.length > 0 && (
-            <div className="ml-4 flex-shrink-0">
-              <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 ring-2 ring-white shadow-sm">
+          {/* Business Logo */}
+          <div className="ml-4 flex-shrink-0">
+            {logo_url ? (
+              <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 ring-2 ring-white shadow-sm">
                 <img
-                  src={gallery[0]}
-                  alt={business_name}
+                  src={logo_url}
+                  alt={`${business_name} logo`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.style.display = 'none';
+                    const target = e.currentTarget;
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.style.display = 'none';
+                      const fallbackDiv = parent.nextElementSibling as HTMLElement;
+                      if (fallbackDiv) {
+                        fallbackDiv.style.display = 'flex';
+                      }
+                    }
                   }}
                 />
               </div>
+            ) : null}
+            <div className={`${logo_url ? 'hidden' : 'flex'}`} style={{ display: logo_url ? 'none' : 'flex' }}>
+              <BusinessIcon size="lg" />
             </div>
-          )}
+          </div>
         </div>
 
         {/* Bio */}
@@ -155,6 +169,11 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
                   />
                 </div>
               ))}
+              {remainingLanguages > 0 && (
+                <div className="flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-sm text-xs font-medium">
+                  +{remainingLanguages}
+                </div>
+              )}
             </div>
           </div>
         )}

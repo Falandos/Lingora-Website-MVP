@@ -16,11 +16,11 @@ export const YourPathForwardSection = ({ className = '' }: YourPathForwardSectio
         <div className="max-w-6xl mx-auto">
           
           {/* Section Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {t('path_forward.title')}
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               {t('path_forward.subtitle')}
             </p>
           </div>
@@ -29,11 +29,11 @@ export const YourPathForwardSection = ({ className = '' }: YourPathForwardSectio
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             
             {/* Left Card - For Users */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
+            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
               <div className="text-center">
                 {/* Icon */}
-                <div className="w-20 h-20 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <svg className="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
@@ -81,16 +81,16 @@ export const YourPathForwardSection = ({ className = '' }: YourPathForwardSectio
             </div>
 
             {/* Right Card - For Providers */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-primary-200 hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden">
+            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-xl border-2 border-primary-200 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] relative overflow-hidden">
               {/* Popular Badge */}
-              <div className="absolute top-0 right-0 bg-gradient-to-r from-primary-500 to-purple-500 text-white px-6 py-2 rounded-bl-2xl text-sm font-bold">
+              <div className="absolute top-0 right-0 bg-gradient-to-r from-primary-500 to-purple-500 text-white px-4 md:px-6 py-2 rounded-bl-2xl text-xs md:text-sm font-bold">
                 {t('path_forward.grow_business.popular')}
               </div>
               
               <div className="text-center pt-4">
                 {/* Icon */}
-                <div className="w-20 h-20 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <svg className="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m8 6V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2z" />
                   </svg>
                 </div>

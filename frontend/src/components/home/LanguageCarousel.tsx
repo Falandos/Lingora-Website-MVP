@@ -26,7 +26,8 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
   // If renderWithTitle is provided, use it to render the content with the current language
   if (renderWithTitle) {
     const itemWidth = 280; // Width for each language item
-    const centerOffset = 350; // Half of carousel width (700px / 2)
+    const totalWidth = 700; // Total carousel width
+    const centerOffset = totalWidth / 2; // Dynamic center calculation
     
     // Helper function to lighten a color
     const lightenColor = (color: string, amount: number = 0.6): string => {
@@ -71,7 +72,7 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
         <div 
           className="flex items-center transition-transform duration-500 ease-in-out"
           style={{
-            transform: `translateX(${-adjustedIndex * itemWidth + centerOffset}px)`, // Proper centering
+            transform: `translateX(${-adjustedIndex * itemWidth + centerOffset - itemWidth / 2}px)`, // Center the current item
             width: `${extendedLanguages.length * itemWidth}px`
           }}
         >
