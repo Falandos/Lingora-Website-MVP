@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface BackToTopButtonProps {
   className?: string;
 }
 
 export const BackToTopButton = ({ className = '' }: BackToTopButtonProps) => {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export const BackToTopButton = ({ className = '' }: BackToTopButtonProps) => {
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed bottom-6 right-6 z-40 w-12 h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group ${className}`}
+      className={`fixed bottom-6 right-6 z-40 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 px-4 py-3 group ${className}`}
       aria-label="Back to top"
     >
       <svg 
@@ -49,6 +51,9 @@ export const BackToTopButton = ({ className = '' }: BackToTopButtonProps) => {
           d="M5 10l7-7m0 0l7 7m-7-7v18" 
         />
       </svg>
+      <span className="text-sm font-medium whitespace-nowrap">
+        {t('common.back_to_top')}
+      </span>
     </button>
   );
 };

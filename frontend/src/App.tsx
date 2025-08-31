@@ -16,7 +16,9 @@ import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import ProviderPage from './pages/ProviderPage';
 import DashboardPage from './pages/DashboardPage';
-import RegisterPage from './pages/RegisterPage';
+import RegisterChoicePage from './pages/RegisterChoicePage';
+import RegisterProviderPage from './pages/RegisterProviderPage';
+import RegisterUserPage from './pages/RegisterUserPage';
 import LoginPage from './pages/LoginPage';
 import LegalPage from './pages/LegalPage';
 
@@ -59,7 +61,9 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/register" element={<RegisterChoicePage />} />
+              <Route path="/register-provider" element={<RegisterProviderPage />} />
+              <Route path="/register-user" element={<RegisterUserPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/terms" element={<LegalPage type="terms" />} />
               <Route path="/privacy" element={<LegalPage type="privacy" />} />

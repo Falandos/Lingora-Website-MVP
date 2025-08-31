@@ -16,7 +16,9 @@
     "next": "Volgende",
     "previous": "Vorige",
     "yes": "Ja",
-    "no": "Nee"
+    "no": "Nee",
+    "back_to_top": "Terug naar boven",
+    "browse_professionals": "Professionals Bekijken"
   },
   "days": {
     "monday": "Maandag",
@@ -177,8 +179,18 @@
   "auth": {
     "login_title": "Inloggen op Jouw Account",
     "register_title": "Maak Provider Account",
+    "register_user_title": "Maak Gebruikers Account",
+    "choose_account_type": "Kies Je Account Type",
+    "choose_subtitle": "Selecteer het type account dat het beste bij je behoeften past",
+    "i_am_business": "Ik ben een Bedrijf",
+    "i_am_user": "Ik zoek diensten",
+    "business_description": "Registreer als dienstverlener en maak contact met klanten die jouw taal spreken",
+    "user_description": "Maak een account om je zoekopdrachten op te slaan, favoriete aanbieders te bewaren en afspraken te beheren",
+    "continue_as_business": "Verder als Bedrijf",
+    "continue_as_user": "Verder als Gebruiker",
     "email": "E-mailadres",
     "password": "Wachtwoord",
+    "name": "Volledige Naam",
     "business_name": "Bedrijfsnaam",
     "kvk_number": "KvK Nummer",
     "btw_number": "BTW Nummer",
@@ -187,7 +199,9 @@
     "forgot_password": "Wachtwoord Vergeten?",
     "have_account": "Heb je al een account?",
     "need_account": "Account nodig?",
-    "email_verification": "Controleer je e-mail om je account te verifiëren"
+    "email_verification": "Controleer je e-mail om je account te verifiëren",
+    "google_signin_coming": "Inloggen met Google (Binnenkort)",
+    "or_divider": "of"
   },
   "dashboard": {
     "title": "Provider Dashboard",
@@ -256,6 +270,34 @@
     "join_platform": "Sluit je aan bij ons platform en maak contact met internationale klanten die jouw talen spreken.",
     "list_business": "Registreer je Bedrijf",
     "trial_features": "✓ 3 maanden gratis proefperiode  ✓ Premium functies  ✓ Verificatie badge"
+  },
+  "path_forward": {
+    "title": "Jouw Weg Voorwaarts",
+    "subtitle": "Of je nu professionele diensten zoekt of aanbiedt, wij hebben je reis eenvoudig en effectief gemaakt.",
+    "find_professional": {
+      "title": "Vind Jouw Professional",
+      "step_1": "Zoek op dienst en taal",
+      "step_2": "Maak contact met geverifieerde professionals",
+      "step_3": "Boek je afspraak of dienst",
+      "cta": "Begin Zoeken",
+      "free_note": "✨ Altijd gratis voor gebruikers"
+    },
+    "grow_business": {
+      "title": "Laat Je Bedrijf Groeien",
+      "popular": "Meest Populair",
+      "benefit_1": "Bereik meertalige klanten die jouw diensten nodig hebben",
+      "benefit_2": "Word geverifieerd via ons KVK/BTW validatiesysteem",
+      "benefit_3": "Eenvoudige setup met AI-ondersteunde profieloptimalisatie",
+      "trial_offer": "3 Maanden GRATIS",
+      "trial_subtitle": "Volledige proefperiode",
+      "cta": "Start 3 Maanden GRATIS",
+      "pricing": "Daarna slechts €9,99/maand • Altijd opzegbaar"
+    },
+    "trust": {
+      "kvk_verified": "KVK Geverifieerde Bedrijven",
+      "gdpr_compliant": "GDPR Conform",
+      "ai_powered": "AI-Ondersteund Zoeken"
+    }
   },
   "legal": {
     "terms_title": "Servicevoorwaarden",

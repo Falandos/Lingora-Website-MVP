@@ -66,7 +66,7 @@ const Header = () => {
               to="/search"
               className="text-gray-600 hover:text-primary-600 font-medium transition-colors duration-200 relative group"
             >
-              {t('common.search')}
+              {t('common.browse_professionals')}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 group-hover:w-full transition-all duration-300"></span>
             </Link>
             
@@ -165,7 +165,7 @@ const Header = () => {
                 className="text-gray-600 hover:text-primary-600 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                {t('common.search')}
+                {t('common.browse_professionals')}
               </Link>
               
               {isAuthenticated ? (

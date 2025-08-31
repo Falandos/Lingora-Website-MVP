@@ -16,7 +16,9 @@
     "next": "Next",
     "previous": "Previous",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "back_to_top": "Back to top",
+    "browse_professionals": "Browse Professionals"
   },
   "days": {
     "monday": "Monday",
@@ -177,8 +179,18 @@
   "auth": {
     "login_title": "Login to Your Account",
     "register_title": "Create Provider Account",
+    "register_user_title": "Create User Account",
+    "choose_account_type": "Choose Your Account Type",
+    "choose_subtitle": "Select the type of account that best fits your needs",
+    "i_am_business": "I'm a Business",
+    "i_am_user": "I'm looking for services",
+    "business_description": "Register as a service provider and connect with customers who speak your language",
+    "user_description": "Create an account to save your searches, favorite providers, and manage appointments",
+    "continue_as_business": "Continue as Business",
+    "continue_as_user": "Continue as User",
     "email": "Email Address",
     "password": "Password",
+    "name": "Full Name",
     "business_name": "Business Name",
     "kvk_number": "KvK Number",
     "btw_number": "BTW Number",
@@ -187,7 +199,9 @@
     "forgot_password": "Forgot Password?",
     "have_account": "Already have an account?",
     "need_account": "Need an account?",
-    "email_verification": "Please check your email to verify your account"
+    "email_verification": "Please check your email to verify your account",
+    "google_signin_coming": "Sign in with Google (Coming Soon)",
+    "or_divider": "or"
   },
   "dashboard": {
     "title": "Provider Dashboard",
@@ -256,6 +270,34 @@
     "join_platform": "Join our platform and connect with international clients who speak your languages.",
     "list_business": "List Your Business",
     "trial_features": "✓ 3-month free trial  ✓ Premium features  ✓ Verified badge"
+  },
+  "path_forward": {
+    "title": "Your Path Forward",
+    "subtitle": "Whether you're seeking professional services or offering them, we've made your journey simple and effective.",
+    "find_professional": {
+      "title": "Find Your Professional",
+      "step_1": "Search by service and language",
+      "step_2": "Connect with verified professionals", 
+      "step_3": "Book your appointment or service",
+      "cta": "Start Searching",
+      "free_note": "✨ Always free for users"
+    },
+    "grow_business": {
+      "title": "Grow Your Business",
+      "popular": "Most Popular",
+      "benefit_1": "Reach multilingual clients who need your services",
+      "benefit_2": "Get verified through our KVK/BTW validation system",
+      "benefit_3": "Easy setup with AI-powered profile optimization",
+      "trial_offer": "3 Months FREE",
+      "trial_subtitle": "Complete trial period",
+      "cta": "Start 3 Months FREE",
+      "pricing": "Then only €9.99/month • Cancel anytime"
+    },
+    "trust": {
+      "kvk_verified": "KVK Verified Businesses",
+      "gdpr_compliant": "GDPR Compliant",
+      "ai_powered": "AI-Powered Search"
+    }
   },
   "legal": {
     "terms_title": "Terms of Service",

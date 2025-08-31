@@ -39,18 +39,10 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
   const [locationCoords, setLocationCoords] = useState<{lat: number, lng: number} | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const locationDropdownRef = useRef<HTMLDivElement>(null);
   
   // Use shared language rotation (same timing as header)
   const { currentLanguage } = useLanguageRotation(2500);
 
-  // Major Dutch cities for dropdown
-  const majorCities = [
-    'Amsterdam', 'Rotterdam', 'Utrecht', 'Den Haag', 'Eindhoven',
-    'Tilburg', 'Groningen', 'Almere', 'Breda', 'Nijmegen',
-    'Enschede', 'Haarlem', 'Arnhem', 'Zaanstad', 'Amersfoort'
-  ];
 
   // Language-specific placeholder examples mapping
   const getPlaceholderForLanguage = (langCode: string): string => {
@@ -75,22 +67,6 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
     return languagePlaceholders[langCode] || languagePlaceholders['en'];
   };
   
-  // Handle click outside dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target as Node)) {
-        setShowLocationDropdown(false);
-      }
-    };
-
-    if (showLocationDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showLocationDropdown]);
 
 
   // Calculate distance between two coordinates (Haversine formula)
@@ -163,19 +139,6 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
   const clearLocation = () => {
     setLocation('');
     setLocationCoords(null);
-    setShowLocationDropdown(false);
-  };
-
-  const selectCity = (cityName: string) => {
-    setLocation(cityName);
-    setShowLocationDropdown(false);
-    // Don't set locationCoords for manual city selection - let backend handle it
-    setLocationCoords(null);
-  };
-
-  const handleGeolocation = () => {
-    setShowLocationDropdown(false);
-    getUserLocation();
   };
 
   const handleSearch = () => {
@@ -240,79 +203,40 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
               />
             </div>
 
-            {/* Compact Location Section */}
-            <div ref={locationDropdownRef} className="relative flex items-center border-t lg:border-t-0 lg:border-l lg:border-r border-gray-200 px-4 py-3 lg:py-5 lg:w-36">
-              <div className="flex items-center w-full">
-                <svg className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                
-                <button
-                  onClick={() => setShowLocationDropdown(!showLocationDropdown)}
-                  className="flex items-center text-sm text-gray-600 hover:text-gray-800 transition-colors w-full min-w-0"
-                >
-                  <span className="truncate mr-1">
-                    {location ? `${t('search.location_near')} ${location}` : t('search.location_near')}
-                  </span>
-                  <svg className={`w-3 h-3 flex-shrink-0 transition-transform ${showLocationDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            {/* Compact Location Button */}
+            <div className="relative flex items-center justify-center border-t lg:border-t-0 lg:border-l lg:border-r border-gray-200 px-3 py-3 lg:py-5 lg:w-14">
+              {location ? (
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 mr-1 flex-shrink-0" viewBox="0 0 24 24" fill="none" title={`${t('search.location_near')} ${location}`}>
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#dc2626"/>
+                    <circle cx="12" cy="9" r="2.5" fill="white"/>
                   </svg>
-                </button>
-
-                {location && (
                   <button
                     onClick={clearLocation}
-                    className="ml-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-                    title="Clear location"
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    title={`Clear location (${location})`}
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
-                )}
-              </div>
-
-              {/* Dropdown Menu */}
-              {showLocationDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
-                  {/* Geolocation Option */}
-                  <button
-                    onClick={handleGeolocation}
-                    disabled={isGettingLocation}
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center disabled:opacity-50"
-                  >
-                    {isGettingLocation ? (
-                      <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary-500 mr-2"></div>
-                        <span>Getting location...</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <circle cx="12" cy="12" r="10" strokeWidth="2"/>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 2v4m0 12v4m10-10h-4m-12 0h4"/>
-                          <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                        </svg>
-                        {t('search.my_location')}
-                      </>
-                    )}
-                  </button>
-                  
-                  {/* Separator */}
-                  <div className="border-t border-gray-100"></div>
-                  
-                  {/* City Options */}
-                  {majorCities.map((city) => (
-                    <button
-                      key={city}
-                      onClick={() => selectCity(city)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors"
-                    >
-                      {city}
-                    </button>
-                  ))}
                 </div>
+              ) : (
+                <button
+                  onClick={getUserLocation}
+                  disabled={isGettingLocation}
+                  className="text-gray-400 hover:text-primary-500 transition-colors disabled:opacity-50 p-1"
+                  title={t('search.my_location')}
+                >
+                  {isGettingLocation ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#9ca3af"/>
+                      <circle cx="12" cy="9" r="2.5" fill="white"/>
+                    </svg>
+                  )}
+                </button>
               )}
             </div>
             
