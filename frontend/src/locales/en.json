@@ -62,6 +62,15 @@
   },
   "search": {
     "placeholder_prefix": "I'm searching for a:",
+    "placeholder_examples": [
+      "arabic speaking doctor",
+      "polish lawyer amsterdam", 
+      "turkish dentist rotterdam",
+      "chinese psychologist",
+      "spanish notary den haag",
+      "german accountant",
+      "french interpreter"
+    ],
     "location_near": "Near:",
     "my_location": "📍 My location",
     "button_search": "Search",

@@ -7,9 +7,8 @@ import LanguageSelector from '../components/ui/LanguageSelector';
 import SearchBar from '../components/ui/SearchBar';
 import StatisticsBar from '../components/home/StatisticsBar';
 import HeroSearchBar from '../components/home/HeroSearchBar';
-import DiscoverSection from '../components/home/DiscoverSection';
 import RecentProvidersCarousel from '../components/home/RecentProvidersCarousel';
-import TrustSignalsSection from '../components/home/TrustSignalsSection';
+import YourPathForwardSection from '../components/home/YourPathForwardSection';
 import StickySearchBar from '../components/home/StickySearchBar';
 import BackToTopButton from '../components/ui/BackToTopButton';
 import LanguageCarousel from '../components/home/LanguageCarousel';
@@ -150,11 +149,8 @@ const HomePage = () => {
       {/* Recently Added Providers */}
       <RecentProvidersCarousel />
 
-      {/* Discover Section with Tabs */}
-      <DiscoverSection />
-
-      {/* Trust Signals & CTA */}
-      <TrustSignalsSection />
+      {/* Your Path Forward - Combined User & Provider CTAs */}
+      <YourPathForwardSection />
       
       {/* Back to Top Button */}
       <BackToTopButton />

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
+import useLanguageRotation from '../../hooks/useLanguageRotation';
 
 // Get flag URL for language code
 const getFlagUrl = (langCode: string) => {
@@ -40,6 +41,9 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const locationDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Use shared language rotation (same timing as header)
+  const { currentLanguage } = useLanguageRotation(2500);
 
   // Major Dutch cities for dropdown
   const majorCities = [
@@ -48,7 +52,29 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
     'Enschede', 'Haarlem', 'Arnhem', 'Zaanstad', 'Amersfoort'
   ];
 
-
+  // Language-specific placeholder examples mapping
+  const getPlaceholderForLanguage = (langCode: string): string => {
+    const languagePlaceholders: Record<string, string> = {
+      'nl': 'turkse advocaat amsterdam',
+      'en': 'arabic speaking doctor',
+      'ar': 'طبيب يتكلم عربي',
+      'de': 'türkischer anwalt amsterdam',
+      'es': 'médico que habla árabe',
+      'fr': 'médecin parlant arabe',
+      'pl': 'arabski mówiący lekarz',
+      'uk': 'арабськомовний лікар',
+      'zh-Hans': '会说阿拉伯语的医生',
+      'tr': 'türkçe konuşan doktor',
+      'hi': 'अरबी बोलने वाले डॉक्टर',
+      'so': 'dhakhtar ku hadla carabi',
+      'ti': 'ዓረባዊ ዝዛረብ ሓኪም',
+      'yue': '講阿拉伯文嘅醫生',
+      'zgh': 'ⴰⵎⴰⵔ ⵉⵜⵜⵎⴰⵙⵍⴰⵢ ⵜⴰⵄⵔⴰⴱⵜ'
+    };
+    
+    return languagePlaceholders[langCode] || languagePlaceholders['en'];
+  };
+  
   // Handle click outside dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -65,6 +91,7 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showLocationDropdown]);
+
 
   // Calculate distance between two coordinates (Haversine formula)
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
@@ -200,7 +227,7 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
               
               <input
                 type="text"
-                placeholder={`${t('search.placeholder_prefix')} 'dokter', 'طبيب', '律师', 'psikolog'...`}
+                placeholder={getPlaceholderForLanguage(currentLanguage.code)}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -208,7 +235,7 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
                 onBlur={() => setIsFocused(false)}
                 className="
                   flex-1 px-6 py-5 text-lg bg-transparent border-0 outline-none 
-                  placeholder-gray-400 text-gray-900
+                  placeholder-gray-400 text-gray-900 transition-all duration-500
                 "
               />
             </div>
@@ -303,40 +330,36 @@ export const HeroSearchBar = ({ className = '', onShowHowItWorks }: HeroSearchBa
 
       </div>
 
-      {/* Clean 3-Element Info Bar */}
+      {/* Clean Info Bar with Combined Features */}
       <div className="mt-6 text-center animate-fade-in">
-        <div className="flex items-center justify-center gap-6 flex-wrap">
-          {/* AI-Powered Search */}
-          <div className="flex items-center gap-2 text-gray-600">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+        <div className="flex items-center justify-center gap-8 flex-wrap">
+          {/* Combined Feature Badge */}
+          <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-full border border-gray-200/50">
+            <div className="flex items-center gap-1">
               <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-            </div>
-            <span className="font-medium text-sm">{t('search.ai_powered')}</span>
-          </div>
-
-          {/* Search in Any Language */}
-          <div className="flex items-center gap-2 text-gray-600">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
               <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
               </svg>
             </div>
-            <span className="font-medium text-sm">{t('search.search_any_language')}</span>
+            <span className="font-medium text-sm text-gray-700">
+              AI-powered multilingual search
+            </span>
           </div>
 
-          {/* How It Works Button */}
+          {/* How It Works Button - Clear Action */}
           <button
             onClick={onShowHowItWorks}
-            className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors group"
+            className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-full font-medium text-sm transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
           >
-            <div className="w-8 h-8 bg-primary-100 group-hover:bg-primary-200 rounded-full flex items-center justify-center transition-colors">
-              <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <span className="font-medium text-sm group-hover:underline">{t('home.how_it_works')}</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>See examples</span>
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       </div>

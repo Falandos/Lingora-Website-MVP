@@ -15,6 +15,16 @@ const getFlagUrl = (langCode: string) => {
   return `https://flagcdn.com/24x18/${countryCode}.png`;
 };
 
+// Generate business initials from business name
+const getBusinessInitials = (businessName: string) => {
+  return businessName
+    .split(' ')
+    .filter(word => word.length > 0)
+    .map(word => word.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('');
+};
+
 // Get category icon and styling
 const getCategoryInfo = (category?: string) => {
   const categoryMap: Record<string, { icon: string; color: string; bgColor: string; }> = {
@@ -41,7 +51,7 @@ interface RecentProvider {
   bio_nl?: string;
   primary_category?: string;
   category_id?: number;
-  kvk_verified: boolean;
+  logo_url?: string;
 }
 
 interface RecentProvidersCarouselProps {
@@ -179,7 +189,7 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
   }
 
   return (
-    <section className={`py-16 bg-gray-50 ${className}`}>
+    <section className={`py-16 bg-blue-50 ${className}`}>
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
@@ -217,22 +227,37 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
                       onClick={() => handleProviderClick(provider.slug)}
                     >
                       <CardBody className="p-6 flex flex-col h-full">
-                        {/* Header Row with Category and KVK Badge */}
-                        <div className="flex items-start justify-between mb-4">
-                          {provider.primary_category && (
-                            <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getCategoryInfo(provider.primary_category).color} ${getCategoryInfo(provider.primary_category).bgColor}`}>
-                              <span className="text-sm">{getCategoryInfo(provider.primary_category).icon}</span>
-                              {provider.primary_category}
+                        {/* Logo/Initials and Category Header */}
+                        <div className="flex items-center gap-4 mb-4">
+                          {/* Logo or Initials */}
+                          <div className="flex-shrink-0">
+                            {provider.logo_url ? (
+                              <img 
+                                src={provider.logo_url} 
+                                alt={`${provider.business_name} logo`}
+                                className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                onError={(e) => {
+                                  // Fallback to initials if logo fails to load
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  target.nextElementSibling?.classList.remove('hidden');
+                                }}
+                              />
+                            ) : null}
+                            <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-sm ${provider.logo_url ? 'hidden' : ''}`}>
+                              {getBusinessInitials(provider.business_name)}
                             </div>
-                          )}
-                          {provider.kvk_verified && (
-                            <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                              KVK
-                            </div>
-                          )}
+                          </div>
+
+                          {/* Category Badge */}
+                          <div className="flex-grow">
+                            {provider.primary_category && (
+                              <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getCategoryInfo(provider.primary_category).color} ${getCategoryInfo(provider.primary_category).bgColor}`}>
+                                <span className="text-sm">{getCategoryInfo(provider.primary_category).icon}</span>
+                                {provider.primary_category}
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {/* Business Name - Large and Prominent */}

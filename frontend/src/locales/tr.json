@@ -53,6 +53,15 @@
   },
   "search": {
     "placeholder_prefix": "Arıyorum:",
+    "placeholder_examples": [
+      "türkçe konuşan doktor",
+      "arapça bilen avukat amsterdam",
+      "lehçe konuşan dişçi rotterdam",
+      "çince bilen psikolog",
+      "ispanyolca konuşan noter",
+      "almanca bilen muhasebeci",
+      "hollandaca tercüman"
+    ],
     "location_near": "Yakında:",
     "my_location": "📍 Konumum",
     "button_search": "Ara",

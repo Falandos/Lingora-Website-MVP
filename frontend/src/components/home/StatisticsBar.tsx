@@ -66,7 +66,7 @@ export const StatisticsBar = ({ className = '' }: StatisticsBarProps) => {
   );
 
   return (
-    <div className={`bg-white border-b border-gray-100 ${className}`}>
+    <div className={`bg-gray-100 border-b border-gray-200 ${className}`}>
       <div className="container mx-auto px-4 py-3">
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-center">
           <StatItem 

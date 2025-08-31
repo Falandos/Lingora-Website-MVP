@@ -62,6 +62,15 @@
   },
   "search": {
     "placeholder_prefix": "Ik zoek naar:",
+    "placeholder_examples": [
+      "turkse advocaat amsterdam",
+      "arabisch sprekende huisarts",
+      "poolse tandarts rotterdam", 
+      "chinese psycholoog",
+      "spaanse notaris den haag",
+      "duitse accountant",
+      "franse tolk"
+    ],
     "location_near": "Nabij:",
     "my_location": "📍 Mijn locatie",
     "button_search": "Zoeken",

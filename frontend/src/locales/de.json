@@ -53,6 +53,15 @@
   },
   "search": {
     "placeholder_prefix": "Ich suche nach:",
+    "placeholder_examples": [
+      "türkischer anwalt amsterdam",
+      "arabisch sprechender arzt",
+      "polnischer zahnarzt rotterdam",
+      "chinesischer psychologe",
+      "spanischer notar den haag",
+      "französischer steuerberater",
+      "niederländischer dolmetscher"
+    ],
     "location_near": "In der Nähe:",
     "my_location": "📍 Mein Standort",
     "button_search": "Suchen",
