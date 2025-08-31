@@ -102,19 +102,48 @@
     "subtitle_magic": "Where language barriers vanish and connections flourish! 🌟",
     "try_your_search": "Try Your Own Search Now",
     "search_tagline": "Search in any language • Get instant results • No registration needed",
-    "examples_title": "Real Search Examples:",
-    "example_1_query": "dokter die arabisch spreekt",
-    "example_1_desc": "Arabic-speaking doctor in Dutch",
-    "example_1_results": "Found 3 providers",
-    "example_2_query": "need help with stress",
-    "example_2_desc": "Natural English expression",
-    "example_2_results": "Found 2 psychologists",
-    "example_3_query": "Turkish lawyer immigration",
-    "example_3_desc": "Mixed language search",
-    "example_3_results": "Found 1 specialist",
-    "example_4_query": "طبيب نفسي",
-    "example_4_desc": "Arabic for psychologist",
-    "example_4_results": "Found 2 providers"
+    "examples": [
+      {
+        "query": "طبيب يتكلم عربي",
+        "language": "Arabic",
+        "description": "Arabic-speaking doctor",
+        "results": "4 providers found",
+        "explanation": "AI understands Arabic and finds doctors who speak your language",
+        "emoji": "👩‍⚕️",
+        "whimsicalResult": "Arabic-speaking doctors ready to help!",
+        "category": "Medical"
+      },
+      {
+        "query": "Türkçe konuşan avukat",
+        "language": "Turkish",
+        "description": "Turkish-speaking lawyer",
+        "results": "3 providers found",
+        "explanation": "AI recognizes Turkish and matches you with legal experts",
+        "emoji": "⚖️",
+        "whimsicalResult": "Turkish legal experts found!",
+        "category": "Legal"
+      },
+      {
+        "query": "immigration lawyer",
+        "language": "English",
+        "description": "Help with visa and permits",
+        "results": "6 providers found",
+        "explanation": "AI connects you with specialized immigration lawyers",
+        "emoji": "🛂",
+        "whimsicalResult": "Immigration experts ready to help!",
+        "category": "Immigration"
+      },
+      {
+        "query": "psycholog mówiący po polsku",
+        "language": "Polish",
+        "description": "Polish-speaking psychologist",
+        "results": "5 providers found",
+        "explanation": "AI finds Polish mental health professionals for you",
+        "emoji": "🧠",
+        "whimsicalResult": "Polish psychologists located!",
+        "category": "Mental Health"
+      }
+    ]
   },
   "provider": {
     "quick_contact": "Quick Contact",

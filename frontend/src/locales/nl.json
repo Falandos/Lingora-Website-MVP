@@ -102,19 +102,48 @@
     "subtitle_magic": "Waar taalbarrières verdwijnen en verbindingen bloeien! 🌟",
     "try_your_search": "Probeer Nu Je Eigen Zoekopdracht",
     "search_tagline": "Zoek in elke taal • Onmiddellijke resultaten • Geen registratie vereist",
-    "examples_title": "Echte Zoekvoorbeelden:",
-    "example_1_query": "dokter die arabisch spreekt",
-    "example_1_desc": "Arabisch sprekende dokter in het Nederlands",
-    "example_1_results": "3 aanbieders gevonden",
-    "example_2_query": "hulp bij stress",
-    "example_2_desc": "Natuurlijke Nederlandse uitdrukking",
-    "example_2_results": "2 psychologen gevonden",
-    "example_3_query": "Turkse advocaat immigratie",
-    "example_3_desc": "Gemixte taal zoekopdracht",
-    "example_3_results": "1 specialist gevonden",
-    "example_4_query": "طبيب نفسي",
-    "example_4_desc": "Arabisch voor psycholoog",
-    "example_4_results": "2 aanbieders gevonden"
+    "examples": [
+      {
+        "query": "Turkse tandarts Amsterdam",
+        "language": "Dutch",
+        "description": "Turkse tandarts in Amsterdam",
+        "results": "3 aanbieders gevonden",
+        "explanation": "AI begrijpt Nederlands en vindt Turkse tandartsen in Amsterdam",
+        "emoji": "🦷",
+        "whimsicalResult": "Turkse tandartsen gevonden in Amsterdam!",
+        "category": "Tandheelkunde"
+      },
+      {
+        "query": "Poolse advocaat arbeidsrecht",
+        "language": "Dutch",
+        "description": "Poolse advocaat voor arbeidsrecht",
+        "results": "2 advocaten gevonden",
+        "explanation": "AI vindt Poolse juridische experts gespecialiseerd in arbeidsrecht",
+        "emoji": "⚖️",
+        "whimsicalResult": "Poolse arbeidsrecht advocaten klaar!",
+        "category": "Juridisch"
+      },
+      {
+        "query": "Arabisch sprekende huisarts",
+        "language": "Dutch",
+        "description": "Huisarts die Arabisch spreekt",
+        "results": "4 huisartsen gevonden",
+        "explanation": "AI zoekt huisartsen die vloeiend Arabisch spreken",
+        "emoji": "👩‍⚕️",
+        "whimsicalResult": "Arabisch sprekende huisartsen beschikbaar!",
+        "category": "Medisch"
+      },
+      {
+        "query": "Chinese belastingadviseur Rotterdam",
+        "language": "Dutch",
+        "description": "Chinese belastingadviseur in Rotterdam",
+        "results": "3 adviseurs gevonden",
+        "explanation": "AI vindt Chinese belastingexperts in de regio Rotterdam",
+        "emoji": "📊",
+        "whimsicalResult": "Chinese belastingadviseurs in Rotterdam!",
+        "category": "Financieel"
+      }
+    ]
   },
   "provider": {
     "quick_contact": "Snel Contact",

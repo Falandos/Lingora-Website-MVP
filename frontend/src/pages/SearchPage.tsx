@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import ProviderCard from '../components/search/ProviderCard';
 import SimpleMap from '../components/search/SimpleMap';
 import CityAutocomplete from '../components/ui/CityAutocomplete';
+import LanguageSwitchSuggestion from '../components/search/LanguageSwitchSuggestion';
 
 interface SearchResult {
   id: number;
@@ -55,6 +56,8 @@ const SearchPage = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [detectionInfo, setDetectionInfo] = useState<any>(null);
+  const [languageSuggestionDismissed, setLanguageSuggestionDismissed] = useState<Set<string>>(new Set());
 
   const [filters, setFilters] = useState<SearchFilters>({
     languages: searchParams.get('languages')?.split(',') || [],
@@ -301,6 +304,62 @@ const SearchPage = () => {
         // Use real API results or fallback to mock format
         const apiResults = data.results || data.items || [];
         
+        // STORE DETECTION INFO (for UI suggestions and display)
+        // Always store detection info if we have language detection data
+        if (data.language_detection) {
+          setDetectionInfo(data.language_detection);
+        } else {
+          setDetectionInfo(null);
+        }
+        
+        // SYNC FILTERS WITH AUTO-DETECTED VALUES
+        // If the backend detected languages or city, update the frontend filters
+        if (data.language_detection?.auto_applied) {
+          const detection = data.language_detection;
+          const updatedFilters: Partial<SearchFilters> = {};
+          
+          // Sync languages if detected
+          if (detection.detected_languages && detection.detected_languages.length > 0) {
+            const backendLanguages = data.filters?.languages || [];
+            if (JSON.stringify(filters.languages.sort()) !== JSON.stringify(backendLanguages.sort())) {
+              updatedFilters.languages = backendLanguages;
+            }
+          }
+          
+          // Sync city if detected
+          if (detection.detected_city && detection.detected_city !== filters.city) {
+            updatedFilters.city = detection.detected_city;
+            // Also try to get coordinates for the detected city
+            const coords = getCityCoordinates(detection.detected_city);
+            if (coords) {
+              updatedFilters.coordinates = { lat: coords[0], lng: coords[1] };
+            }
+          }
+          
+          // DON'T sync keyword with cleaned version - preserve user's original input
+          // The backend uses cleaned_keyword for search, but frontend keeps original for display
+          // This ensures user sees what they typed (e.g., "psikolog polski") in the search box
+          
+          // Apply updates if any
+          if (Object.keys(updatedFilters).length > 0) {
+            console.log('Syncing filters with backend detection:', updatedFilters);
+            setFilters(prev => ({ ...prev, ...updatedFilters }));
+            
+            // Update URL params to reflect the detection
+            const newParams = new URLSearchParams(params);
+            if (updatedFilters.languages) {
+              newParams.set('languages', updatedFilters.languages.join(','));
+            }
+            if (updatedFilters.city) {
+              newParams.set('city', updatedFilters.city);
+            }
+            if (updatedFilters.keyword) {
+              newParams.set('keyword', updatedFilters.keyword);
+            }
+            setSearchParams(newParams);
+          }
+        }
+        
         // API now handles all filtering including geographic radius
         setResults(apiResults);
         // Use actual results length since backend count query has a bug
@@ -348,8 +407,32 @@ const SearchPage = () => {
     setSearchParams({});
   };
 
+  // Handle language suggestion acceptance
+  const handleLanguageSuggestionAccept = (suggestedLanguage: string) => {
+    i18n.changeLanguage(suggestedLanguage);
+    setLanguageSuggestionDismissed(prev => new Set([...prev, suggestedLanguage]));
+  };
+
+  // Handle language suggestion dismissal
+  const handleLanguageSuggestionDismiss = (suggestedLanguage: string) => {
+    setLanguageSuggestionDismissed(prev => new Set([...prev, suggestedLanguage]));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Language Switch Suggestion */}
+      {detectionInfo && 
+       detectionInfo.typed_language && 
+       detectionInfo.typed_language !== i18n.language && 
+       !languageSuggestionDismissed.has(detectionInfo.typed_language) && (
+        <LanguageSwitchSuggestion
+          detectedLanguage={detectionInfo.typed_language}
+          currentUILanguage={i18n.language}
+          onAccept={() => handleLanguageSuggestionAccept(detectionInfo.typed_language)}
+          onDismiss={() => handleLanguageSuggestionDismiss(detectionInfo.typed_language)}
+        />
+      )}
+      
       {/* Search Header */}
       <div className="bg-white shadow-soft border-b border-gray-100">
         <div className="container-custom py-6">
@@ -567,6 +650,45 @@ const SearchPage = () => {
 
           {/* Results */}
           <div className="lg:w-3/4">
+            {/* Auto-Detection Feedback */}
+            {detectionInfo && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-medium text-blue-900 mb-1">Smart Search Applied</h4>
+                      <p className="text-sm text-blue-800">
+                        From "{detectionInfo.original_query}" we detected:
+                        {detectionInfo.detected_languages && detectionInfo.detected_languages.length > 0 && (
+                          <span className="font-medium"> {detectionInfo.detected_languages.map(lang => {
+                            const langObj = availableLanguages.find(l => l.code === lang);
+                            return langObj ? langObj.name_en : lang;
+                          }).join(', ')} language{detectionInfo.detected_languages.length > 1 ? 's' : ''}</span>
+                        )}
+                        {detectionInfo.detected_city && (
+                          <span className="font-medium"> in {detectionInfo.detected_city}</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setDetectionInfo(null)}
+                    className="flex-shrink-0 text-blue-400 hover:text-blue-600 transition-colors"
+                    title="Dismiss"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Results Header */}
             <div className="flex items-center justify-between mb-6">
               {/* Left: Results count */}
