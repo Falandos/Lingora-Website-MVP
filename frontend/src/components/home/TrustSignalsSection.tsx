@@ -11,7 +11,7 @@ export const TrustSignalsSection = ({ className = '' }: TrustSignalsSectionProps
   const { t } = useTranslation();
 
   return (
-    <section className={`py-16 bg-primary-50 ${className}`}>
+    <section className={`py-16 bg-white ${className}`}>
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           

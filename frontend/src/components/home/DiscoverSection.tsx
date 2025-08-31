@@ -42,48 +42,7 @@ export const DiscoverSection = ({ className = '' }: DiscoverSectionProps) => {
     return () => clearInterval(interval);
   }, [loadingMessages.length]);
 
-  const searchExamples = [
-    {
-      query: 'طبيب يتكلم عربي',
-      language: 'Arabic',
-      description: 'Arabic-speaking doctor',
-      results: '4 providers found',
-      explanation: 'AI understands Arabic and finds doctors who speak your language',
-      emoji: '👩‍⚕️',
-      whimsicalResult: 'Arabic-speaking doctors ready to help!',
-      category: 'Medical'
-    },
-    {
-      query: 'Türkçe konuşan avukat',
-      language: 'Turkish', 
-      description: 'Turkish-speaking lawyer',
-      results: '3 providers found',
-      explanation: 'AI recognizes Turkish and matches you with legal experts',
-      emoji: '⚖️',
-      whimsicalResult: 'Turkish legal experts found!',
-      category: 'Legal'
-    },
-    {
-      query: 'immigration lawyer',
-      language: 'English',
-      description: 'Help with visa and permits',
-      results: '6 providers found',
-      explanation: 'AI connects you with specialized immigration lawyers',
-      emoji: '🛂',
-      whimsicalResult: 'Immigration experts ready to help!',
-      category: 'Immigration'
-    },
-    {
-      query: 'psycholog mówiący po polsku',
-      language: 'Polish',
-      description: 'Polish-speaking psychologist',
-      results: '5 providers found',
-      explanation: 'AI finds Polish mental health professionals for you',
-      emoji: '🧠',
-      whimsicalResult: 'Polish psychologists located!',
-      category: 'Mental Health'
-    }
-  ];
+  const searchExamples = t('discover.examples', { returnObjects: true });
 
   const handleExampleClick = (query: string, index: number) => {
     // Whimsical click feedback

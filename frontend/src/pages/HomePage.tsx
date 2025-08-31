@@ -13,6 +13,7 @@ import TrustSignalsSection from '../components/home/TrustSignalsSection';
 import StickySearchBar from '../components/home/StickySearchBar';
 import BackToTopButton from '../components/ui/BackToTopButton';
 import LanguageCarousel from '../components/home/LanguageCarousel';
+import HowItWorksModal from '../components/home/HowItWorksModal';
 
 interface Language {
   code: string;
@@ -38,6 +39,7 @@ const HomePage = () => {
     query: '',
     location: '',
   });
+  const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
 
   useEffect(() => {
     // Fetch categories for the popular categories section
@@ -137,7 +139,7 @@ const HomePage = () => {
 
               {/* Hero Search Bar */}
               <div className="animate-slide-up mb-16">
-                <HeroSearchBar />
+                <HeroSearchBar onShowHowItWorks={() => setShowHowItWorksModal(true)} />
               </div>
 
             </div>
@@ -156,6 +158,12 @@ const HomePage = () => {
       
       {/* Back to Top Button */}
       <BackToTopButton />
+      
+      {/* How It Works Modal - Rendered at page level */}
+      <HowItWorksModal 
+        isOpen={showHowItWorksModal}
+        onClose={() => setShowHowItWorksModal(false)}
+      />
     </div>
   );
 };

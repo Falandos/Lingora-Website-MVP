@@ -179,7 +179,7 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
   }
 
   return (
-    <section className={`py-16 bg-white ${className}`}>
+    <section className={`py-16 bg-gray-50 ${className}`}>
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
