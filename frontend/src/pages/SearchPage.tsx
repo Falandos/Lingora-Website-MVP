@@ -1125,12 +1125,12 @@ const SearchPage = () => {
                 )}
               </div>
               
-              {/* Center: Enhanced View Toggle with Text */}
-              <div className="flex-1 flex justify-center">
+              {/* Center: Enhanced View Toggle with Text - Slightly left-aligned */}
+              <div className="flex-1 flex justify-center" style={{ marginLeft: '-30px' }}>
                 <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`flex items-center gap-2 px-4 py-2.5 transition-all duration-200 font-medium text-sm ${
+                    className={`flex items-center justify-center gap-2 w-32 sm:w-40 py-2.5 transition-all duration-200 font-medium text-sm ${
                       viewMode === 'list' 
                         ? 'bg-primary-600 text-white shadow-sm' 
                         : 'bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900'
@@ -1145,7 +1145,7 @@ const SearchPage = () => {
                   </button>
                   <button
                     onClick={() => setViewMode('map')}
-                    className={`flex items-center gap-2 px-4 py-2.5 transition-all duration-200 font-medium text-sm border-l border-gray-200 ${
+                    className={`flex items-center justify-center gap-2 w-32 sm:w-40 py-2.5 transition-all duration-200 font-medium text-sm border-l border-gray-200 ${
                       viewMode === 'map' 
                         ? 'bg-primary-600 text-white shadow-sm' 
                         : 'bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900'
@@ -1162,19 +1162,21 @@ const SearchPage = () => {
                 </div>
               </div>
 
-              {/* Right: Sort Options (List View Only) */}
-              <div className="flex items-center">
-                {viewMode === 'list' && (
-                  <select 
-                    className="text-sm border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 shadow-sm hover:border-gray-400 transition-colors"
-                    value={filters.sortBy}
-                    onChange={(e) => updateFilters({ sortBy: e.target.value })}
-                  >
-                    <option value="best_match">{t('search.best_match')}</option>
-                    {filters.city && <option value="distance">{t('search.distance_asc')}</option>}
-                    <option value="name">Name A-Z</option>
-                  </select>
-                )}
+              {/* Right: Sort Options - Always visible for consistency */}
+              <div className="flex items-center min-w-[140px] justify-end">
+                <select 
+                  className={`text-sm border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 shadow-sm hover:border-gray-400 transition-colors ${
+                    viewMode === 'map' ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  value={filters.sortBy}
+                  onChange={(e) => updateFilters({ sortBy: e.target.value })}
+                  disabled={viewMode === 'map'}
+                  title={viewMode === 'map' ? 'Sorting not available in map view' : 'Sort results'}
+                >
+                  <option value="best_match">{t('search.best_match')}</option>
+                  {filters.city && <option value="distance">{t('search.distance_asc')}</option>}
+                  <option value="name">Name A-Z</option>
+                </select>
               </div>
             </div>
 
