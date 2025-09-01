@@ -1002,26 +1002,38 @@ const SearchPage = () => {
                   </button>
                   {expandedSections.categories && (
                     <div className="space-y-1 max-h-48 overflow-y-auto">
-                      {availableCategories.filter(cat => !cat.parent_id).slice(0, 10).map((category) => (
-                      <label key={category.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={filters.categories.includes(category.id.toString())}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              updateFilters({ categories: [...filters.categories, category.id.toString()] });
-                            } else {
-                              updateFilters({ categories: filters.categories.filter(c => c !== category.id.toString()) });
-                            }
-                          }}
-                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {category.icon && <span className="mr-2">{category.icon}</span>}
-                          {i18n.language === 'nl' ? category.name_nl : category.name_en}
-                        </span>
-                      </label>
-                      ))}
+                      {availableCategories.filter(cat => !cat.parent_id).slice(0, 10).map((category) => {
+                        const isSelected = filters.categories.includes(category.id.toString());
+                        
+                        return (
+                          <label key={category.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  updateFilters({ categories: [...filters.categories, category.id.toString()] });
+                                } else {
+                                  updateFilters({ categories: filters.categories.filter(c => c !== category.id.toString()) });
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            <div className="flex items-center space-x-2">
+                              {category.icon && (
+                                <span className={`text-lg transition-all duration-200 ${
+                                  isSelected ? 'opacity-100' : 'opacity-40 grayscale'
+                                }`}>
+                                  {category.icon}
+                                </span>
+                              )}
+                              <span className="text-sm text-gray-700">
+                                {i18n.language === 'nl' ? category.name_nl : category.name_en}
+                              </span>
+                            </div>
+                          </label>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -1490,26 +1502,38 @@ const SearchPage = () => {
                 </button>
                 {expandedSections.categories && (
                   <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {availableCategories.filter(cat => !cat.parent_id).slice(0, 10).map((category) => (
-                    <label key={category.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={filters.categories.includes(category.id.toString())}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            updateFilters({ categories: [...filters.categories, category.id.toString()] });
-                          } else {
-                            updateFilters({ categories: filters.categories.filter(c => c !== category.id.toString()) });
-                          }
-                        }}
-                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {category.icon && <span className="mr-2">{category.icon}</span>}
-                        {i18n.language === 'nl' ? category.name_nl : category.name_en}
-                      </span>
-                    </label>
-                    ))}
+                    {availableCategories.filter(cat => !cat.parent_id).slice(0, 10).map((category) => {
+                      const isSelected = filters.categories.includes(category.id.toString());
+                      
+                      return (
+                        <label key={category.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                updateFilters({ categories: [...filters.categories, category.id.toString()] });
+                              } else {
+                                updateFilters({ categories: filters.categories.filter(c => c !== category.id.toString()) });
+                              }
+                            }}
+                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                          />
+                          <div className="flex items-center space-x-2">
+                            {category.icon && (
+                              <span className={`text-lg transition-all duration-200 ${
+                                isSelected ? 'opacity-100' : 'opacity-40 grayscale'
+                              }`}>
+                                {category.icon}
+                              </span>
+                            )}
+                            <span className="text-sm text-gray-700">
+                              {i18n.language === 'nl' ? category.name_nl : category.name_en}
+                            </span>
+                          </div>
+                        </label>
+                      );
+                    })}
                   </div>
                 )}
               </div>

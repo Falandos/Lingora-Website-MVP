@@ -220,10 +220,9 @@ const CityAutocomplete = ({
             className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 border-0 whitespace-nowrap transition-colors duration-150"
             title="Detect my location"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" strokeWidth="2"/>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 2v4m0 12v4m10-10h-4m-12 0h4"/>
-              <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#9ca3af"/>
+              <circle cx="12" cy="9" r="2.5" fill="white"/>
             </svg>
           </Button>
         )}
