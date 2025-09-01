@@ -51,6 +51,17 @@ interface SearchFilters {
   } | null;
 }
 
+// Get flag URL for language code
+const getFlagUrl = (langCode: string) => {
+  const countryCodeMap: Record<string, string> = {
+    'nl': 'nl', 'en': 'gb', 'de': 'de', 'ar': 'sa', 'zgh': 'ma',
+    'uk': 'ua', 'pl': 'pl', 'zh': 'cn', 'yue': 'hk', 'es': 'es',
+    'hi': 'in', 'tr': 'tr', 'fr': 'fr', 'ti': 'er', 'so': 'so'
+  };
+  const countryCode = countryCodeMap[langCode] || 'un';
+  return `https://flagcdn.com/24x18/${countryCode}.png`;
+};
+
 const SearchPage = () => {
   const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -599,11 +610,6 @@ const SearchPage = () => {
         // Sort by newest providers
         updateFilters({ sortBy: 'best_match' });
         break;
-        
-      case 'online_services':
-        // Filter for online/remote services
-        updateFilters({ mode: 'online' });
-        break;
     }
   };
 
@@ -814,14 +820,14 @@ const SearchPage = () => {
                 {/* Quick Filter Presets */}
                 <div className="mb-6 pb-6 border-b border-gray-100">
                   <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Filters</h4>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleQuickFilter('near_me')}
-                      className="justify-start text-xs px-2 py-1.5 h-auto"
+                      className="justify-start text-xs px-3 py-2 h-auto"
                     >
-                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
@@ -831,9 +837,9 @@ const SearchPage = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleQuickFilter('open_now')}
-                      className="justify-start text-xs px-2 py-1.5 h-auto"
+                      className="justify-start text-xs px-3 py-2 h-auto"
                     >
-                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Open Now
@@ -842,23 +848,12 @@ const SearchPage = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleQuickFilter('top_rated')}
-                      className="justify-start text-xs px-2 py-1.5 h-auto"
+                      className="justify-start text-xs px-3 py-2 h-auto"
                     >
-                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                       </svg>
                       Top Rated
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleQuickFilter('online_services')}
-                      className="justify-start text-xs px-2 py-1.5 h-auto"
-                    >
-                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      Online
                     </Button>
                   </div>
                 </div>
@@ -943,30 +938,40 @@ const SearchPage = () => {
                             .localeCompare(i18n.language === 'nl' ? b.name_native : b.name_en);
                         })
                         .slice(0, expandedSections.languages ? 15 : 5)
-                        .map((lang) => (
-                      <label key={lang.code} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={filters.languages.includes(lang.code)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              updateFilters({ languages: [...filters.languages, lang.code] });
-                            } else {
-                              updateFilters({ languages: filters.languages.filter(l => l !== lang.code) });
-                            }
-                          }}
-                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                        />
-                        <img 
-                          src={`https://flagcdn.com/24x18/${lang.code === 'en' ? 'gb' : lang.code === 'ar' ? 'sa' : lang.code === 'zgh' ? 'ma' : lang.code === 'uk' ? 'ua' : lang.code === 'zh' ? 'cn' : lang.code === 'yue' ? 'hk' : lang.code === 'ti' ? 'er' : lang.code === 'so' ? 'so' : lang.code === 'hi' ? 'in' : lang.code}.png`}
-                          alt={`${lang.code} flag`}
-                          className="w-4 h-3 object-cover rounded-sm"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {i18n.language === 'nl' ? lang.name_native : lang.name_en}
-                        </span>
-                      </label>
-                      ))}
+                        .map((lang) => {
+                          const isSelected = filters.languages.includes(lang.code);
+                          const uiLanguageName = lang.name_en; // Use English name for UI language
+                          const nativeName = lang.name_native;
+                          
+                          return (
+                            <label key={lang.code} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    updateFilters({ languages: [...filters.languages, lang.code] });
+                                  } else {
+                                    updateFilters({ languages: filters.languages.filter(l => l !== lang.code) });
+                                  }
+                                }}
+                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              />
+                              <div className="flex items-center space-x-2">
+                                <img 
+                                  src={getFlagUrl(lang.code)} 
+                                  alt={`${lang.name_en} flag`}
+                                  className={`w-6 h-4 rounded-sm border border-white shadow-sm transition-all duration-200 ${
+                                    isSelected ? 'opacity-100' : 'opacity-40 grayscale'
+                                  }`}
+                                />
+                                <span className="text-sm text-gray-700">
+                                  {uiLanguageName} ({nativeName})
+                                </span>
+                              </div>
+                            </label>
+                          );
+                        })}
                     </div>
                   )}
                 </div>
@@ -1308,14 +1313,14 @@ const SearchPage = () => {
               {/* Quick Filter Presets */}
               <div className="mb-6 pb-6 border-b border-gray-100">
                 <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Filters</h4>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleQuickFilter('near_me')}
-                    className="justify-start text-xs px-2 py-1.5 h-auto"
+                    className="justify-start text-xs px-3 py-2 h-auto"
                   >
-                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -1325,9 +1330,9 @@ const SearchPage = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleQuickFilter('open_now')}
-                    className="justify-start text-xs px-2 py-1.5 h-auto"
+                    className="justify-start text-xs px-3 py-2 h-auto"
                   >
-                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Open Now
@@ -1336,23 +1341,12 @@ const SearchPage = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleQuickFilter('top_rated')}
-                    className="justify-start text-xs px-2 py-1.5 h-auto"
+                    className="justify-start text-xs px-3 py-2 h-auto"
                   >
-                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                     </svg>
                     Top Rated
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleQuickFilter('online_services')}
-                    className="justify-start text-xs px-2 py-1.5 h-auto"
-                  >
-                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    Online
                   </Button>
                 </div>
               </div>
@@ -1432,30 +1426,40 @@ const SearchPage = () => {
                           .localeCompare(i18n.language === 'nl' ? b.name_native : b.name_en);
                       })
                       .slice(0, expandedSections.languages ? 15 : 5)
-                      .map((lang) => (
-                    <label key={lang.code} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={filters.languages.includes(lang.code)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            updateFilters({ languages: [...filters.languages, lang.code] });
-                          } else {
-                            updateFilters({ languages: filters.languages.filter(l => l !== lang.code) });
-                          }
-                        }}
-                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                      />
-                      <img 
-                        src={`https://flagcdn.com/24x18/${lang.code === 'en' ? 'gb' : lang.code === 'ar' ? 'sa' : lang.code === 'zgh' ? 'ma' : lang.code === 'uk' ? 'ua' : lang.code === 'zh' ? 'cn' : lang.code === 'yue' ? 'hk' : lang.code === 'ti' ? 'er' : lang.code === 'so' ? 'so' : lang.code === 'hi' ? 'in' : lang.code}.png`}
-                        alt={`${lang.code} flag`}
-                        className="w-4 h-3 object-cover rounded-sm"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {i18n.language === 'nl' ? lang.name_native : lang.name_en}
-                      </span>
-                    </label>
-                    ))}
+                      .map((lang) => {
+                        const isSelected = filters.languages.includes(lang.code);
+                        const uiLanguageName = lang.name_en; // Use English name for UI language
+                        const nativeName = lang.name_native;
+                        
+                        return (
+                          <label key={lang.code} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  updateFilters({ languages: [...filters.languages, lang.code] });
+                                } else {
+                                  updateFilters({ languages: filters.languages.filter(l => l !== lang.code) });
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            <div className="flex items-center space-x-2">
+                              <img 
+                                src={getFlagUrl(lang.code)} 
+                                alt={`${lang.name_en} flag`}
+                                className={`w-6 h-4 rounded-sm border border-white shadow-sm transition-all duration-200 ${
+                                  isSelected ? 'opacity-100' : 'opacity-40 grayscale'
+                                }`}
+                              />
+                              <span className="text-sm text-gray-700">
+                                {uiLanguageName} ({nativeName})
+                              </span>
+                            </div>
+                          </label>
+                        );
+                      })}
                   </div>
                 )}
               </div>

@@ -77,22 +77,46 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
   const [bioExpanded, setBioExpanded] = useState(false);
 
   const bio = currentLanguage === 'nl' ? bio_nl : bio_en;
-  const displayLanguages = languages.slice(0, 3); // Show max 3 languages
-  const remainingLanguages = Math.max(0, languages.length - 3); // Count remaining languages
-
-  // Determine flag styling based on active language filters
-  const getFlagClassName = (langCode: string) => {
-    const hasActiveFilters = activeLanguageFilters.length > 0;
-    const isMatchingFilter = activeLanguageFilters.includes(langCode);
-    const baseClasses = "w-6 h-4 rounded-sm border border-white shadow-sm transition-all duration-200 hover:scale-110 transform";
-    
-    if (hasActiveFilters && isMatchingFilter) {
-      // Show in color - only when filter is active AND matches
-      return `${baseClasses} hover:shadow-md`;
-    } else {
-      // Show greyed - default state (no filters) OR non-matching when filters active
-      return `${baseClasses} grayscale opacity-40 hover:opacity-70 hover:grayscale-50`;
+  
+  // Smart language display logic - prioritize filtered languages
+  const getDisplayLanguages = () => {
+    if (!activeLanguageFilters || activeLanguageFilters.length === 0) {
+      // No filters active - show first 3 languages
+      return {
+        display: languages.slice(0, 3),
+        remaining: Math.max(0, languages.length - 3)
+      };
     }
+    
+    // Separate filtered and non-filtered languages
+    const filteredLanguages = languages.filter(lang => 
+      activeLanguageFilters.includes(lang.language_code)
+    );
+    const otherLanguages = languages.filter(lang => 
+      !activeLanguageFilters.includes(lang.language_code)
+    );
+    
+    if (activeLanguageFilters.length > 3) {
+      // If more than 3 languages are filtered, show ALL filtered languages
+      return {
+        display: filteredLanguages,
+        remaining: otherLanguages.length
+      };
+    } else {
+      // Show filtered first, then fill up to 3 with others
+      const combined = [...filteredLanguages, ...otherLanguages];
+      return {
+        display: combined.slice(0, 3),
+        remaining: Math.max(0, combined.length - 3)
+      };
+    }
+  };
+  
+  const { display: displayLanguages, remaining: remainingLanguages } = getDisplayLanguages();
+
+  // Always show flags in full color - no greying out
+  const getFlagClassName = () => {
+    return "w-6 h-4 rounded-sm border border-white shadow-sm transition-all duration-200 hover:scale-110 transform hover:shadow-md";
   };
 
   return (
@@ -204,7 +228,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
                   <img 
                     src={getFlagUrl(lang.language_code)} 
                     alt={currentLanguage === 'nl' ? lang.name_native : lang.name_en}
-                    className={getFlagClassName(lang.language_code)}
+                    className={getFlagClassName()}
                   />
                 </div>
               ))}
@@ -220,12 +244,21 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
         {/* Bottom Row - Location Info (Bottom Left) and Contact Button (Bottom Right) */}
         <div className="flex items-end justify-between mt-auto pt-4">
           {/* Location and Status Info - Bottom Left */}
-          <div className="flex flex-col gap-1 text-xs text-gray-500">
-            <span className="font-medium text-gray-700">{city}</span>
+          <div className="flex flex-col gap-2 text-xs">
+            {/* City and Distance on same line */}
+            <div className="flex items-center gap-1 text-gray-700">
+              <span className="font-medium">{city}</span>
+              {distance && (
+                <>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-blue-600 font-medium">{Math.round(distance)}km</span>
+                </>
+              )}
+            </div>
             
-            <div className="flex flex-wrap gap-2">
-              {/* Open/Closed Status */}
-              {isOpen !== null && (
+            {/* Open/Closed Status as separate badge */}
+            {isOpen !== null && (
+              <div>
                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
                   isOpen 
                     ? 'bg-green-100 text-green-700' 
@@ -236,19 +269,8 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
                   }`}></div>
                   {isOpen ? 'Open Now' : 'Closed'}
                 </span>
-              )}
-              
-              {/* Distance */}
-              {distance && (
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {Math.round(distance)} {t('provider.distance_km')}
-                </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Quick Contact Button - Bottom Right */}
