@@ -70,10 +70,19 @@ class LanguageRotationManager {
       this.notifySubscribers();
       
       setTimeout(() => {
-        this.currentIndex = (this.currentIndex + 1) % languages.length;
-        this.isVisible = true;
-        this.notifySubscribers();
-      }, 150); // Smooth fade transition
+        const nextIndex = (this.currentIndex + 1) % languages.length;
+        
+        // Add extra delay when transitioning from last to first (infinite loop)
+        const isInfiniteLoopTransition = this.currentIndex === languages.length - 1 && nextIndex === 0;
+        const transitionDelay = isInfiniteLoopTransition ? 100 : 0;
+        
+        setTimeout(() => {
+          this.currentIndex = nextIndex;
+          this.isVisible = true;
+          this.notifySubscribers();
+        }, transitionDelay);
+        
+      }, 500); // Match LanguageCarousel's 500ms transition timing
       
     }, this.interval);
   }
