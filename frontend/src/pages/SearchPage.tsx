@@ -1125,11 +1125,48 @@ const SearchPage = () => {
                 )}
               </div>
               
-              {/* Center: Sort Options (List View Only) */}
+              {/* Center: Enhanced View Toggle with Text */}
               <div className="flex-1 flex justify-center">
+                <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`flex items-center gap-2 px-4 py-2.5 transition-all duration-200 font-medium text-sm ${
+                      viewMode === 'list' 
+                        ? 'bg-primary-600 text-white shadow-sm' 
+                        : 'bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                    title={t('search.view_list')}
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    <span className="hidden sm:inline">{t('search.view_list')}</span>
+                    <span className="sm:hidden">List</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('map')}
+                    className={`flex items-center gap-2 px-4 py-2.5 transition-all duration-200 font-medium text-sm border-l border-gray-200 ${
+                      viewMode === 'map' 
+                        ? 'bg-primary-600 text-white shadow-sm' 
+                        : 'bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                    title={t('search.view_map')}
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="hidden sm:inline">{t('search.view_map')}</span>
+                    <span className="sm:hidden">Map</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right: Sort Options (List View Only) */}
+              <div className="flex items-center">
                 {viewMode === 'list' && (
                   <select 
-                    className="text-sm border border-gray-300 rounded-md px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    className="text-sm border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 shadow-sm hover:border-gray-400 transition-colors"
                     value={filters.sortBy}
                     onChange={(e) => updateFilters({ sortBy: e.target.value })}
                   >
@@ -1138,37 +1175,6 @@ const SearchPage = () => {
                     <option value="name">Name A-Z</option>
                   </select>
                 )}
-              </div>
-
-              {/* Right: View Toggle - Clean icon buttons */}
-              <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 transition-colors ${
-                    viewMode === 'list' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                  title="List view"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewMode('map')}
-                  className={`px-3 py-2 transition-colors border-l border-gray-200 ${
-                    viewMode === 'map' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                  title="Map view"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </button>
               </div>
             </div>
 

@@ -91,9 +91,11 @@
     "both": "Both",
     "sort_by": "Sort by",
     "best_match": "Best Match",
-    "distance_asc": "Distance",
+    "distance_asc": "Distance", 
     "show_map": "Show Map",
-    "show_list": "Show List"
+    "show_list": "Show List",
+    "view_list": "Zorgverleners Lijst",
+    "view_map": "Zorgverleners Kaart"
   },
   "stats": {
     "active_businesses": "Actieve Bedrijven",
