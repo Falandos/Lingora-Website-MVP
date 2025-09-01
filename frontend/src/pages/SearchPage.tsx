@@ -31,6 +31,10 @@ interface SearchResult {
     category_name: string;
   }>;
   distance?: number;
+  opening_hours?: Record<string, { 
+    isOpen: boolean; 
+    slots: { open: string; close: string }[] 
+  }>;
 }
 
 interface SearchFilters {
@@ -58,17 +62,42 @@ const SearchPage = () => {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [detectionInfo, setDetectionInfo] = useState<any>(null);
   const [languageSuggestionDismissed, setLanguageSuggestionDismissed] = useState<Set<string>>(new Set());
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  
+  // Search autocomplete state
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const [filters, setFilters] = useState<SearchFilters>({
-    languages: searchParams.get('languages')?.split(',') || [],
-    categories: searchParams.get('categories')?.split(',') || [],
-    city: searchParams.get('city') || '', // Start empty so user can select
-    radius: parseInt(searchParams.get('radius') || '25'),
-    mode: searchParams.get('mode') || '',
-    keyword: searchParams.get('keyword') || '',
-    sortBy: searchParams.get('sortBy') || 'best_match',
-    coordinates: null
-  });
+  // Initialize filters with URL params taking priority over localStorage
+  const initializeFilters = (): SearchFilters => {
+    // Load saved preferences from localStorage
+    const savedPreferences = (() => {
+      try {
+        const stored = localStorage.getItem('lingora_filter_preferences');
+        return stored ? JSON.parse(stored) : {};
+      } catch {
+        return {};
+      }
+    })();
+
+    return {
+      // URL params have highest priority, then localStorage, then defaults
+      languages: searchParams.get('languages')?.split(',').filter(Boolean) || 
+                 savedPreferences.languages || [],
+      categories: searchParams.get('categories')?.split(',').filter(Boolean) || 
+                  savedPreferences.categories || [],
+      city: searchParams.get('city') || savedPreferences.city || '',
+      radius: parseInt(searchParams.get('radius') || savedPreferences.radius?.toString() || '25'),
+      mode: searchParams.get('mode') || '',
+      keyword: searchParams.get('keyword') || '', // Never persist keyword
+      sortBy: searchParams.get('sortBy') || savedPreferences.sortBy || 'best_match',
+      coordinates: savedPreferences.coordinates || null
+    };
+  };
+
+  const [filters, setFilters] = useState<SearchFilters>(initializeFilters());
   
   // Available languages and categories for filters
   const [availableLanguages, setAvailableLanguages] = useState<any[]>([]);
@@ -117,6 +146,28 @@ const SearchPage = () => {
               Math.sin(dLng/2) * Math.sin(dLng/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return Math.round(R * c * 10) / 10; // Round to 1 decimal place
+  };
+
+  // Check if a provider is currently open based on opening hours
+  const isProviderOpen = (openingHours?: Record<string, { isOpen: boolean; slots: { open: string; close: string }[] }>): boolean | null => {
+    if (!openingHours) return null; // No opening hours data
+    
+    const now = new Date();
+    const currentDay = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()];
+    const currentTime = now.getHours() * 60 + now.getMinutes(); // Current time in minutes from 00:00
+    
+    const dayHours = openingHours[currentDay];
+    if (!dayHours || !dayHours.isOpen) return false; // Closed today
+    
+    // Check if current time falls within any of the day's time slots
+    return dayHours.slots.some(slot => {
+      const [openHour, openMin] = slot.open.split(':').map(Number);
+      const [closeHour, closeMin] = slot.close.split(':').map(Number);
+      const openTime = openHour * 60 + openMin;
+      const closeTime = closeHour * 60 + closeMin;
+      
+      return currentTime >= openTime && currentTime <= closeTime;
+    });
   };
 
   // Fetch all providers for map display
@@ -376,10 +427,52 @@ const SearchPage = () => {
     performSearch();
   }, [page, filters]);
 
+  // Save filters to localStorage
+  const saveFiltersToStorage = (filtersToSave: SearchFilters) => {
+    try {
+      const filterPreferences = {
+        languages: filtersToSave.languages,
+        categories: filtersToSave.categories,
+        city: filtersToSave.city,
+        radius: filtersToSave.radius,
+        sortBy: filtersToSave.sortBy,
+        coordinates: filtersToSave.coordinates,
+        // Don't persist keyword as it's search-specific
+      };
+      localStorage.setItem('lingora_filter_preferences', JSON.stringify(filterPreferences));
+    } catch (error) {
+      console.error('Error saving filter preferences:', error);
+    }
+  };
+
+  // Load filters from localStorage
+  const loadFiltersFromStorage = (): Partial<SearchFilters> => {
+    try {
+      const stored = localStorage.getItem('lingora_filter_preferences');
+      if (stored) {
+        const preferences = JSON.parse(stored);
+        return {
+          languages: preferences.languages || [],
+          categories: preferences.categories || [],
+          city: preferences.city || '',
+          radius: preferences.radius || 25,
+          sortBy: preferences.sortBy || 'best_match',
+          coordinates: preferences.coordinates || null,
+        };
+      }
+    } catch (error) {
+      console.error('Error loading filter preferences:', error);
+    }
+    return {};
+  };
+
   const updateFilters = (newFilters: Partial<SearchFilters>) => {
     const updatedFilters = { ...filters, ...newFilters };
     setFilters(updatedFilters);
     setPage(1);
+    
+    // Save to localStorage (excluding keyword for privacy)
+    saveFiltersToStorage(updatedFilters);
     
     // Update URL params
     const params = new URLSearchParams();
@@ -387,6 +480,7 @@ const SearchPage = () => {
     if (updatedFilters.categories.length > 0) params.set('categories', updatedFilters.categories.join(','));
     if (updatedFilters.city) params.set('city', updatedFilters.city);
     params.set('radius', updatedFilters.radius.toString());
+    if (updatedFilters.sortBy !== 'best_match') params.set('sortBy', updatedFilters.sortBy);
     // Service mode filter removed
     if (updatedFilters.keyword) params.set('keyword', updatedFilters.keyword);
     
@@ -394,17 +488,26 @@ const SearchPage = () => {
   };
 
   const clearFilters = () => {
-    setFilters({
+    const clearedFilters = {
       languages: [],
       categories: [],
       city: '',
       radius: 25,
       mode: '',
       keyword: '',
-      sortBy: 'distance',
+      sortBy: 'best_match',
       coordinates: null
-    });
+    };
+    
+    setFilters(clearedFilters);
     setSearchParams({});
+    
+    // Clear localStorage preferences as well
+    try {
+      localStorage.removeItem('lingora_filter_preferences');
+    } catch (error) {
+      console.error('Error clearing filter preferences:', error);
+    }
   };
 
   // Handle language suggestion acceptance
@@ -416,6 +519,188 @@ const SearchPage = () => {
   // Handle language suggestion dismissal
   const handleLanguageSuggestionDismiss = (suggestedLanguage: string) => {
     setLanguageSuggestionDismissed(prev => new Set([...prev, suggestedLanguage]));
+  };
+
+  // Quick filter presets
+  const handleQuickFilter = (presetType: string) => {
+    switch (presetType) {
+      case 'near_me':
+        // Use geolocation to find user's location
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const { latitude, longitude } = position.coords;
+              
+              // Find closest major city
+              try {
+                const response = await fetch(`/api/cities?major_only=true&limit=20`);
+                if (response.ok) {
+                  const result = await response.json();
+                  const cities = result.cities || [];
+                  
+                  // Find closest city
+                  let closestCity = null;
+                  let minDistance = Infinity;
+                  
+                  cities.forEach((city: any) => {
+                    const distance = Math.sqrt(
+                      Math.pow(latitude - city.coordinates.lat, 2) +
+                      Math.pow(longitude - city.coordinates.lng, 2)
+                    );
+                    
+                    if (distance < minDistance) {
+                      minDistance = distance;
+                      closestCity = city;
+                    }
+                  });
+                  
+                  if (closestCity) {
+                    updateFilters({ 
+                      city: closestCity.name,
+                      coordinates: { lat: latitude, lng: longitude },
+                      radius: 25,
+                      sortBy: 'distance'
+                    });
+                  }
+                }
+              } catch (error) {
+                console.error('Error finding closest city:', error);
+                // Fallback - just set coordinates
+                updateFilters({ 
+                  coordinates: { lat: latitude, lng: longitude },
+                  radius: 25,
+                  sortBy: 'distance'
+                });
+              }
+            },
+            (error) => {
+              console.error('Geolocation error:', error);
+              alert('Unable to get your location. Please enable location access or select a city manually.');
+            }
+          );
+        } else {
+          alert('Geolocation is not supported by this browser. Please select a city manually.');
+        }
+        break;
+        
+      case 'open_now':
+        // This would filter for providers that are currently open
+        // For now, we'll just sort by best match and add a note
+        updateFilters({ sortBy: 'best_match' });
+        // In a real implementation, this would add a filter for opening hours
+        break;
+        
+      case 'top_rated':
+        // Sort by rating once we have rating data
+        updateFilters({ sortBy: 'best_match' });
+        break;
+        
+      case 'recently_added':
+        // Sort by newest providers
+        updateFilters({ sortBy: 'best_match' });
+        break;
+        
+      case 'online_services':
+        // Filter for online/remote services
+        updateFilters({ mode: 'online' });
+        break;
+    }
+  };
+
+  // Search autocomplete functionality
+  const fetchSearchSuggestions = async (query: string) => {
+    if (!query || query.length < 2) {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    
+    setIsSearching(true);
+    try {
+      // For now, generate mock suggestions based on the query
+      // In production, this would be an API call to get actual suggestions
+      const mockSuggestions = [
+        `${query} dokter`,
+        `${query} arts`,
+        `${query} tandarts`,
+        `${query} psycholoog`,
+        `${query} fysiotherapeut`,
+      ].filter(suggestion => suggestion !== query);
+      
+      // Also add some popular searches
+      const popularSearches = [
+        'Nederlandse dokter',
+        'Turkse arts',
+        'Psycholoog Amsterdam',
+        'Tandarts Rotterdam',
+        'Huisarts Utrecht'
+      ].filter(search => search.toLowerCase().includes(query.toLowerCase()));
+      
+      const allSuggestions = [...mockSuggestions, ...popularSearches].slice(0, 6);
+      
+      setSearchSuggestions(allSuggestions);
+      setShowSuggestions(allSuggestions.length > 0);
+    } catch (error) {
+      console.error('Error fetching search suggestions:', error);
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Debounced search suggestions
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchSearchSuggestions(filters.keyword);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [filters.keyword]);
+
+  // Handle search input key navigation
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev < searchSuggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev > 0 ? prev - 1 : searchSuggestions.length - 1
+        );
+        break;
+      case 'Enter':
+        if (selectedSuggestionIndex >= 0) {
+          e.preventDefault();
+          selectSuggestion(searchSuggestions[selectedSuggestionIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        setSelectedSuggestionIndex(-1);
+        break;
+    }
+  };
+
+  const selectSuggestion = (suggestion: string) => {
+    updateFilters({ keyword: suggestion });
+    setShowSuggestions(false);
+    setSelectedSuggestionIndex(-1);
+    
+    // Store in recent searches (localStorage)
+    try {
+      const recentSearches = JSON.parse(localStorage.getItem('lingora_recent_searches') || '[]');
+      const updatedSearches = [suggestion, ...recentSearches.filter((s: string) => s !== suggestion)].slice(0, 10);
+      localStorage.setItem('lingora_recent_searches', JSON.stringify(updatedSearches));
+    } catch (error) {
+      console.error('Error saving recent search:', error);
+    }
   };
 
   return (
@@ -443,12 +728,70 @@ const SearchPage = () => {
                   type="text"
                   placeholder={t('header.search_placeholder')}
                   value={filters.keyword}
-                  onChange={(e) => updateFilters({ keyword: e.target.value })}
-                  className="input-field w-full pl-12"
+                  onChange={(e) => {
+                    updateFilters({ keyword: e.target.value });
+                    setSelectedSuggestionIndex(-1);
+                  }}
+                  onKeyDown={handleSearchKeyDown}
+                  onFocus={() => {
+                    if (searchSuggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    // Delay hiding suggestions to allow clicking on them
+                    setTimeout(() => setShowSuggestions(false), 150);
+                  }}
+                  className="input-field w-full pl-12 pr-16 lg:pr-4"
+                  autoComplete="off"
                 />
                 <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+                
+                {/* Loading indicator */}
+                {isSearching && (
+                  <div className="absolute right-16 lg:right-8 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500"></div>
+                  </div>
+                )}
+                
+                {/* Mobile Filter Button */}
+                <button
+                  onClick={() => setMobileFiltersOpen(true)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 lg:hidden p-1.5 text-gray-500 hover:text-gray-700 transition-colors"
+                  title="Open filters"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  {/* Active filters indicator */}
+                  {(filters.languages.length > 0 || filters.categories.length > 0 || filters.city) && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary-600 rounded-full"></span>
+                  )}
+                </button>
+
+                {/* Search Suggestions Dropdown */}
+                {showSuggestions && searchSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+                    {searchSuggestions.map((suggestion, index) => (
+                      <button
+                        key={suggestion}
+                        onClick={() => selectSuggestion(suggestion)}
+                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                          index === selectedSuggestionIndex ? 'bg-primary-50 text-primary-700' : 'text-gray-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                          <span className="text-sm">{suggestion}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -457,8 +800,8 @@ const SearchPage = () => {
 
       <div className="container-custom py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:w-1/4">
+          {/* Filters Sidebar - Hidden on mobile */}
+          <div className="hidden lg:block lg:w-1/4">
             <Card className="sticky top-24">
               <CardBody className="p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -466,6 +809,58 @@ const SearchPage = () => {
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
                     {t('common.clear')}
                   </Button>
+                </div>
+
+                {/* Quick Filter Presets */}
+                <div className="mb-6 pb-6 border-b border-gray-100">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Filters</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickFilter('near_me')}
+                      className="justify-start text-xs px-2 py-1.5 h-auto"
+                    >
+                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Near Me
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickFilter('open_now')}
+                      className="justify-start text-xs px-2 py-1.5 h-auto"
+                    >
+                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Open Now
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickFilter('top_rated')}
+                      className="justify-start text-xs px-2 py-1.5 h-auto"
+                    >
+                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                      Top Rated
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickFilter('online_services')}
+                      className="justify-start text-xs px-2 py-1.5 h-auto"
+                    >
+                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      Online
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Location Filter - Clean & Streamlined */}
@@ -536,7 +931,19 @@ const SearchPage = () => {
                   </button>
                   {expandedSections.languages && (
                     <div className="space-y-1 max-h-48 overflow-y-auto">
-                      {availableLanguages.slice(0, expandedSections.languages ? 15 : 5).map((lang) => (
+                      {availableLanguages
+                        .sort((a, b) => {
+                          // Sort selected languages to the top
+                          const aSelected = filters.languages.includes(a.code);
+                          const bSelected = filters.languages.includes(b.code);
+                          if (aSelected && !bSelected) return -1;
+                          if (!aSelected && bSelected) return 1;
+                          // Keep alphabetical order within selected/unselected groups
+                          return (i18n.language === 'nl' ? a.name_native : a.name_en)
+                            .localeCompare(i18n.language === 'nl' ? b.name_native : b.name_en);
+                        })
+                        .slice(0, expandedSections.languages ? 15 : 5)
+                        .map((lang) => (
                       <label key={lang.code} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
                         <input
                           type="checkbox"
@@ -770,7 +1177,7 @@ const SearchPage = () => {
               )
             ) : results.length > 0 ? (
               viewMode === 'list' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {results.map((result) => (
                     <ProviderCard
                       key={result.id || result.provider?.id}
@@ -791,6 +1198,8 @@ const SearchPage = () => {
                       distance={result.distance_km || result.distance}
                       currentLanguage={i18n.language}
                       activeLanguageFilters={filters.languages}
+                      openingHours={result.opening_hours}
+                      isOpen={isProviderOpen(result.opening_hours)}
                     />
                   ))}
                 </div>
@@ -864,6 +1273,286 @@ const SearchPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Filter Drawer */}
+      {mobileFiltersOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setMobileFiltersOpen(false)}
+          ></div>
+          
+          {/* Drawer */}
+          <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-white shadow-xl transform transition-transform overflow-y-auto">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+              <h3 className="text-lg font-semibold text-gray-900">{t('search.filters')}</h3>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  {t('common.clear')}
+                </Button>
+                <button
+                  onClick={() => setMobileFiltersOpen(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Drawer Content - Same as sidebar */}
+            <div className="p-4">
+              {/* Quick Filter Presets */}
+              <div className="mb-6 pb-6 border-b border-gray-100">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Filters</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickFilter('near_me')}
+                    className="justify-start text-xs px-2 py-1.5 h-auto"
+                  >
+                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Near Me
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickFilter('open_now')}
+                    className="justify-start text-xs px-2 py-1.5 h-auto"
+                  >
+                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Open Now
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickFilter('top_rated')}
+                    className="justify-start text-xs px-2 py-1.5 h-auto"
+                  >
+                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                    Top Rated
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickFilter('online_services')}
+                    className="justify-start text-xs px-2 py-1.5 h-auto"
+                  >
+                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Online
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Location Filter */}
+              <div className="mb-6">
+                <CityAutocomplete
+                  value={filters.city}
+                  onChange={(city, cityName) => {
+                    if (city) {
+                      updateFilters({ 
+                        city: city.name,
+                        coordinates: city.coordinates
+                      });
+                    } else {
+                      updateFilters({ city: cityName, coordinates: null });
+                    }
+                  }}
+                  placeholder="Enter city name..."
+                  showGeolocation={true}
+                  className="mb-4"
+                />
+              
+                <label className="label">{t('search.distance')}</label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="range"
+                    min="5"
+                    max="350"
+                    step="5"
+                    value={filters.radius}
+                    onChange={(e) => updateFilters({ radius: parseInt(e.target.value) })}
+                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${((filters.radius - 5) / (350 - 5)) * 100}%, #E5E7EB ${((filters.radius - 5) / (350 - 5)) * 100}%, #E5E7EB 100%)`
+                    }}
+                  />
+                  <span className="text-sm font-medium text-gray-700 min-w-[3rem]">{filters.radius} km</span>
+                </div>
+              </div>
+
+              {/* Language Filter */}
+              <div className="mb-6">
+                <button
+                  type="button"
+                  onClick={() => toggleSection('languages')}
+                  className="w-full flex items-center justify-between py-2 text-left hover:text-primary-600 transition-colors"
+                >
+                  <span className="label flex items-center">
+                    {t('search.languages')}
+                    {filters.languages.length > 0 && (
+                      <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-primary-600 rounded-full">
+                        {filters.languages.length}
+                      </span>
+                    )}
+                  </span>
+                  <svg
+                    className={`w-5 h-5 transition-transform ${expandedSections.languages ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {expandedSections.languages && (
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {availableLanguages
+                      .sort((a, b) => {
+                        // Sort selected languages to the top
+                        const aSelected = filters.languages.includes(a.code);
+                        const bSelected = filters.languages.includes(b.code);
+                        if (aSelected && !bSelected) return -1;
+                        if (!aSelected && bSelected) return 1;
+                        // Keep alphabetical order within selected/unselected groups
+                        return (i18n.language === 'nl' ? a.name_native : a.name_en)
+                          .localeCompare(i18n.language === 'nl' ? b.name_native : b.name_en);
+                      })
+                      .slice(0, expandedSections.languages ? 15 : 5)
+                      .map((lang) => (
+                    <label key={lang.code} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={filters.languages.includes(lang.code)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            updateFilters({ languages: [...filters.languages, lang.code] });
+                          } else {
+                            updateFilters({ languages: filters.languages.filter(l => l !== lang.code) });
+                          }
+                        }}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <img 
+                        src={`https://flagcdn.com/24x18/${lang.code === 'en' ? 'gb' : lang.code === 'ar' ? 'sa' : lang.code === 'zgh' ? 'ma' : lang.code === 'uk' ? 'ua' : lang.code === 'zh' ? 'cn' : lang.code === 'yue' ? 'hk' : lang.code === 'ti' ? 'er' : lang.code === 'so' ? 'so' : lang.code === 'hi' ? 'in' : lang.code}.png`}
+                        alt={`${lang.code} flag`}
+                        className="w-4 h-3 object-cover rounded-sm"
+                      />
+                      <span className="text-sm text-gray-700">
+                        {i18n.language === 'nl' ? lang.name_native : lang.name_en}
+                      </span>
+                    </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Category Filter */}
+              <div className="mb-6">
+                <button
+                  type="button"
+                  onClick={() => toggleSection('categories')}
+                  className="w-full flex items-center justify-between py-2 text-left hover:text-primary-600 transition-colors"
+                >
+                  <span className="label flex items-center">
+                    {t('search.categories')}
+                    {filters.categories.length > 0 && (
+                      <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-primary-600 rounded-full">
+                        {filters.categories.length}
+                      </span>
+                    )}
+                  </span>
+                  <svg
+                    className={`w-5 h-5 transition-transform ${expandedSections.categories ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {expandedSections.categories && (
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {availableCategories.filter(cat => !cat.parent_id).slice(0, 10).map((category) => (
+                    <label key={category.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={filters.categories.includes(category.id.toString())}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            updateFilters({ categories: [...filters.categories, category.id.toString()] });
+                          } else {
+                            updateFilters({ categories: filters.categories.filter(c => c !== category.id.toString()) });
+                          }
+                        }}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700">
+                        {category.icon && <span className="mr-2">{category.icon}</span>}
+                        {i18n.language === 'nl' ? category.name_nl : category.name_en}
+                      </span>
+                    </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Active Filters */}
+              {(filters.languages.length > 0 || filters.categories.length > 0 || filters.mode || filters.city) && (
+                <div className="pt-4 border-t border-gray-100">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Active Filters</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {filters.languages.map((lang) => (
+                      <Badge key={lang} variant="primary" size="sm" className="cursor-pointer" onClick={() => updateFilters({ languages: filters.languages.filter(l => l !== lang) })}>
+                        {lang}
+                        <span className="ml-1">×</span>
+                      </Badge>
+                    ))}
+                    {filters.categories.map((catId) => {
+                      const category = availableCategories.find(c => c.id.toString() === catId);
+                      return category ? (
+                        <Badge key={catId} variant="primary" size="sm" className="cursor-pointer" onClick={() => updateFilters({ categories: filters.categories.filter(c => c !== catId) })}>
+                          {i18n.language === 'nl' ? category.name_nl : category.name_en}
+                          <span className="ml-1">×</span>
+                        </Badge>
+                      ) : null;
+                    })}
+                    {filters.city && (
+                      <Badge variant="secondary" size="sm" className="cursor-pointer" onClick={() => updateFilters({ city: '' })}>
+                        {filters.city}
+                        <span className="ml-1">×</span>
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Apply Button */}
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <Button 
+                  onClick={() => setMobileFiltersOpen(false)}
+                  className="w-full"
+                >
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
