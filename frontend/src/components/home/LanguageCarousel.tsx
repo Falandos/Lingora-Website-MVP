@@ -12,36 +12,11 @@ interface LanguageCarouselProps {
   className?: string;
   interval?: number; // milliseconds between language changes
   renderWithTitle?: (currentLanguage: Language) => React.ReactNode;
+  onLanguageClick?: (languageCode: string) => void;
 }
 
-export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTitle }: LanguageCarouselProps) => {
-  const { currentLanguage, currentIndex, isVisible, setIsPaused } = useLanguageRotation(interval);
-  
-  // Track previous index for smooth infinite loop transitions
-  const [previousIndex, setPreviousIndex] = useState(currentIndex);
-  const [visualIndex, setVisualIndex] = useState(currentIndex);
-  const [isResetting, setIsResetting] = useState(false);
-  
-  // Update visual index with smart wrap-around handling
-  useEffect(() => {
-    const isWrapAround = previousIndex === languages.length - 1 && currentIndex === 0;
-    
-    if (isWrapAround) {
-      // Continue to the duplicate position instead of jumping
-      setVisualIndex(languages.length); // Position 15, which is duplicate Nederlands
-      
-      // After transition, reset to the real position invisibly
-      setTimeout(() => {
-        setIsResetting(true);
-        setVisualIndex(0);
-        setTimeout(() => setIsResetting(false), 50); // Brief disable of transition
-      }, 500); // Match transition duration
-    } else {
-      setVisualIndex(currentIndex);
-    }
-    
-    setPreviousIndex(currentIndex);
-  }, [currentIndex, previousIndex]);
+export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTitle, onLanguageClick }: LanguageCarouselProps) => {
+  const { currentLanguage, currentIndex, isVisible, setIsPaused, goToNext, goToPrevious, goToLanguage } = useLanguageRotation(interval);
 
   // Get dynamic height based on language script - Hindi needs extra space
   const getHeightForLanguage = (langCode: string): string => {
@@ -87,39 +62,57 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
       return `rgb(${lightR}, ${lightG}, ${lightB})`;
     };
     
-    // Create infinite loop by duplicating languages with large buffer for seamless transitions
+    // Create proper infinite loop by duplicating languages at both ends
     const extendedLanguages = [
-      ...languages.slice(-5), // Last 5 languages at the beginning
-      ...languages, // All languages
-      ...languages, // Duplicate all languages again for smoother infinite loop
-      ...languages.slice(0, 5) // First 5 languages at the end
+      ...languages.slice(-3), // Last 3 languages at the beginning (buffer)
+      ...languages, // All languages 
+      ...languages.slice(0, 3) // First 3 languages at the end (buffer)
     ];
     
-    const adjustedIndex = visualIndex + 5; // Use visualIndex for smooth transitions
+    const adjustedIndex = currentIndex + 3; // Offset by buffer size
     
     return (
       <div 
-        className={`relative overflow-hidden ${className}`}
+        className={`relative flex items-center ${className}`}
         style={{ 
-          width: '700px',
+          width: '800px', // Wider to accommodate buttons
           height: getHeightForLanguage(currentLanguage.code),
           margin: '0 auto'
         }}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-        role="status"
-        aria-live="polite"
-        aria-label={`Currently showing language: ${currentLanguage.native}`}
-        title={`Language: ${currentLanguage.native}`}
       >
-        {/* Sliding Languages Container */}
+        {/* Left Navigation Arrow */}
+        <button
+          onClick={goToPrevious}
+          className="w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 mr-4"
+          title="Previous language"
+        >
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        {/* Carousel Container */}
         <div 
-          className={`flex items-center ${isResetting ? '' : 'transition-transform duration-500'}`}
+          className="relative overflow-hidden flex-1"
+          style={{ 
+            width: '700px',
+            height: getHeightForLanguage(currentLanguage.code)
+          }}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          role="status"
+          aria-live="polite"
+          aria-label={`Currently showing language: ${currentLanguage.native}`}
+          title={`Language: ${currentLanguage.native}`}
+        >
+          {/* Sliding Languages Container */}
+        <div 
+          className="flex items-center transition-transform duration-500"
           style={{
             transform: `translateX(${-adjustedIndex * itemWidth + centerOffset - itemWidth / 2}px)`, // Center the current item
             width: `${extendedLanguages.length * itemWidth}px`,
             willChange: 'transform', // Optimize for animations
-            transitionTimingFunction: isResetting ? 'none' : 'cubic-bezier(0.4, 0, 0.2, 1)' // Disable during reset
+            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
           {extendedLanguages.map((lang, index) => {
@@ -141,7 +134,7 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
               >
                 {isCurrent ? (
                   <div 
-                    className="flex items-center"
+                    className="flex items-center cursor-pointer"
                     style={{
                       alignItems: lang.code === 'hi' ? 'center' : 'center',
                       transform: lang.code === 'hi' ? 'translateY(5px)' : 'translateY(0px)',
@@ -149,27 +142,52 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
                       display: 'flex',
                       justifyContent: 'center'
                     }}
+                    onClick={() => {
+                      if (onLanguageClick) {
+                        onLanguageClick(lang.code);
+                      }
+                    }}
                   >
-                    <span style={{ margin: '0 12px', color: 'rgb(209, 213, 219)', fontSize: '16px' }}>•</span>
                     {renderWithTitle(lang)}
-                    <span style={{ margin: '0 12px', color: 'rgb(209, 213, 219)', fontSize: '16px' }}>•</span>
                   </div>
                 ) : (
-                  <div className="flex items-center">
-                    <span style={{ margin: '0 8px', color: 'rgb(209, 213, 219)', fontSize: '12px', opacity: '0.3' }}>•</span>
+                  <div 
+                    className="flex items-center cursor-pointer hover:opacity-75 transition-opacity"
+                    onClick={() => {
+                      // Find the real language index (not extended array index)
+                      const realIndex = languages.findIndex(l => l.code === lang.code);
+                      if (realIndex !== -1) {
+                        goToLanguage(realIndex);
+                        if (onLanguageClick) {
+                          onLanguageClick(lang.code);
+                        }
+                      }
+                    }}
+                  >
                     <div 
                       className="language-text-shadow" 
                       style={{ color: lightenColor(lang.color) }}
                     >
                       {lang.native}
                     </div>
-                    <span style={{ margin: '0 8px', color: 'rgb(209, 213, 219)', fontSize: '12px', opacity: '0.3' }}>•</span>
                   </div>
                 )}
               </div>
             );
           })}
         </div>
+        </div>
+
+        {/* Right Navigation Arrow */}
+        <button
+          onClick={goToNext}
+          className="w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 ml-4"
+          title="Next language"
+        >
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
       </div>
     );
   }

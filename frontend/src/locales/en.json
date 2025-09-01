@@ -276,20 +276,20 @@
     "subtitle": "Whether you're seeking professional services or offering them, we've made your journey simple and effective.",
     "find_professional": {
       "title": "Find Your Professional",
-      "step_1": "Search by service and language",
-      "step_2": "Connect with verified professionals", 
-      "step_3": "Book your appointment or service",
+      "step_1": "Search in your language",
+      "step_2": "Favorite providers & send direct messages", 
+      "step_3": "Become part of the multilingual Dutch community",
       "cta": "Start Searching",
       "free_note": "✨ Always free for users"
     },
     "grow_business": {
       "title": "Grow Your Business",
-      "popular": "Most Popular",
+      "popular": "Try for Free",
       "benefit_1": "Reach multilingual clients who need your services",
-      "benefit_2": "Get verified through our KVK/BTW validation system",
-      "benefit_3": "Easy setup with AI-powered profile optimization",
-      "trial_offer": "3 Months FREE",
-      "trial_subtitle": "Complete trial period",
+      "benefit_2": "Solve societal issues while doing good",
+      "benefit_3": "100% free to use and try",
+      "trial_offer": "Premium Features",
+      "trial_subtitle": "Full access included",
       "cta": "Start 3 Months FREE",
       "pricing": "Then only €9.99/month • Cancel anytime"
     },

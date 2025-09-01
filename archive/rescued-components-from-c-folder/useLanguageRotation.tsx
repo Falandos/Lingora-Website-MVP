@@ -32,9 +32,6 @@ export interface UseLanguageRotationReturn {
   isVisible: boolean;
   isPaused: boolean;
   setIsPaused: (paused: boolean) => void;
-  goToNext: () => void;
-  goToPrevious: () => void;
-  goToLanguage: (index: number) => void;
 }
 
 // Global singleton state for synchronized rotation
@@ -80,10 +77,23 @@ class LanguageRotationManager {
     this.timer = setInterval(() => {
       if (this.isPaused) return;
       
-      // For timer-based transitions, just increment normally
-      // The component will handle the seamless display using the buffer system
-      this.currentIndex = (this.currentIndex + 1) % languages.length;
+      this.isVisible = false;
       this.notifySubscribers();
+      
+      setTimeout(() => {
+        const nextIndex = (this.currentIndex + 1) % languages.length;
+        
+        // Add extra delay when transitioning from last to first (infinite loop)
+        const isInfiniteLoopTransition = this.currentIndex === languages.length - 1 && nextIndex === 0;
+        const transitionDelay = isInfiniteLoopTransition ? 100 : 0;
+        
+        setTimeout(() => {
+          this.currentIndex = nextIndex;
+          this.isVisible = true;
+          this.notifySubscribers();
+        }, transitionDelay);
+        
+      }, 500); // Match LanguageCarousel's 500ms transition timing
       
     }, this.interval);
   }
@@ -114,24 +124,6 @@ class LanguageRotationManager {
   setIsPaused(paused: boolean) {
     this.isPaused = paused;
     this.notifySubscribers();
-  }
-
-  // Manual navigation methods - direct transitions, let component handle smoothness
-  goToNext() {
-    this.currentIndex = (this.currentIndex + 1) % languages.length;
-    this.notifySubscribers();
-  }
-
-  goToPrevious() {
-    this.currentIndex = (this.currentIndex - 1 + languages.length) % languages.length;
-    this.notifySubscribers();
-  }
-
-  goToLanguage(index: number) {
-    if (index >= 0 && index < languages.length && index !== this.currentIndex) {
-      this.currentIndex = index;
-      this.notifySubscribers();
-    }
   }
 
   // Reset function to ensure clean state
@@ -171,10 +163,7 @@ export const useLanguageRotation = (_interval: number = 2500): UseLanguageRotati
     currentIndex,
     isVisible,
     isPaused,
-    setIsPaused: (paused: boolean) => rotationManager.setIsPaused(paused),
-    goToNext: () => rotationManager.goToNext(),
-    goToPrevious: () => rotationManager.goToPrevious(),
-    goToLanguage: (index: number) => rotationManager.goToLanguage(index)
+    setIsPaused: (paused: boolean) => rotationManager.setIsPaused(paused)
   };
 };
 

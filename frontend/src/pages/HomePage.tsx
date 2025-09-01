@@ -13,6 +13,7 @@ import StickySearchBar from '../components/home/StickySearchBar';
 import BackToTopButton from '../components/ui/BackToTopButton';
 import LanguageCarousel from '../components/home/LanguageCarousel';
 import HowItWorksModal from '../components/home/HowItWorksModal';
+import LanguageSwitchSuggestion from '../components/search/LanguageSwitchSuggestion';
 
 interface Language {
   code: string;
@@ -39,6 +40,8 @@ const HomePage = () => {
     location: '',
   });
   const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
+  const [showLanguageSwitchSuggestion, setShowLanguageSwitchSuggestion] = useState(false);
+  const [suggestedLanguage, setSuggestedLanguage] = useState<string>('');
 
   useEffect(() => {
     // Fetch categories for the popular categories section
@@ -80,6 +83,25 @@ const HomePage = () => {
 
   const currentLang = i18n.language;
 
+  const handleLanguageClick = (languageCode: string) => {
+    // Don't show suggestion if user clicked the same language as UI
+    if (languageCode === currentLang) return;
+    
+    setSuggestedLanguage(languageCode);
+    setShowLanguageSwitchSuggestion(true);
+  };
+
+  const handleLanguageSwitch = () => {
+    if (suggestedLanguage) {
+      i18n.changeLanguage(suggestedLanguage);
+    }
+    setShowLanguageSwitchSuggestion(false);
+  };
+
+  const handleLanguageSwitchDismiss = () => {
+    setShowLanguageSwitchSuggestion(false);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Sticky Search Bar */}
@@ -115,6 +137,7 @@ const HomePage = () => {
                     <div className="min-h-[1.2em] flex items-center justify-center">
                       <LanguageCarousel 
                         className="language-text-shadow" 
+                        onLanguageClick={handleLanguageClick}
                         renderWithTitle={(currentLanguage) => (
                           <div 
                             className="language-text-shadow" 
@@ -160,6 +183,16 @@ const HomePage = () => {
         isOpen={showHowItWorksModal}
         onClose={() => setShowHowItWorksModal(false)}
       />
+      
+      {/* Language Switch Suggestion */}
+      {showLanguageSwitchSuggestion && (
+        <LanguageSwitchSuggestion
+          detectedLanguage={suggestedLanguage}
+          currentUILanguage={currentLang}
+          onAccept={handleLanguageSwitch}
+          onDismiss={handleLanguageSwitchDismiss}
+        />
+      )}
     </div>
   );
 };
