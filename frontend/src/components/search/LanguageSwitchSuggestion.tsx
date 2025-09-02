@@ -115,7 +115,7 @@ const LanguageSwitchSuggestion: React.FC<LanguageSwitchSuggestionProps> = ({
   };
 
   return (
-    <div className="fixed top-24 right-6 z-50 animate-slide-in-right">
+    <div className="fixed bottom-6 right-6 z-50 animate-slide-in-up md:bottom-8 md:right-8">
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm">
         <div className="flex items-start space-x-3">
           {/* Language Icon */}

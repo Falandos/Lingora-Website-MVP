@@ -1,4 +1,4 @@
-# Work in Progress - Session September 1, 2025
+# Work in Progress - Session September 2, 2025
 *Real-time tracking of uncommitted changes and test status*
 
 ## HOMEPAGE PHASE COMPLETE - SESSION HANDOVER ✅
@@ -276,5 +276,139 @@
 - Fixed development server syntax issues
 - Search page completion increased from 70% to 85%
 
+## CRITICAL RECURRING ISSUE DOCUMENTATION - SEPTEMBER 2, 2025 🚨
+
+### 10. SEMANTIC SEARCH CORRUPTION ISSUE DOCUMENTED
+**Status**: CRITICAL DOCUMENTATION COMPLETE ✅
+**Files Modified**:
+- `C:/Cursor/Lingora/active/technical-development.md`
+
+**Problem Addressed**:
+- **RECURRING CRITICAL ISSUE**: Semantic search service corruption after 12+ hours runtime
+- Symptoms: Health check reports "healthy" but search queries return `{"error":"[Errno 22] Invalid argument","success":false}`
+- Has happened multiple times during development
+- Previously undocumented, causing repeated debugging sessions
+
+**Changes Implemented**:
+- **CRITICAL ISSUE #1**: Added comprehensive documentation of the semantic search service corruption
+- **PROVEN SOLUTION**: Step-by-step fix procedure (kill corrupted service, restart fresh)
+- **TROUBLESHOOTING CHECKLIST**: Priority-ordered debugging steps for semantic search failures
+- **PREVENTION STRATEGIES**: Daily restart recommendations, monitoring suggestions
+- **ENHANCED STRUCTURE**: Reorganized AI troubleshooting section with clear issue prioritization
+
+**Key Documentation Added**:
+```
+### 🔴 CRITICAL ISSUE #1: Semantic Search Service Corruption (RECURRING)
+- Root cause: Python embedding service corrupts after 12+ hours
+- Solution: Kill corrupted process, restart fresh embedding service
+- Verification: Test actual search queries, not just health endpoint
+```
+
+**Test Status**: ✅ DOCUMENTATION COMPLETE AND ACCESSIBLE
+- Issue now permanently documented in technical-development.md
+- Clear step-by-step resolution procedure available
+- Troubleshooting checklist provides priority-based debugging approach
+- Future developers will have immediate access to proven solution
+
+**Impact**:
+- **PREVENTS**: Hours of debugging time on recurring issue
+- **PROVIDES**: Instant solution access for future occurrences
+- **PROTECTS**: Developer productivity and project momentum
+- **DOCUMENTS**: Critical institutional knowledge for team
+
+## MAJOR FEATURE COMPLETE: CONSISTENT LANGUAGE ORDERING SYSTEM ✅
+
+### 11. SMART DYNAMIC LANGUAGE ORDERING IMPLEMENTATION
+**Status**: COMPLETE AND TESTED ✅
+**Date**: September 2, 2025
+**Files Modified**:
+- `C:\xampp\htdocs\lingora\backend\api\languages\index.php` - Production API
+- `C:\cursor\lingora\backend\api\languages\index.php` - Development API sync
+- `C:\cursor\lingora\frontend\src\hooks\useLanguageRotation.tsx` - Dynamic API fetching
+- `C:\cursor\lingora\frontend\src\pages\SearchPage.tsx` - API integration & sort fix
+- `C:\cursor\lingora\frontend\src\components\home\LanguageCarousel.tsx` - Loading states
+
+**Changes**:
+- **Context-aware ordering**: Current UI language always appears first
+- **Priority system**: Most-used languages in Netherlands (Dutch, English, Turkish, Arabic) prioritized
+- **Scalable architecture**: Remaining languages appear alphabetically, easy to add new ones
+- **Cross-platform consistency**: Same order across homepage carousel and search filters
+- **Enhanced API**: Updated `/api/languages` endpoint with `ui_lang` parameter and dynamic SQL ordering
+- **Frontend synchronization**: Homepage carousel now fetches from API, search filters properly integrated
+- **Robust error handling**: Added loading states, fallback languages, and graceful degradation
+
+**Major Bug Fixes**:
+- Fixed white screen crash from `Cannot read properties of undefined (reading 'code')`
+- Added fallback languages and loading guards for graceful degradation
+- Fixed timer logic to prevent errors when languages array is empty
+- Removed conflicting alphabetical sort that was overriding API order
+
+**Test Status**: ✅ FULLY TESTED AND WORKING
+- English UI: `en → ar → nl → tr → [others alphabetically]`
+- Dutch UI: `nl → ar → en → tr → [others alphabetically]`
+- Consistent across homepage carousel and search filters
+- Dynamic adaptation when switching UI languages
+- Graceful loading and error handling
+- No crashes or white screens during loading
+
+**User Experience Impact**:
+- **Predictable**: Language order is now consistent and logical across entire app
+- **Personalized**: Current UI language always visible first for immediate relevance
+- **Smooth**: No more crashes or loading failures
+- **Scalable**: Easy to add new languages without breaking the system
+- **Professional**: Cohesive, user-friendly language selection experience
+
+## UI LANGUAGE SWITCH LOGIC FIX - MAJOR COMPLETION ✅
+
+### 12. SMART LANGUAGE DETECTION SYSTEM IMPLEMENTATION
+**Status**: COMPLETE AND TESTED ✅
+**Date**: September 2, 2025
+**Files Modified**:
+- `C:\xampp\htdocs\lingora\backend\services\LanguageDetector.php` - Production backend
+- `C:\cursor\lingora\frontend\src\pages\SearchPage.tsx` - Frontend integration
+
+**Changes**:
+- **Problem Solved**: Fixed issue where typing "turkish" in English UI incorrectly triggered Turkish UI switch popup
+- **Root Cause Resolution**: System was confusing language filter searches with typing IN that language
+- **Enhanced Backend**: Added `containsLanguageNames()` method to detect language names in current UI language
+- **Modified Detection Logic**: Updated `detectTypedLanguage()` to accept UI language parameter for context-aware decisions
+- **Frontend Integration**: Added `ui_lang` parameter to search API requests for proper backend context
+- **Smart Logic Implementation**: Language filter searches → `typed_language: null`; Foreign word usage → `typed_language: detected_lang`
+
+**Technical Implementation**:
+```php
+// New containsLanguageNames() method detects language names in UI language
+// Modified detectTypedLanguage() accepts ui_lang parameter
+// Smart logic: "turkish" in English → null (filter search)
+// Smart logic: "dokter" in English → "nl" (typing in Dutch)
+```
+
+**Test Status**: ✅ COMPREHENSIVE TESTING COMPLETE
+- ✅ "turkish" in English UI: No popup (correct - searching FOR Turkish services)
+- ✅ "dokter" in English UI: Dutch UI switch suggested (correct - typing IN Dutch) 
+- ✅ "avocat" in English UI: French UI switch suggested (correct - typing IN French)
+- ✅ Context-aware suggestions that understand user intent
+- ✅ Zero false positives for language filter searches
+- ✅ Enhanced UX with intelligent, non-disruptive suggestions
+
+**User Experience Impact**:
+- **Enhanced UX**: Smart language detection that understands user intent
+- **Reduced False Positives**: No more incorrect UI switch suggestions for language filters
+- **Scalable Solution**: Works for all language combinations across the platform
+- **Search Page Advancement**: Completed from 90% to 95% - ready for final polish
+
+## READY FOR GIT COMMIT ✅
+
+**STATUS**: MAJOR FEATURE COMPLETION - ALL CRITERIA MET
+- ✅ UI Language Switch Logic Fix fully implemented and tested
+- ✅ Backend enhancement with smart language detection logic
+- ✅ Frontend integration with UI language context parameter
+- ✅ Comprehensive testing across all language scenarios completed
+- ✅ No breaking changes introduced
+- ✅ Search page functionality at 95% completion
+- ✅ User explicitly confirmed feature is working correctly
+
+**Commit Summary**: Major UI Language Switch Logic Fix implementing smart language detection that distinguishes between language filter searches vs foreign word usage, eliminating false positive UI switch suggestions while maintaining intelligent language switching recommendations.
+
 ---
-*Last Updated: September 1, 2025 - Search Page Language Filters Complete, 85% Overall Completion*
+*Last Updated: September 2, 2025 - UI Language Switch Logic Fix Complete and Ready for Commit*

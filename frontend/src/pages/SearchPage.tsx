@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/Button';
@@ -80,6 +80,9 @@ const SearchPage = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
+  
+  // Refs for click-outside detection
+  const searchDropdownRef = useRef<HTMLDivElement>(null);
 
   // Initialize filters with URL params taking priority over localStorage
   const initializeFilters = (): SearchFilters => {
@@ -220,7 +223,7 @@ const SearchPage = () => {
     const fetchFilterData = async () => {
       try {
         const [languagesRes, categoriesRes] = await Promise.all([
-          fetch('/api/languages'),
+          fetch(`/api/languages?ui_lang=${i18n.language}`),
           fetch('/api/categories'),
         ]);
 
@@ -248,7 +251,7 @@ const SearchPage = () => {
 
     fetchFilterData();
     fetchAllProviders(); // Fetch all providers for map
-  }, []);
+  }, [i18n.language]);
 
   // PLACEHOLDER: Mock filtering logic - will be replaced with API calls in production
   const applyLocalFilters = (rawResults: any[]) => {
@@ -632,7 +635,7 @@ const SearchPage = () => {
     }
   };
 
-  // Search autocomplete functionality
+  // Search autocomplete functionality with smart suggestions
   const fetchSearchSuggestions = async (query: string) => {
     if (!query || query.length < 2) {
       setSearchSuggestions([]);
@@ -642,33 +645,32 @@ const SearchPage = () => {
     
     setIsSearching(true);
     try {
-      // For now, generate mock suggestions based on the query
-      // In production, this would be an API call to get actual suggestions
-      const mockSuggestions = [
-        `${query} dokter`,
-        `${query} arts`,
-        `${query} tandarts`,
-        `${query} psycholoog`,
-        `${query} fysiotherapeut`,
-      ].filter(suggestion => suggestion !== query);
+      // Call the smart suggestions API
+      const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
       
-      // Also add some popular searches
-      const popularSearches = [
-        'Nederlandse dokter',
-        'Turkse arts',
-        'Psycholoog Amsterdam',
-        'Tandarts Rotterdam',
-        'Huisarts Utrecht'
-      ].filter(search => search.toLowerCase().includes(query.toLowerCase()));
-      
-      const allSuggestions = [...mockSuggestions, ...popularSearches].slice(0, 6);
-      
-      setSearchSuggestions(allSuggestions);
-      setShowSuggestions(allSuggestions.length > 0);
+      if (response.ok) {
+        const result = await response.json();
+        const suggestions = result.suggestions || [];
+        
+        setSearchSuggestions(suggestions);
+        setShowSuggestions(suggestions.length > 0);
+      } else {
+        // Fallback to empty suggestions if API fails
+        setSearchSuggestions([]);
+        setShowSuggestions(false);
+      }
     } catch (error) {
       console.error('Error fetching search suggestions:', error);
-      setSearchSuggestions([]);
-      setShowSuggestions(false);
+      // Fallback to basic suggestions if API fails
+      const basicSuggestions = [
+        `turkse advocaat`,
+        `nederlandse dokter`,
+        `${query} amsterdam`,
+        `${query} rotterdam`
+      ].filter(suggestion => suggestion !== query).slice(0, 4);
+      
+      setSearchSuggestions(basicSuggestions);
+      setShowSuggestions(basicSuggestions.length > 0);
     } finally {
       setIsSearching(false);
     }
@@ -682,6 +684,24 @@ const SearchPage = () => {
     
     return () => clearTimeout(timer);
   }, [filters.keyword]);
+
+  // Click-outside detection for search suggestions dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchDropdownRef.current && !searchDropdownRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+        setSelectedSuggestionIndex(-1);
+      }
+    };
+
+    if (showSuggestions) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSuggestions]);
 
   // Handle search input key navigation
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
@@ -748,7 +768,7 @@ const SearchPage = () => {
         <div className="container-custom py-6">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             <div className="flex-1 w-full">
-              <div className="relative">
+              <div className="relative" ref={searchDropdownRef}>
                 <input
                   type="text"
                   placeholder={t('header.search_placeholder')}
@@ -762,10 +782,6 @@ const SearchPage = () => {
                     if (searchSuggestions.length > 0) {
                       setShowSuggestions(true);
                     }
-                  }}
-                  onBlur={() => {
-                    // Delay hiding suggestions to allow clicking on them
-                    setTimeout(() => setShowSuggestions(false), 150);
                   }}
                   className="input-field w-full pl-12 pr-16 lg:pr-4"
                   autoComplete="off"
@@ -913,9 +929,8 @@ const SearchPage = () => {
                           const bSelected = filters.languages.includes(b.code);
                           if (aSelected && !bSelected) return -1;
                           if (!aSelected && bSelected) return 1;
-                          // Keep alphabetical order within selected/unselected groups
-                          return (i18n.language === 'nl' ? a.name_native : a.name_en)
-                            .localeCompare(i18n.language === 'nl' ? b.name_native : b.name_en);
+                          // Keep original API order (smart ordering)
+                          return 0;
                         })
                         .slice(0, expandedSections.languages ? 15 : 5)
                         .map((lang) => {
@@ -1433,9 +1448,8 @@ const SearchPage = () => {
                         const bSelected = filters.languages.includes(b.code);
                         if (aSelected && !bSelected) return -1;
                         if (!aSelected && bSelected) return 1;
-                        // Keep alphabetical order within selected/unselected groups
-                        return (i18n.language === 'nl' ? a.name_native : a.name_en)
-                          .localeCompare(i18n.language === 'nl' ? b.name_native : b.name_en);
+                        // Keep original API order (smart ordering)
+                        return 0;
                       })
                       .slice(0, expandedSections.languages ? 15 : 5)
                       .map((lang) => {

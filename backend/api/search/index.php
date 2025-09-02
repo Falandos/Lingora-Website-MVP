@@ -1,7 +1,13 @@
 <?php
 // Search API endpoint
 
-global $method, $database, $jwt;
+global $method, $action, $database, $jwt;
+
+// Route to suggestions endpoint if action is 'suggestions'
+if ($action === 'suggestions') {
+    require_once 'suggestions/index.php';
+    return;
+}
 
 // Function to get coordinates for a city name
 function getCityCoordinates($city) {
@@ -57,10 +63,18 @@ $params = [];
 
 // Join tables as needed
 if (!empty($languages)) {
-    $joins .= " LEFT JOIN provider_languages pl ON p.id = pl.provider_id";
+    // Use AND logic to find providers with ALL of the selected languages
     $placeholders = str_repeat('?,', count($languages) - 1) . '?';
-    $where .= " AND pl.language_code IN ($placeholders)";
+    $languageCount = count($languages);
+    $where .= " AND p.id IN (
+        SELECT pl.provider_id 
+        FROM provider_languages pl 
+        WHERE pl.language_code IN ($placeholders)
+        GROUP BY pl.provider_id
+        HAVING COUNT(DISTINCT pl.language_code) = ?
+    )";
     $params = array_merge($params, $languages);
+    $params[] = $languageCount;
 }
 
 if (!empty($categories)) {

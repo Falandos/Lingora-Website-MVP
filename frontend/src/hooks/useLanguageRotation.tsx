@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Language {
   code: string;
@@ -7,24 +8,30 @@ interface Language {
   rtl?: boolean;
 }
 
-// All 15 available languages (same as LanguageCarousel)
-const languages: Language[] = [
-  { code: 'nl', native: 'Nederlands', color: '#FF6B35' }, // Dutch orange
-  { code: 'en', native: 'English', color: '#3B82F6' }, // Classic blue
-  { code: 'ar', native: 'العربية', color: '#059669', rtl: true }, // Arabic green
-  { code: 'de', native: 'Deutsch', color: '#DC2626' }, // German red
-  { code: 'es', native: 'Español', color: '#FBBF24' }, // Spanish yellow
-  { code: 'fr', native: 'Français', color: '#6366F1' }, // French indigo
-  { code: 'pl', native: 'Polski', color: '#EF4444' }, // Polish red
-  { code: 'uk', native: 'Українська', color: '#0EA5E9' }, // Ukrainian blue
-  { code: 'zh-Hans', native: '中文', color: '#DC2626' }, // Chinese red
-  { code: 'tr', native: 'Türkçe', color: '#059669' }, // Turkish green
-  { code: 'hi', native: 'हिन्दी', color: '#F97316' }, // Hindi orange
-  { code: 'so', native: 'Soomaali', color: '#06B6D4' }, // Somali cyan
-  { code: 'ti', native: 'ትግርኛ', color: '#8B5CF6' }, // Tigrinya purple
-  { code: 'yue', native: '廣東話', color: '#EC4899' }, // Cantonese pink
-  { code: 'zgh', native: 'ⵜⴰⵎⴰⵣⵉⵖⵜ', color: '#10B981' } // Berber green
-];
+// Color mapping for languages (keeping visual consistency)
+const languageColors: Record<string, string> = {
+  'nl': '#FF6B35', // Dutch orange
+  'en': '#3B82F6', // Classic blue
+  'ar': '#059669', // Arabic green
+  'de': '#DC2626', // German red
+  'es': '#FBBF24', // Spanish yellow
+  'fr': '#6366F1', // French indigo
+  'pl': '#EF4444', // Polish red
+  'uk': '#0EA5E9', // Ukrainian blue
+  'zh-Hans': '#DC2626', // Chinese red
+  'tr': '#059669', // Turkish green
+  'hi': '#F97316', // Hindi orange
+  'so': '#06B6D4', // Somali cyan
+  'ti': '#8B5CF6', // Tigrinya purple
+  'yue': '#EC4899', // Cantonese pink
+  'zgh': '#10B981' // Berber green
+};
+
+// RTL languages
+const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+
+// Initialize with empty array - will be fetched from API
+let languages: Language[] = [];
 
 export interface UseLanguageRotationReturn {
   currentLanguage: Language;
@@ -46,6 +53,50 @@ class LanguageRotationManager {
   private timer: NodeJS.Timeout | null = null;
   private interval: number = 4500;
   private initialized: boolean = false;
+  private languagesLoaded: boolean = false;
+  private currentUILanguage: string = 'en';
+
+  // Fetch languages from API with UI language ordering
+  private async fetchLanguages(uiLanguage: string = 'en'): Promise<void> {
+    try {
+      const response = await fetch(`/api/languages?ui_lang=${uiLanguage}`);
+      if (response.ok) {
+        const apiLanguages = await response.json();
+        
+        // Convert API format to our Language interface
+        languages = apiLanguages.map((lang: any) => ({
+          code: lang.code,
+          native: lang.name_native,
+          color: languageColors[lang.code] || '#6B7280', // Default gray if color not found
+          rtl: rtlLanguages.includes(lang.code)
+        }));
+        
+        this.languagesLoaded = true;
+        this.currentUILanguage = uiLanguage;
+        
+        // Notify subscribers that languages are loaded
+        this.notifySubscribers();
+      }
+    } catch (error) {
+      console.error('Failed to fetch languages:', error);
+      // Fallback to basic languages if API fails
+      languages = [
+        { code: 'nl', native: 'Nederlands', color: '#FF6B35' },
+        { code: 'en', native: 'English', color: '#3B82F6' },
+        { code: 'tr', native: 'Türkçe', color: '#059669' },
+        { code: 'ar', native: 'العربية', color: '#059669', rtl: true }
+      ];
+      this.languagesLoaded = true;
+      this.notifySubscribers();
+    }
+  }
+
+  // Update languages when UI language changes
+  public async updateUILanguage(uiLanguage: string): Promise<void> {
+    if (uiLanguage !== this.currentUILanguage) {
+      await this.fetchLanguages(uiLanguage);
+    }
+  }
 
   subscribe(callback: () => void) {
     this.subscribers.add(callback);
@@ -56,12 +107,15 @@ class LanguageRotationManager {
       this.currentIndex = 0;
       this.isVisible = true;
       
-      // Add delay to ensure smooth initial render and prevent first/last overlap
-      setTimeout(() => {
-        this.startTimer();
-      }, 200);
-    } else if (this.subscribers.size === 1) {
-      // Start timer if this is the first subscriber after initialization
+      // Fetch languages before starting timer
+      this.fetchLanguages().then(() => {
+        // Add delay to ensure smooth initial render
+        setTimeout(() => {
+          this.startTimer();
+        }, 200);
+      });
+    } else if (this.subscribers.size === 1 && this.languagesLoaded) {
+      // Start timer if this is the first subscriber after initialization and languages are loaded
       this.startTimer();
     }
     
@@ -76,9 +130,10 @@ class LanguageRotationManager {
 
   private startTimer() {
     if (this.timer) return;
+    if (languages.length === 0) return; // Don't start timer if no languages loaded
     
     this.timer = setInterval(() => {
-      if (this.isPaused) return;
+      if (this.isPaused || languages.length === 0) return;
       
       // For timer-based transitions, just increment normally
       // The component will handle the seamless display using the buffer system
@@ -149,6 +204,7 @@ class LanguageRotationManager {
 const rotationManager = new LanguageRotationManager();
 
 export const useLanguageRotation = (_interval: number = 2500): UseLanguageRotationReturn => {
+  const { i18n } = useTranslation();
   const [, forceUpdate] = useState(0);
 
   // Force re-render when state changes
@@ -161,10 +217,24 @@ export const useLanguageRotation = (_interval: number = 2500): UseLanguageRotati
     return unsubscribe;
   }, [updateComponent]);
 
+  // Update languages when UI language changes
+  useEffect(() => {
+    if (i18n.language) {
+      rotationManager.updateUILanguage(i18n.language);
+    }
+  }, [i18n.language]);
+
   const currentIndex = rotationManager.getCurrentIndex();
   const isVisible = rotationManager.getIsVisible();
   const isPaused = rotationManager.getIsPaused();
-  const currentLanguage = languages[currentIndex];
+  
+  // Provide fallback language when languages haven't loaded yet
+  const currentLanguage = languages[currentIndex] || {
+    code: 'en',
+    native: 'Loading...',
+    color: '#3B82F6',
+    rtl: false
+  };
 
   return {
     currentLanguage,

@@ -6,13 +6,25 @@ global $method, $action, $database, $jwt;
 switch ($method) {
     case 'GET':
         if ($action === null) {
-            // Get all active languages
+            // Get UI language for dynamic ordering
+            $uiLang = $_GET['ui_lang'] ?? 'en';
+            
+            // Priority languages (most used in Netherlands)
+            $priorityLanguages = ['nl', 'en', 'tr', 'ar'];
+            $priorityPlaceholders = str_repeat('?,', count($priorityLanguages) - 1) . '?';
+            
+            // Dynamic ordering: UI language first, then priority languages, then alphabetical
             $sql = "SELECT code, name_en, name_native, sort_order
                     FROM languages 
                     WHERE is_active = TRUE 
-                    ORDER BY sort_order, name_en";
+                    ORDER BY 
+                        CASE WHEN code = ? THEN 0 ELSE 1 END,
+                        CASE WHEN code IN ($priorityPlaceholders) THEN 1 ELSE 2 END,
+                        name_en";
             
-            $languages = $database->fetchAll($sql);
+            // Build parameters: UI language first, then priority languages
+            $params = array_merge([$uiLang], $priorityLanguages);
+            $languages = $database->fetchAll($sql, $params);
             response($languages);
             
         } else {

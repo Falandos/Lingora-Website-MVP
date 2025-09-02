@@ -37,6 +37,9 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
 
   // Helper function to get language at specific offset from current
   const getLanguageAtOffset = (offset: number) => {
+    if (languages.length === 0) {
+      return { code: 'en', native: 'Loading...', color: '#3B82F6' };
+    }
     const index = (currentIndex + offset + languages.length) % languages.length;
     return languages[index];
   };
@@ -61,6 +64,15 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
       
       return `rgb(${lightR}, ${lightG}, ${lightB})`;
     };
+    
+    // Don't render carousel if languages haven't loaded yet
+    if (languages.length === 0) {
+      return (
+        <div className={`relative flex items-center justify-center ${className}`}>
+          <div className="text-gray-500">Loading languages...</div>
+        </div>
+      );
+    }
     
     // Create proper infinite loop by duplicating languages at both ends
     const extendedLanguages = [
@@ -193,6 +205,15 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
   }
 
   // Default rendering for when used as standalone component
+  // Don't render if languages haven't loaded yet
+  if (languages.length === 0) {
+    return (
+      <span className={`inline-block min-w-[180px] text-center ${className}`}>
+        <div className="text-gray-500">Loading...</div>
+      </span>
+    );
+  }
+  
   return (
     <span 
       className={`inline-block min-w-[180px] sm:min-w-[220px] text-center transition-all duration-300 ${className}`}
