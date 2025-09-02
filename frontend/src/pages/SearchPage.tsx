@@ -100,10 +100,10 @@ const SearchPage = () => {
       categories: searchParams.get('categories')?.split(',').filter(Boolean) || 
                   savedPreferences.categories || [],
       city: searchParams.get('city') || savedPreferences.city || '',
-      radius: parseInt(searchParams.get('radius') || savedPreferences.radius?.toString() || '25'),
+      radius: parseInt(searchParams.get('radius') || savedPreferences.radius?.toString() || '0'), // 0 = show all providers
       mode: searchParams.get('mode') || '',
       keyword: searchParams.get('keyword') || '', // Never persist keyword
-      sortBy: searchParams.get('sortBy') || savedPreferences.sortBy || 'best_match',
+      sortBy: searchParams.get('sortBy') || savedPreferences.sortBy || 'recently_added', // Default to recently added for discovery
       coordinates: savedPreferences.coordinates || null
     };
   };
@@ -140,6 +140,23 @@ const SearchPage = () => {
       'breda': [51.5719, 4.7683],
       'tilburg': [51.5555, 5.0913],
       'eindhoven': [51.4416, 5.4697],
+      // Add more major Dutch cities
+      'haarlem': [52.3874, 4.6462],
+      'arnhem': [51.9851, 5.8987],
+      'zaanstad': [52.4389, 4.8289],
+      'nijmegen': [51.8426, 5.8518],
+      'enschede': [52.2215, 6.8937],
+      'apeldoorn': [52.2112, 5.9699],
+      'almere': [52.3508, 5.2647],
+      'leeuwarden': [53.2012, 5.7999],
+      'zwolle': [52.5168, 6.0830],
+      's-hertogenbosch': [51.6978, 5.3037],
+      'den bosch': [51.6978, 5.3037],
+      'alkmaar': [52.6317, 4.7516],
+      'leiden': [52.1601, 4.4970],
+      'dordrecht': [51.8133, 4.6900],
+      'zoetermeer': [52.0575, 4.4935],
+      'emmen': [52.7787, 6.9003],
     };
     
     const city = cityName.toLowerCase().trim();
@@ -352,6 +369,7 @@ const SearchPage = () => {
           }
         }
       }
+      // Always add radius parameter (0 = show all providers nationwide)
       params.set('radius', filters.radius.toString());
       // Service mode filter removed - mode displayed on provider cards only
       if (filters.keyword) params.set('keyword', filters.keyword);
@@ -490,8 +508,9 @@ const SearchPage = () => {
     if (updatedFilters.languages.length > 0) params.set('languages', updatedFilters.languages.join(','));
     if (updatedFilters.categories.length > 0) params.set('categories', updatedFilters.categories.join(','));
     if (updatedFilters.city) params.set('city', updatedFilters.city);
+    // Always set radius in URL (0 = show all providers)
     params.set('radius', updatedFilters.radius.toString());
-    if (updatedFilters.sortBy !== 'best_match') params.set('sortBy', updatedFilters.sortBy);
+    if (updatedFilters.sortBy !== 'recently_added') params.set('sortBy', updatedFilters.sortBy);
     // Service mode filter removed
     if (updatedFilters.keyword) params.set('keyword', updatedFilters.keyword);
     
@@ -503,10 +522,10 @@ const SearchPage = () => {
       languages: [],
       categories: [],
       city: '',
-      radius: 25,
+      radius: 0, // 0 = show all providers by default
       mode: '',
       keyword: '',
-      sortBy: 'best_match',
+      sortBy: 'recently_added', // Default to recently added for discovery
       coordinates: null
     };
     
@@ -569,7 +588,7 @@ const SearchPage = () => {
                     updateFilters({ 
                       city: closestCity.name,
                       coordinates: { lat: latitude, lng: longitude },
-                      radius: 25,
+                      radius: 25, // Apply 25km radius when location is selected
                       sortBy: 'distance'
                     });
                   }
@@ -817,47 +836,6 @@ const SearchPage = () => {
                   </Button>
                 </div>
 
-                {/* Quick Filter Presets */}
-                <div className="mb-6 pb-6 border-b border-gray-100">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Filters</h4>
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleQuickFilter('near_me')}
-                      className="justify-start text-xs px-3 py-2 h-auto"
-                    >
-                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      Near Me
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleQuickFilter('open_now')}
-                      className="justify-start text-xs px-3 py-2 h-auto"
-                    >
-                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Open Now
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleQuickFilter('top_rated')}
-                      className="justify-start text-xs px-3 py-2 h-auto"
-                    >
-                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                      </svg>
-                      Top Rated
-                    </Button>
-                  </div>
-                </div>
-
                 {/* Location Filter - Clean & Streamlined */}
                 <div className="mb-6">
                   <CityAutocomplete
@@ -884,17 +862,19 @@ const SearchPage = () => {
                   <div className="flex items-center space-x-3">
                     <input
                       type="range"
-                      min="5"
+                      min="0"
                       max="350"
                       step="5"
                       value={filters.radius}
                       onChange={(e) => updateFilters({ radius: parseInt(e.target.value) })}
                       className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                       style={{
-                        background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${((filters.radius - 5) / (350 - 5)) * 100}%, #E5E7EB ${((filters.radius - 5) / (350 - 5)) * 100}%, #E5E7EB 100%)`
+                        background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(filters.radius / 350) * 100}%, #E5E7EB ${(filters.radius / 350) * 100}%, #E5E7EB 100%)`
                       }}
                     />
-                    <span className="text-sm font-medium text-gray-700 min-w-[3rem]">{filters.radius} km</span>
+                    <span className="text-sm font-medium text-gray-700 min-w-[4.5rem]">
+                      {filters.radius === 0 ? 'All NL' : `${filters.radius} km`}
+                    </span>
                   </div>
                 </div>
 
@@ -974,6 +954,47 @@ const SearchPage = () => {
                         })}
                     </div>
                   )}
+                </div>
+
+                {/* Quick Filter Presets - Moved below USP filters (location & languages) */}
+                <div className="mb-6 pb-6 border-b border-gray-100">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Filters</h4>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickFilter('near_me')}
+                      className="justify-start text-xs px-3 py-2 h-auto"
+                    >
+                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Near Me
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickFilter('open_now')}
+                      className="justify-start text-xs px-3 py-2 h-auto"
+                    >
+                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Open Now
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickFilter('top_rated')}
+                      className="justify-start text-xs px-3 py-2 h-auto"
+                    >
+                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                      Top Rated
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Category Filter */}
@@ -1118,10 +1139,19 @@ const SearchPage = () => {
               {/* Left: Results count */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">
-                  {loading ? 'Searching...' : `${total} providers found`}
+                  {loading ? 'Searching...' : 
+                    filters.city || filters.languages.length > 0 || filters.categories.length > 0 || filters.keyword ?
+                      `${total} providers found` :
+                      `All ${total} providers in Netherlands`
+                  }
                 </h2>
                 {filters.city && (
-                  <p className="text-sm text-gray-500 mt-1">Near {filters.city}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Near {filters.city} {filters.radius > 0 ? `(${filters.radius}km radius)` : ''}
+                  </p>
+                )}
+                {!filters.city && filters.radius === 0 && !filters.languages.length && !filters.categories.length && !filters.keyword && (
+                  <p className="text-sm text-gray-500 mt-1">Nationwide search - showing all available providers</p>
                 )}
               </div>
               
@@ -1173,6 +1203,7 @@ const SearchPage = () => {
                   disabled={viewMode === 'map'}
                   title={viewMode === 'map' ? 'Sorting not available in map view' : 'Sort results'}
                 >
+                  <option value="recently_added">Recently Added</option>
                   <option value="best_match">{t('search.best_match')}</option>
                   {filters.city && <option value="distance">{t('search.distance_asc')}</option>}
                   <option value="name">Name A-Z</option>
@@ -1330,47 +1361,6 @@ const SearchPage = () => {
 
             {/* Drawer Content - Same as sidebar */}
             <div className="p-4">
-              {/* Quick Filter Presets */}
-              <div className="mb-6 pb-6 border-b border-gray-100">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Filters</h4>
-                <div className="flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleQuickFilter('near_me')}
-                    className="justify-start text-xs px-3 py-2 h-auto"
-                  >
-                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Near Me
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleQuickFilter('open_now')}
-                    className="justify-start text-xs px-3 py-2 h-auto"
-                  >
-                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Open Now
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleQuickFilter('top_rated')}
-                    className="justify-start text-xs px-3 py-2 h-auto"
-                  >
-                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                    </svg>
-                    Top Rated
-                  </Button>
-                </div>
-              </div>
-              
               {/* Location Filter */}
               <div className="mb-6">
                 <CityAutocomplete
@@ -1394,17 +1384,19 @@ const SearchPage = () => {
                 <div className="flex items-center space-x-3">
                   <input
                     type="range"
-                    min="5"
+                    min="0"
                     max="350"
                     step="5"
                     value={filters.radius}
                     onChange={(e) => updateFilters({ radius: parseInt(e.target.value) })}
                     className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                     style={{
-                      background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${((filters.radius - 5) / (350 - 5)) * 100}%, #E5E7EB ${((filters.radius - 5) / (350 - 5)) * 100}%, #E5E7EB 100%)`
+                      background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(filters.radius / 350) * 100}%, #E5E7EB ${(filters.radius / 350) * 100}%, #E5E7EB 100%)`
                     }}
                   />
-                  <span className="text-sm font-medium text-gray-700 min-w-[3rem]">{filters.radius} km</span>
+                  <span className="text-sm font-medium text-gray-700 min-w-[4.5rem]">
+                    {filters.radius === 0 ? 'All NL' : `${filters.radius} km`}
+                  </span>
                 </div>
               </div>
 
@@ -1482,6 +1474,47 @@ const SearchPage = () => {
                       })}
                   </div>
                 )}
+              </div>
+
+              {/* Quick Filter Presets - Moved below USP filters (location & languages) */}
+              <div className="mb-6 pb-6 border-b border-gray-100">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Filters</h4>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickFilter('near_me')}
+                    className="justify-start text-xs px-3 py-2 h-auto"
+                  >
+                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Near Me
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickFilter('open_now')}
+                    className="justify-start text-xs px-3 py-2 h-auto"
+                  >
+                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Open Now
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickFilter('top_rated')}
+                    className="justify-start text-xs px-3 py-2 h-auto"
+                  >
+                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                    Top Rated
+                  </Button>
+                </div>
               </div>
 
               {/* Category Filter */}

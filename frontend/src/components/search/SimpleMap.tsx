@@ -1,6 +1,7 @@
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useEffect } from 'react';
 
 // Fix for default markers
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -28,18 +29,43 @@ interface SimpleMapProps {
   searchRadius?: number; // in kilometers
 }
 
-const SimpleMap = ({ providers, userLocation, searchRadius = 25 }: SimpleMapProps) => {
-  console.log('SimpleMap rendering with providers:', providers);
-  console.log('User location:', userLocation);
-  console.log('Search radius:', searchRadius);
+// Component to automatically fit map bounds to show all providers
+const AutoFitBounds = ({ providers, userLocation, searchRadius }: { providers: any[], userLocation: any, searchRadius: number }) => {
+  const map = useMap();
   
-  // Calculate map center and zoom based on user location or default to Amsterdam
+  useEffect(() => {
+    if (!userLocation && searchRadius === 0) {
+      // Set fixed bounds for Netherlands to ensure consistent wide view
+      const netherlandsBounds = L.latLngBounds(
+        [50.7, 3.2],  // Southwest corner (southern Netherlands)
+        [53.7, 7.3]   // Northeast corner (northern Netherlands)
+      );
+      
+      // Fit map to Netherlands bounds with generous padding
+      setTimeout(() => {
+        map.fitBounds(netherlandsBounds, { 
+          padding: [20, 20]
+        });
+      }, 100); // Small delay to ensure map is fully initialized
+    }
+  }, [map, userLocation, searchRadius]);
+  
+  return null;
+};
+
+const SimpleMap = ({ providers, userLocation, searchRadius = 25 }: SimpleMapProps) => {
+  
+  // Calculate map center and zoom based on user location or show entire Netherlands
   const mapCenter: [number, number] = userLocation 
     ? [userLocation.lat, userLocation.lng]
-    : [52.3676, 4.9041]; // Amsterdam default
+    : [52.1326, 5.2913]; // Netherlands center coordinates
     
-  // Adjust zoom based on search radius
-  const getZoomLevel = (radius: number): number => {
+  // Adjust zoom based on search radius and user location
+  const getZoomLevel = (radius: number, hasUserLocation: boolean): number => {
+    // If no user location and radius is 0, show entire Netherlands (wider view)
+    if (!hasUserLocation && radius === 0) return 6;
+    
+    // Normal zoom levels for location-based searches
     if (radius <= 10) return 12;
     if (radius <= 25) return 10;
     if (radius <= 50) return 9;
@@ -51,7 +77,7 @@ const SimpleMap = ({ providers, userLocation, searchRadius = 25 }: SimpleMapProp
     <div style={{ height: '600px', width: '100%' }}>
       <MapContainer
         center={mapCenter}
-        zoom={getZoomLevel(searchRadius)}
+        zoom={getZoomLevel(searchRadius, !!userLocation)}
         style={{ height: '100%', width: '100%' }}
       >
         <TileLayer
@@ -59,22 +85,27 @@ const SimpleMap = ({ providers, userLocation, searchRadius = 25 }: SimpleMapProp
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
+        {/* Auto-fit bounds when showing all providers */}
+        <AutoFitBounds providers={providers} userLocation={userLocation} searchRadius={searchRadius} />
+        
         {/* User location marker and search radius */}
         {userLocation && (
           <>
-            {/* Search radius circle */}
-            <Circle
-              center={[userLocation.lat, userLocation.lng]}
-              radius={searchRadius * 1000} // Convert km to meters
-              pathOptions={{
-                fillColor: '#3984FF',
-                fillOpacity: 0.1,
-                color: '#3984FF',
-                weight: 2,
-                opacity: 0.8,
-                dashArray: '5, 5'
-              }}
-            />
+            {/* Search radius circle - only show if radius > 0 */}
+            {searchRadius > 0 && (
+              <Circle
+                center={[userLocation.lat, userLocation.lng]}
+                radius={searchRadius * 1000} // Convert km to meters
+                pathOptions={{
+                  fillColor: '#3984FF',
+                  fillOpacity: 0.1,
+                  color: '#3984FF',
+                  weight: 2,
+                  opacity: 0.8,
+                  dashArray: '5, 5'
+                }}
+              />
+            )}
             
             {/* User location marker */}
             <Marker 
@@ -94,7 +125,10 @@ const SimpleMap = ({ providers, userLocation, searchRadius = 25 }: SimpleMapProp
                     <p className="text-sm text-gray-600 mb-2">{userLocation.city}</p>
                   )}
                   <p className="text-xs text-gray-500">
-                    Searching within {searchRadius}km radius
+                    {searchRadius > 0 
+                      ? `Searching within ${searchRadius}km radius`
+                      : 'Nationwide search - no radius limit'
+                    }
                   </p>
                 </div>
               </Popup>

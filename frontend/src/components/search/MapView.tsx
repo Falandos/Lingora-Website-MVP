@@ -64,8 +64,8 @@ function MapBounds({ providers }: { providers: Provider[] }) {
 const MapView = ({ 
   providers, 
   onProviderClick, 
-  center = [52.3676, 4.9041], // Default to Amsterdam
-  zoom = 10,
+  center = [52.1326, 5.2913], // Default to Netherlands center (shows entire country + borders)
+  zoom = 7, // Country-wide view
   className = ''
 }: MapViewProps) => {
   const mapRef = useRef<L.Map>(null);

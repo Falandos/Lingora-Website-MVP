@@ -27,11 +27,15 @@ interface Staff {
 interface EditableStaffSectionProps {
   staff: Staff[];
   triggerConfetti: () => void;
+  searchLanguages?: string[];
+  uiLanguage?: string;
 }
 
 const EditableStaffSection: React.FC<EditableStaffSectionProps> = ({
   staff,
-  triggerConfetti
+  triggerConfetti,
+  searchLanguages = [],
+  uiLanguage = 'en'
 }) => {
   const { isEditMode, canEdit } = useEditMode();
   const { 
@@ -50,6 +54,7 @@ const EditableStaffSection: React.FC<EditableStaffSectionProps> = ({
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedStaffForDetail, setSelectedStaffForDetail] = useState<Staff | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Update managed staff when prop changes
   useEffect(() => {
@@ -206,6 +211,62 @@ const EditableStaffSection: React.FC<EditableStaffSectionProps> = ({
     return member.phone_public || member.phone || '';
   };
 
+  // Smart staff prioritization algorithm
+  const prioritizeStaff = (staffList: Staff[]): Staff[] => {
+    return [...staffList].sort((a, b) => {
+      const aLanguages = getLanguageCodes(a.languages);
+      const bLanguages = getLanguageCodes(b.languages);
+      
+      // Priority 1: Search languages (if any)
+      if (searchLanguages.length > 0) {
+        const aHasSearchLang = searchLanguages.some(lang => aLanguages.includes(lang));
+        const bHasSearchLang = searchLanguages.some(lang => bLanguages.includes(lang));
+        
+        if (aHasSearchLang !== bHasSearchLang) {
+          return bHasSearchLang ? 1 : -1;
+        }
+      }
+      
+      // Priority 2: UI language
+      const aHasUiLang = aLanguages.includes(uiLanguage);
+      const bHasUiLang = bLanguages.includes(uiLanguage);
+      
+      if (aHasUiLang !== bHasUiLang) {
+        return bHasUiLang ? 1 : -1;
+      }
+      
+      // Priority 3: Number of languages (more = better)
+      if (aLanguages.length !== bLanguages.length) {
+        return bLanguages.length - aLanguages.length;
+      }
+      
+      // Priority 4: Profile completeness score
+      const getCompletenessScore = (member: Staff): number => {
+        let score = 0;
+        if (getEmail(member)) score += 1;
+        if (getPhone(member)) score += 1;
+        if (getRoleTitle(member) && getRoleTitle(member) !== 'Staff Member') score += 1;
+        return score;
+      };
+      
+      const aScore = getCompletenessScore(a);
+      const bScore = getCompletenessScore(b);
+      
+      if (aScore !== bScore) {
+        return bScore - aScore;
+      }
+      
+      // Priority 5: Alphabetical by name
+      return a.name.localeCompare(b.name);
+    });
+  };
+
+  // Get the staff to display (prioritized and limited)
+  const prioritizedStaff = prioritizeStaff(managedStaff);
+  const displayStaff = isExpanded ? prioritizedStaff : prioritizedStaff.slice(0, 3);
+  const hasMoreStaff = prioritizedStaff.length > 3;
+
+
   return (
     <StaffEditProvider onStaffAutoSave={handleStaffAutoSave}>
       <div className="edit-section">
@@ -230,7 +291,14 @@ const EditableStaffSection: React.FC<EditableStaffSectionProps> = ({
       )}
 
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-xl font-bold text-gray-900">Who Speaks What</h3>
+        <div className="flex items-center gap-3">
+          <h3 className="text-xl font-bold text-gray-900">Who Speaks What</h3>
+          {hasMoreStaff && !isExpanded && (
+            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+              Showing top 3 of {prioritizedStaff.length}
+            </span>
+          )}
+        </div>
         {canEdit && isEditMode && (
           <button
             onClick={addNewStaff}
@@ -253,7 +321,7 @@ const EditableStaffSection: React.FC<EditableStaffSectionProps> = ({
       </div>
 
       <div className="space-y-3">
-        {managedStaff.map((member, index) => (
+        {displayStaff.map((member, index) => (
           <div 
             key={member.id} 
             className={`
@@ -262,9 +330,13 @@ const EditableStaffSection: React.FC<EditableStaffSectionProps> = ({
                 ? 'bg-blue-50 border-blue-200 shadow-md' 
                 : 'bg-gray-50 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 hover:border-primary-200 hover:shadow-md'
               }
-              animate-slide-up
+              animate-slide-up transform transition-all duration-300 hover:scale-105
+              ${index >= 3 && !isExpanded ? 'opacity-0 max-h-0 overflow-hidden' : 'opacity-100 max-h-none'}
             `}
-            style={{ animationDelay: `${index * 150}ms` }}
+            style={{ 
+              animationDelay: `${index * 100}ms`,
+              transitionDelay: isExpanded ? `${(index - 3) * 50}ms` : '0ms'
+            }}
             onClick={() => {
               if (canEdit && isEditMode) {
                 toggleStaffEdit(member.id);
@@ -287,7 +359,7 @@ const EditableStaffSection: React.FC<EditableStaffSectionProps> = ({
             <div className="flex-1 min-w-0">
               {/* Name and Contact Row */}
               <div className="flex items-center gap-2 mb-1">
-                {/* Name - Now part of the whole clickable card */}
+                {/* Name - Clean without badge */}
                 <div className="font-medium text-gray-900 text-sm flex-1">
                   {member.name}
                 </div>
@@ -361,20 +433,47 @@ const EditableStaffSection: React.FC<EditableStaffSectionProps> = ({
                 {getRoleTitle(member)}
               </div>
 
-              {/* Languages - Now on separate row with wrapping */}
+              {/* Languages - Now on separate row with highlighting */}
               <div className="flex flex-wrap items-center gap-1">
                 {getLanguageCodes(member.languages).map((langCode) => {
+                  const isSearchMatch = searchLanguages.includes(langCode);
+                  const isUIMatch = langCode === uiLanguage;
+                  const isHighlighted = isSearchMatch || isUIMatch;
+                  
                   return (
-                    <div key={langCode} className="inline-flex items-center px-2 py-1 bg-white rounded-full text-xs font-medium text-gray-700 border border-gray-200 shadow-sm">
+                    <div 
+                      key={langCode} 
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border transition-all duration-200 ${
+                        isHighlighted
+                          ? isSearchMatch
+                            ? 'bg-primary-100 border-primary-300 text-primary-800 shadow-md ring-1 ring-primary-200'
+                            : 'bg-green-100 border-green-300 text-green-800 shadow-md ring-1 ring-green-200'
+                          : 'bg-white border-gray-200 text-gray-700 shadow-sm'
+                      }`}
+                      title={
+                        isSearchMatch 
+                          ? 'Matches your search language' 
+                          : isUIMatch 
+                            ? 'Matches interface language'
+                            : undefined
+                      }
+                    >
                       <img
                         src={getFlagUrl(langCode)}
                         alt={`${langCode} flag`}
-                        className="w-3 h-2 object-cover rounded-sm mr-1"
+                        className={`w-3 h-2 object-cover rounded-sm mr-1 transition-all duration-200 ${
+                          isHighlighted ? 'brightness-110' : ''
+                        }`}
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
                       />
-                      <span className="uppercase">{langCode}</span>
+                      <span className="uppercase font-medium">{langCode}</span>
+                      {isHighlighted && (
+                        <span className="ml-1 text-xs">
+                          {isSearchMatch ? '🔍' : '🌐'}
+                        </span>
+                      )}
                     </div>
                   );
                 })}
@@ -384,6 +483,58 @@ const EditableStaffSection: React.FC<EditableStaffSectionProps> = ({
             </div>
           </div>
         ))}
+
+        {/* Expand/Collapse Button */}
+        {hasMoreStaff && !canEdit && (
+          <div className="text-center pt-3">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200"
+            >
+              {isExpanded ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                  Show less
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  Show all {prioritizedStaff.length} team members
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Edit Mode Expand/Collapse Button */}
+        {hasMoreStaff && canEdit && isEditMode && (
+          <div className="text-center pt-3">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all duration-200"
+            >
+              {isExpanded ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                  Show less
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  Show all {prioritizedStaff.length} team members
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Empty State */}
         {managedStaff.length === 0 && canEdit && isEditMode && (

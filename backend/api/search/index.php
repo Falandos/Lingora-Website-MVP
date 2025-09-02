@@ -37,7 +37,7 @@ if ($method !== 'GET') {
 $languages = isset($_GET['languages']) ? explode(',', $_GET['languages']) : [];
 $categories = isset($_GET['categories']) ? array_map('intval', explode(',', $_GET['categories'])) : [];
 $city = $_GET['city'] ?? '';
-$radius = isset($_GET['radius']) ? (int)$_GET['radius'] : 25;
+$radius = isset($_GET['radius']) ? (int)$_GET['radius'] : 0; // Default to 0 = show all providers
 $mode = $_GET['mode'] ?? '';
 $keyword = $_GET['keyword'] ?? '';
 $lat = isset($_GET['lat']) ? (float)$_GET['lat'] : null;
@@ -99,13 +99,15 @@ if ($city && $lat === null && $lng === null) {
     if ($cityCoords) {
         $lat = $cityCoords['lat'];
         $lng = $cityCoords['lng'];
-        $useDistanceFilter = true;
+        // Only use distance filtering if radius > 0
+        $useDistanceFilter = ($radius > 0);
     } else {
         // Fallback to city name matching if geocoding fails
         $where .= " AND p.city LIKE ?";
         $params[] = '%' . $city . '%';
     }
-} elseif ($lat !== null && $lng !== null) {
+} elseif ($lat !== null && $lng !== null && $radius > 0) {
+    // Only use distance filtering if radius > 0
     $useDistanceFilter = true;
 }
 

@@ -94,8 +94,8 @@
     "distance_asc": "Distance",
     "show_map": "Show Map",
     "show_list": "Show List",
-    "view_list": "Provider List",
-    "view_map": "Provider Map"
+    "view_list": "View List",
+    "view_map": "View Map"
   },
   "stats": {
     "active_businesses": "Active Businesses",

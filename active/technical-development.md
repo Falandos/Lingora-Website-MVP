@@ -1,6 +1,57 @@
 # Technical Development Reference - Lingora
 *Architecture decisions, implementation patterns, and critical technical knowledge*
-*Created: 2025-08-30 | Last Updated: 2025-08-30*
+*Created: 2025-08-30 | Last Updated: 2025-09-02*
+
+## 🚨 CRITICAL: AI Service Troubleshooting & Port Conflict Prevention
+
+**ALWAYS Check for Duplicate Processes Before Debugging AI Service Issues!**
+
+### Common Issue: "[Errno 22] Invalid argument" in AI Embedding Service
+
+**Symptoms:**
+- AI service health check works but `/embed` and `/search` endpoints fail
+- Error: "[Errno 22] Invalid argument" in Flask endpoints
+- Model works outside Flask but not inside endpoints
+
+**Root Cause:**
+- Multiple Python processes competing for port 5001
+- Orphaned processes from previous debugging sessions
+- Multiple XAMPP instances running simultaneously
+
+**Solution:**
+1. **Check for duplicate processes:**
+   ```powershell
+   Get-Process python* | Select-Object Id, ProcessName, Path
+   netstat -ano | Select-String ':5001'
+   ```
+
+2. **Kill all duplicate Python processes:**
+   ```powershell
+   Stop-Process -Id [PID] -Force  # For each duplicate process
+   ```
+
+3. **Ensure single XAMPP instance:**
+   - Close extra XAMPP control panels
+   - Verify only one MySQL/Apache running
+
+4. **Start clean AI service:**
+   ```powershell
+   cd C:\xampp\htdocs\lingora\backend\ai_services
+   python embedding_service.py
+   ```
+
+5. **Verify fix:**
+   ```bash
+   curl -X POST http://localhost:5001/embed -H "Content-Type: application/json" -d '{"text":"test"}'
+   ```
+
+**Prevention:**
+- Always kill background processes when debugging
+- Use task manager to verify no orphaned Python processes
+- Monitor XAMPP instances
+- Check port 5001 availability before starting AI service
+
+---
 
 ## 🎯 SEARCH PAGE ENHANCEMENT ARCHITECTURE (ALPHA 0.9 TARGET)
 

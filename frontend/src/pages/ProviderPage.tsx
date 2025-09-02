@@ -711,7 +711,7 @@ const ProviderPage = () => {
           </div>
           
           {/* Logo and Business Title */}
-          <div className="mb-6 flex items-start gap-6">
+          <div className="mb-6 flex items-center gap-6">
             {/* Business Logo */}
             <div className="flex-shrink-0 relative group">
               {providerData?.logo_url ? (
@@ -1076,6 +1076,8 @@ const ProviderPage = () => {
                 <EditableStaffSection 
                   staff={provider.staff}
                   triggerConfetti={triggerConfetti}
+                  searchLanguages={searchParams.get('languages')?.split(',').filter(Boolean) || []}
+                  uiLanguage={i18n.language}
                 />
               </CardBody>
             </Card>

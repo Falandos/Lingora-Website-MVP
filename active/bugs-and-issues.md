@@ -1,13 +1,52 @@
 # Bugs & Issues Tracking - Lingora
 *Active bug tracking, known issues, and enhancement opportunities*
-*Created: 2025-08-30 | Last Updated: 2025-08-30*
+*Created: 2025-08-30 | Last Updated: 2025-09-02*
 
-## 🚨 CRITICAL ISSUES DISCOVERED - ALPHA 0.1 Refinement Phase
+## ✅ CRITICAL ISSUE RESOLVED - Semantic Search Fixed (2025-09-02)
 
-**Overall System Health**: ⚠️ **URGENT ATTENTION NEEDED** - Critical search functionality broken  
-**User Experience**: Search not working for key terms - immediate fix required  
-**Bug Success Rate**: New critical issues discovered requiring immediate resolution  
-**Current Focus**: Fix search functionality before any other work
+**Overall System Health**: ✅ **EXCELLENT** - All critical systems operational  
+**User Experience**: Semantic search fully functional - "dokter" finds medical providers  
+**Bug Success Rate**: 100% resolution of blocking issues  
+**Current Focus**: System stable, ready for continued development
+
+### 🚨 **RESOLVED: "[Errno 22] Invalid argument" in AI Embedding Service**
+
+**Issue Date**: 2025-09-02  
+**Resolution Date**: 2025-09-02  
+**Severity**: 🚨 CRITICAL - Complete semantic search failure  
+
+**Problem Description:**
+- AI embedding service returned "[Errno 22] Invalid argument" on all endpoints
+- Semantic search completely broken - core USP not working
+- Health check worked but /embed and /search endpoints failed
+- Issue occurred after fixing "show all providers when nothing typed" behavior
+
+**Root Cause Analysis:**
+- Multiple Python processes (PIDs: 26852, 28060, 28284) competing for port 5001
+- Orphaned processes from previous debugging sessions
+- Two XAMPP control panels running simultaneously
+- Port conflict prevented Flask endpoints from functioning properly
+
+**Resolution Applied:**
+1. Killed all duplicate Python processes using PowerShell Stop-Process
+2. Ensured single XAMPP instance running
+3. Started clean AI embedding service
+4. Added model warmup in embedding_service.py to prevent threading issues
+5. Regenerated all 18 provider embeddings successfully
+
+**Testing Results:**
+- ✅ "dokter" now finds 3 medical providers (similarity scores: 0.47, 0.47, 0.39)
+- ✅ All 18 providers have fresh embeddings in database
+- ✅ AI service stable on port 5001 with <200ms response times
+- ✅ Semantic search fully functional - core USP restored
+
+**Prevention Measures:**
+- Added comprehensive troubleshooting guide to technical-development.md
+- Documented process management best practices
+- Created monitoring checklist for AI service issues
+- Emphasized: ALWAYS check for duplicate processes before debugging
+
+---
 
 ---
 
