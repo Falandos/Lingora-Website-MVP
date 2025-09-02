@@ -102,3 +102,9 @@ vendor/
 
 # Local development files
 *.local
+
+# Python Virtual Environments
+backend/ai_services/ai_search_env/
+backend/ai_services/__pycache__/
+*.pyc
+__pycache__/
