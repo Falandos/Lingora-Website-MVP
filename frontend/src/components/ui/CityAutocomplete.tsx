@@ -35,6 +35,7 @@ const CityAutocomplete = ({
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Debounce search
   useEffect(() => {
@@ -54,6 +55,24 @@ const CityAutocomplete = ({
   useEffect(() => {
     setQuery(value);
   }, [value]);
+
+  // Click-outside detection for dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setSelectedIndex(-1);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const searchCities = async (searchQuery: string) => {
     try {
@@ -189,7 +208,7 @@ const CityAutocomplete = ({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} ref={dropdownRef}>
       <div className="flex gap-2">
         <div className="relative flex-1">
           <input
@@ -198,7 +217,11 @@ const CityAutocomplete = ({
             value={query}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => query.length >= 2 && setSuggestions.length > 0 && setIsOpen(true)}
+            onFocus={() => {
+              if (query.length >= 2 && suggestions.length > 0) {
+                setIsOpen(true);
+              }
+            }}
             placeholder={placeholder}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
             autoComplete="off"

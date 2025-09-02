@@ -65,7 +65,7 @@ const getNavigationItems = (userRole: string | undefined, providerSlug: string |
   
   if (userRole === 'admin') {
     return [
-      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: currentPath === '/dashboard' },
+      { name: 'Overview', href: '/dashboard', icon: HomeIcon, current: currentPath === '/dashboard' },
       { name: 'Providers', href: '/dashboard/providers', icon: UsersIcon, current: currentPath.startsWith('/dashboard/providers') },
       { name: 'Messages', href: '/dashboard/messages', icon: MessageIcon, current: currentPath.startsWith('/dashboard/messages') },
       { name: 'Statistics', href: '/dashboard/stats', icon: ChartIcon, current: currentPath.startsWith('/dashboard/stats') },
@@ -74,7 +74,7 @@ const getNavigationItems = (userRole: string | undefined, providerSlug: string |
   } else {
     // Provider navigation - Core dashboard items
     const coreItems = [
-      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: currentPath === '/dashboard' },
+      { name: 'Overview', href: '/dashboard', icon: HomeIcon, current: currentPath === '/dashboard' },
       { name: 'Profile', href: '/dashboard/profile', icon: ProfileIcon, current: currentPath.startsWith('/dashboard/profile') },
       { name: 'Services', href: '/dashboard/services', icon: ServicesIcon, current: currentPath.startsWith('/dashboard/services') },
       { name: 'Staff', href: '/dashboard/staff', icon: StaffIcon, current: currentPath.startsWith('/dashboard/staff') },

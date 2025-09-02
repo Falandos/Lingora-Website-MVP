@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import StatCard from '../components/dashboard/StatCard';
+import AnalyticsWidget from '../components/dashboard/AnalyticsWidget';
 import DashboardService from '../services/dashboardService';
 
 // Local type definitions
@@ -217,14 +218,7 @@ const DashboardHome = () => {
       : 0;
 
     return (
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Profile Completion"
-          value={`${providerStats.profile_completion}%`}
-          icon={ProfileIcon}
-          color="blue"
-          loading={loading}
-        />
+      <div className={`grid grid-cols-1 gap-5 sm:grid-cols-2 ${provider?.subscription_status === 'trial' && provider?.trial_expires_at ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
         <StatCard
           title="Messages Received"
           value={`${providerStats.messages_count} total`}
@@ -239,20 +233,19 @@ const DashboardHome = () => {
           color="purple"
           loading={loading}
         />
-        {provider?.subscription_status === 'trial' && provider?.trial_expires_at ? (
+        <StatCard
+          title="Staff Members"
+          value={providerStats.staff_count}
+          icon={StaffIcon}
+          color="yellow"
+          loading={loading}
+        />
+        {provider?.subscription_status === 'trial' && provider?.trial_expires_at && (
           <StatCard
             title="Trial Days Left"
             value={trialDaysLeft > 0 ? trialDaysLeft : 'Expired'}
             icon={ClockIcon}
             color={trialDaysLeft > 7 ? "green" : trialDaysLeft > 0 ? "yellow" : "red"}
-            loading={loading}
-          />
-        ) : (
-          <StatCard
-            title="Staff Members"
-            value={providerStats.staff_count}
-            icon={StaffIcon}
-            color="yellow"
             loading={loading}
           />
         )}
@@ -266,48 +259,48 @@ const DashboardHome = () => {
     return (
       <div className="bg-white shadow rounded-lg p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <a
             href="/dashboard/providers"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
+            className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
           >
-            <div className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-2">
+            <div className="w-6 h-6 text-gray-400 group-hover:text-blue-500 mb-2">
               <UsersIcon />
             </div>
-            <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600">
+            <span className="text-xs font-medium text-gray-900 group-hover:text-blue-600 text-center">
               Manage Providers
             </span>
           </a>
           <a
             href="/dashboard/messages"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
+            className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
           >
-            <div className="w-8 h-8 text-gray-400 group-hover:text-green-500 mb-2">
+            <div className="w-6 h-6 text-gray-400 group-hover:text-green-500 mb-2">
               <MessageIcon />
             </div>
-            <span className="text-sm font-medium text-gray-900 group-hover:text-green-600">
+            <span className="text-xs font-medium text-gray-900 group-hover:text-green-600 text-center">
               View Messages
             </span>
           </a>
           <a
             href="/dashboard/settings"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
+            className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
           >
-            <div className="w-8 h-8 text-gray-400 group-hover:text-purple-500 mb-2">
+            <div className="w-6 h-6 text-gray-400 group-hover:text-purple-500 mb-2">
               <ProfileIcon />
             </div>
-            <span className="text-sm font-medium text-gray-900 group-hover:text-purple-600">
+            <span className="text-xs font-medium text-gray-900 group-hover:text-purple-600 text-center">
               System Settings
             </span>
           </a>
           <a
             href="/dashboard/stats"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
+            className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
           >
-            <div className="w-8 h-8 text-gray-400 group-hover:text-orange-500 mb-2">
+            <div className="w-6 h-6 text-gray-400 group-hover:text-orange-500 mb-2">
               <ChartIcon />
             </div>
-            <span className="text-sm font-medium text-gray-900 group-hover:text-orange-600">
+            <span className="text-xs font-medium text-gray-900 group-hover:text-orange-600 text-center">
               Analytics
             </span>
           </a>
@@ -322,19 +315,19 @@ const DashboardHome = () => {
     return (
       <div className="bg-white shadow rounded-lg p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {provider?.slug && (
             <>
               <a
                 href={`/provider/${provider.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
+                className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
               >
-                <div className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-2">
+                <div className="w-6 h-6 text-gray-400 group-hover:text-blue-500 mb-2">
                   <EyeIcon />
                 </div>
-                <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600">
+                <span className="text-xs font-medium text-gray-900 group-hover:text-blue-600 text-center">
                   View Public Page
                 </span>
               </a>
@@ -342,12 +335,12 @@ const DashboardHome = () => {
                 href={`/provider/${provider.slug}?edit=true`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
+                className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
               >
-                <div className="w-8 h-8 text-gray-400 group-hover:text-orange-500 mb-2">
+                <div className="w-6 h-6 text-gray-400 group-hover:text-orange-500 mb-2">
                   <EditIcon />
                 </div>
-                <span className="text-sm font-medium text-gray-900 group-hover:text-orange-600">
+                <span className="text-xs font-medium text-gray-900 group-hover:text-orange-600 text-center">
                   Edit Public Page
                 </span>
               </a>
@@ -355,23 +348,23 @@ const DashboardHome = () => {
           )}
           <a
             href="/dashboard/services"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
+            className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
           >
-            <div className="w-8 h-8 text-gray-400 group-hover:text-purple-500 mb-2">
+            <div className="w-6 h-6 text-gray-400 group-hover:text-purple-500 mb-2">
               <PlusIcon />
             </div>
-            <span className="text-sm font-medium text-gray-900 group-hover:text-purple-600">
+            <span className="text-xs font-medium text-gray-900 group-hover:text-purple-600 text-center">
               Add Service
             </span>
           </a>
           <a
             href="/dashboard/staff"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
+            className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
           >
-            <div className="w-8 h-8 text-gray-400 group-hover:text-green-500 mb-2">
+            <div className="w-6 h-6 text-gray-400 group-hover:text-green-500 mb-2">
               <PlusIcon />
             </div>
-            <span className="text-sm font-medium text-gray-900 group-hover:text-green-600">
+            <span className="text-xs font-medium text-gray-900 group-hover:text-green-600 text-center">
               Add Staff Member
             </span>
           </a>
@@ -384,7 +377,7 @@ const DashboardHome = () => {
     <div className="space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
         <p className="mt-1 text-sm text-gray-600">
           {user?.role === 'admin' 
             ? 'System overview and key metrics' 
@@ -477,7 +470,7 @@ const DashboardHome = () => {
       )}
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Messages */}
         {user?.role === 'provider' && (
           <div className="bg-white shadow rounded-lg p-6">
@@ -524,6 +517,11 @@ const DashboardHome = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* Analytics Widget - Providers only */}
+        {user?.role === 'provider' && (
+          <AnalyticsWidget />
         )}
 
         {/* Account Status */}

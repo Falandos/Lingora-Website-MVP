@@ -111,7 +111,11 @@ const SearchPage = () => {
     };
   };
 
-  const [filters, setFilters] = useState<SearchFilters>(initializeFilters());
+  const [filters, setFilters] = useState<SearchFilters>(() => {
+    const initialFilters = initializeFilters();
+    console.log('🚀 Initial filters:', initialFilters);
+    return initialFilters;
+  });
   
   // Available languages and categories for filters
   const [availableLanguages, setAvailableLanguages] = useState<any[]>([]);
@@ -231,6 +235,7 @@ const SearchPage = () => {
           const langResult = await languagesRes.json();
           // Handle both mock format (direct array) and real API format (wrapped in data)
           const langs = langResult.data || langResult || [];
+          console.log('🌐 Languages loaded:', langs.length, 'languages');
           setAvailableLanguages(langs);
         }
 
@@ -376,10 +381,16 @@ const SearchPage = () => {
       params.set('radius', filters.radius.toString());
       // Service mode filter removed - mode displayed on provider cards only
       if (filters.keyword) params.set('keyword', filters.keyword);
+      params.set('ui_lang', i18n.language); // Pass UI language for proper language detection
       params.set('page', page.toString());
+
+      console.log('🔍 Performing search with params:', params.toString());
+      console.log('🔍 Filters state:', filters);
 
       const response = await fetch(`/api/search?${params.toString()}`);
       const result = await response.json();
+      
+      console.log('🔍 API Response:', result);
 
       if (response.ok && result) {
         // Handle both mock format and real API format
@@ -763,9 +774,9 @@ const SearchPage = () => {
         />
       )}
       
-      {/* Search Header */}
-      <div className="bg-white shadow-soft border-b border-gray-100">
-        <div className="container-custom py-6">
+      {/* Search Header - Sticky */}
+      <div className="sticky top-16 z-40 bg-white shadow-soft border-b border-gray-100">
+        <div className="container-custom py-4">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             <div className="flex-1 w-full">
               <div className="relative" ref={searchDropdownRef}>
@@ -1210,13 +1221,19 @@ const SearchPage = () => {
               {/* Right: Sort Options - Always visible for consistency */}
               <div className="flex items-center min-w-[140px] justify-end">
                 <select 
-                  className={`text-sm border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 shadow-sm hover:border-gray-400 transition-colors ${
+                  className={`text-sm border border-gray-300 rounded-lg px-3 pr-10 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 shadow-sm hover:border-gray-400 transition-colors appearance-none ${
                     viewMode === 'map' ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   value={filters.sortBy}
                   onChange={(e) => updateFilters({ sortBy: e.target.value })}
                   disabled={viewMode === 'map'}
                   title={viewMode === 'map' ? 'Sorting not available in map view' : 'Sort results'}
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em'
+                  }}
                 >
                   <option value="recently_added">Recently Added</option>
                   <option value="best_match">{t('search.best_match')}</option>

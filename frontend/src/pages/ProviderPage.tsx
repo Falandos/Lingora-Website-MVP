@@ -88,6 +88,35 @@ const ProviderPage = () => {
 
   const currentLang = i18n.language as 'nl' | 'en';
 
+  // Analytics tracking function
+  const trackPageView = async (providerId: number, pageSection: string) => {
+    try {
+      // Generate a simple session ID for this browser session
+      let sessionId = sessionStorage.getItem('lingora_session_id');
+      if (!sessionId) {
+        sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        sessionStorage.setItem('lingora_session_id', sessionId);
+      }
+
+      await fetch('/api/providers/track-view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          provider_id: providerId,
+          page_section: pageSection,
+          viewer_language: currentLang,
+          session_id: sessionId,
+          referrer: document.referrer
+        })
+      });
+    } catch (error) {
+      // Silently fail - analytics shouldn't break the user experience
+      console.debug('Analytics tracking failed:', error);
+    }
+  };
+
   // 🎨 Whimsical utility functions
   const triggerConfetti = () => {
     setShowConfetti(true);
@@ -225,6 +254,11 @@ const ProviderPage = () => {
             };
             
             setProvider(mappedProvider);
+            
+            // Track page view for analytics (non-blocking)
+            trackPageView(providerData.id, 'provider_page').catch(err => {
+              console.warn('Failed to track page view:', err);
+            });
           }
         } else {
           setError('Provider not found');
