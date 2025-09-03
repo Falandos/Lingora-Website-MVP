@@ -2,12 +2,23 @@
 *Active bug tracking, known issues, and enhancement opportunities*
 *Created: 2025-08-30 | Last Updated: 2025-09-02*
 
+## 🔄 ORGANIZATIONAL CHANGE - Technical Issue Routing (Sep 2, 2025)
+
+**IMPORTANT**: All technical issues are now handled by the **solution-architect agent**  
+**PM Agent Role**: Organizational tracking and routing only  
+**New Process**: User → PM Agent → "solution-architect, [technical issue]" → Technical analysis and resolution  
+
+**This file is now maintained by solution-architect agent for technical bug analysis**
+
 ## ✅ ALL CRITICAL SEARCH BUGS RESOLVED - Search Page 100% Operational (2025-09-03)
 
 **Overall System Health**: ✅ **EXCELLENT** - All critical systems operational  
 **User Experience**: Complete search functionality restored - all features working perfectly  
 **Bug Success Rate**: 100% resolution of all critical search issues  
 **Current Focus**: System fully stable, search functionality perfect, ready for next development phase
+
+**Technical Maintenance**: Now handled by solution-architect agent  
+**PM Agent Role**: Organizational impact tracking and routing coordination only
 
 ### 🚨 **RESOLVED: "[Errno 22] Invalid argument" in AI Embedding Service**
 

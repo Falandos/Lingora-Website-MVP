@@ -4,6 +4,8 @@
 
 ## 🚨 CRITICAL: AI Service Troubleshooting & Common Issues
 
+**SOLUTION-ARCHITECT NOTE**: This is now your primary responsibility. PM agent will route all technical issues here.
+
 **ALWAYS Check These Issues Before Debugging AI Service Problems!**
 
 ### 🔴 CRITICAL ISSUE #1: Semantic Search Service Corruption (RECURRING) - RESOLVED SEPTEMBER 3, 2025
@@ -819,3 +821,223 @@ npm run build
 ---
 
 *📝 This document captures critical technical knowledge for Lingora development. Update after major architectural changes or when discovering important implementation patterns.*
+
+---
+
+## 🎨 LANGUAGE CAROUSEL ARCHITECTURE & FIXES (September 3, 2025)
+
+### **Text Cutoff Resolution - COMPLETE**
+
+**Status**: ✅ **RESOLVED** - All character cutoff issues fixed across languages
+
+#### **Problems Identified & Fixed:**
+
+**1. Hindi Text Cutoff (Top Clipping)**
+- **Problem**: Hindi characters with top marks (देवनागरी) were being clipped
+- **Root Cause**: `overflow: 'hidden'` cutting off text beyond baseline
+- **Impact**: Poor user experience for Hindi speakers
+
+**2. English Descender Cutoff (Bottom Clipping)**  
+- **Problem**: Letters like 'g', 'y', 'p', 'q' had descenders cut off
+- **Root Cause**: Insufficient line height and container padding
+- **Impact**: Text appeared truncated and unprofessional
+
+**3. Nederlands Right Cutoff (Horizontal Clipping)**
+- **Problem**: Longer language names were cut off horizontally  
+- **Root Cause**: Fixed width containers without adequate padding
+- **Impact**: Text partially hidden, affecting readability
+
+#### **Comprehensive Solution Applied:**
+
+**Text Container Fixes (Lines 152-154 in LanguageCarousel.tsx):**
+```typescript
+style={{
+  whiteSpace: 'nowrap',
+  padding: '8px 12px',           // Added breathing room for all characters
+  lineHeight: '1.2'              // Proper spacing for ascenders/descenders
+}}
+```
+
+**Overflow Management:**
+- **Removed**: `overflow: 'hidden'` from text display containers
+- **Result**: Characters with diacritics, ascenders, and descenders now display fully
+- **Trade-off**: Slight layout flexibility for complete text visibility
+
+**Typography Enhancement:**
+```css
+/* Enhanced font rendering for better text quality */
+.language-text-shadow {
+  -webkit-font-smoothing: antialiased;    /* Smooth text on webkit browsers */
+  -moz-osx-font-smoothing: grayscale;     /* Smooth text on Firefox */  
+  text-rendering: optimizeLegibility;      /* Better character spacing */
+}
+```
+
+**Layout Stability System:**
+- **Fixed Height**: 120px container height prevents layout shift during rotation
+- **Symmetric Spacing**: `space-y-4` ensures consistent vertical rhythm
+- **Flexbox Centering**: Proper alignment with adequate padding for all character types
+
+#### **Font Size Optimization:**
+
+**Hindi-Specific Adjustment (Lines 25-32):**
+```typescript
+const getFontSizeForLanguage = (langCode: string, isCurrent: boolean): string => {
+  const baseSize = isCurrent ? '1em' : '0.85em';
+  // Make Hindi 30% smaller to fit properly within layout constraints
+  if (langCode === 'hi') {
+    return isCurrent ? '0.7em' : '0.6em'; // 30% reduction for optimal fit
+  }
+  return baseSize;
+};
+```
+
+**Rationale**: Hindi Devanagari script is naturally taller than Latin scripts, requiring size adjustment for visual balance without compromising readability.
+
+#### **Testing Results:**
+
+**Cross-Language Verification:**
+- ✅ **Hindi (हिन्दी)**: Top diacritics fully visible  
+- ✅ **English**: Descenders (g, y, p, q) completely shown
+- ✅ **Nederlands**: Full text width accommodated
+- ✅ **Arabic (العربية)**: RTL text properly contained
+- ✅ **German (Deutsch)**: Umlauts and special characters visible
+- ✅ **All Languages**: No clipping or truncation detected
+
+**Performance Impact:**
+- ✅ **Zero Performance Cost**: Changes are CSS-only optimizations
+- ✅ **Layout Stability**: Fixed height system prevents reflows
+- ✅ **Animation Smoothness**: Transitions unaffected by text fixes
+
+#### **Implementation Pattern for Future Language Support:**
+
+**For New Languages with Complex Scripts:**
+1. **Add Font Size Function**: Extend `getFontSizeForLanguage()` for script-specific sizing
+2. **Test Character Extremes**: Verify tallest/widest characters display fully
+3. **Adjust Padding**: Modify padding values if needed for specific scripts
+4. **Validate RTL Support**: Ensure proper direction handling for RTL languages
+
+**Critical Success Factors:**
+- **Never Use Fixed Overflow Hidden** for text containers with international content
+- **Always Test Extreme Characters** (ascenders, descenders, diacritics)
+- **Provide Adequate Padding** for character breathing room
+- **Use Proper Line Height** for vertical text spacing
+
+---
+
+## 🔄 INFINITE CAROUSEL ENHANCEMENT - NEXT PHASE
+
+### **Current Implementation Analysis:**
+
+**Existing Buffer System (Lines 74-80):**
+```typescript
+// Current approach uses extended array with buffer
+const extendedLanguages = [
+  ...languages.slice(-3), // Last 3 languages at beginning (buffer)
+  ...languages,           // All languages 
+  ...languages.slice(0, 3) // First 3 languages at end (buffer)
+];
+const adjustedIndex = currentIndex + 3; // Offset by buffer size
+```
+
+**Identified Issues:**
+1. **Inconsistent Spacing**: Variable gaps between language items
+2. **Visual Jumps**: Noticeable transitions when reaching buffer boundaries  
+3. **Discontinuous Experience**: Users can perceive the "reset" moment
+4. **Performance Overhead**: Unnecessary DOM element duplication
+
+**Current Transform Logic (Line 120):**
+```typescript
+transform: `translateX(${-adjustedIndex * itemWidth + centerOffset - itemWidth / 2}px)`
+```
+
+**Next Implementation Goal**: True infinite scrolling with imperceptible transitions and consistent spacing.
+
+---
+
+## 🔄 SOLUTION-ARCHITECT HANDOVER (September 2, 2025)
+
+**Status**: Technical responsibility transferred from PM agent to solution-architect agent  
+**Scope**: All technical analysis, debugging, architecture decisions, and implementation guidance  
+**PM Role**: Organizational coordination, agent routing, and project tracking only  
+
+### **Technical Knowledge Transferred from Project Status:**
+
+#### ✅ **RECENT TECHNICAL ACHIEVEMENTS (Sep 3, 2025)**
+
+**Search System Restoration - COMPLETE:**
+- ✅ **Search Page Default State**: Fixed React initialization race condition, all 18 providers show on load
+- ✅ **Language Filters Visibility**: Resolved `availableLanguages` array timing issues, all 15 languages display
+- ✅ **Semantic Search Corruption**: Killed corrupted Python process PID 24460, restarted service, "dokter" finds 3 providers
+- ✅ **AI Service Health**: Embedding service fully operational on port 5001, <200ms response times
+- ✅ **Core USP Restored**: AI-powered semantic search working perfectly
+
+**Previous Technical Milestones:**
+- ✅ **Sort Dropdown Fix**: Z-index and positioning issues resolved for professional UI
+- ✅ **Language Switch Logic**: Smart detection distinguishes filter searches from foreign word typing
+- ✅ **Dynamic Language Ordering**: Context-aware UI language prioritization system
+- ✅ **Language Filter Enhancement**: Country flags, conditional styling, visual feedback
+- ✅ **Translation System**: 3-row hero architecture, react-i18next integration
+
+#### 🛠️ **CURRENT TECHNICAL ENVIRONMENT STATUS**
+
+**Development Stack (Operational):**
+- **Frontend**: Vite dev server with hot reload (localhost:5174)
+- **Backend**: XAMPP Apache + MySQL (localhost/lingora/backend/public)
+- **AI Service**: Flask semantic search (localhost:5001) - **HEALTHY**
+- **Database**: MySQL with comprehensive test data (18 providers, 15 languages)
+- **Authentication**: Working accounts - admin@lingora.nl / password123
+
+**System Health Verification:**
+- ✅ All core systems operational
+- ✅ Search functionality 100% restored
+- ✅ AI semantic search fully functional
+- ✅ No critical blockers identified
+- ✅ Development environment stable
+
+#### 🎯 **TECHNICAL ROADMAP FOR SOLUTION-ARCHITECT**
+
+**Immediate Technical Focus Areas:**
+1. **Provider Dashboard Refinement** (Alpha 0.7/0.8 phase)
+   - Enhance provider dashboard user experience
+   - Optimize dashboard loading and responsiveness
+   - Improve mobile responsiveness for provider interface
+   - Enhance provider data management capabilities
+
+2. **Admin Dashboard Development** (Alpha 0.8)
+   - Admin interface refinements
+   - Enhanced admin functionality
+   - System management improvements
+
+3. **System Stability & Performance**
+   - Monitor AI service health (prevent corruption)
+   - Database optimization and stability
+   - Performance monitoring and optimization
+
+**Technical Deferred Items:**
+- Staff-service association system implementation
+- Mobile responsive testing for all components
+- Enhanced error handling and user feedback
+- WCAG AA accessibility compliance
+
+#### 🚨 **CRITICAL TECHNICAL KNOWLEDGE FOR SOLUTION-ARCHITECT**
+
+**Recurring Issue #1: AI Service Corruption (RESOLVED Sep 3)**
+- **Symptom**: Health check "healthy" but search returns errors
+- **Root Cause**: Python embedding service corrupts after 12+ hours
+- **Solution**: Kill corrupted process, restart embedding service
+- **Prevention**: Monitor service health, proactive restarts
+
+**Key Technical Patterns:**
+- API response handling: Always check `data.error || data.message`
+- Proxy configuration: Must target `/public` for proper PHP routing
+- Database queries: Use proper prepared statements, avoid password corruption
+- Language logic: AND logic for multi-language searches, not OR
+
+**Development Workflow:**
+- Vite proxy handles frontend-backend communication
+- XAMPP provides local PHP/MySQL environment
+- AI service on port 5001 provides semantic search
+- All changes tracked in work-in-progress.md by PM agent
+
+---

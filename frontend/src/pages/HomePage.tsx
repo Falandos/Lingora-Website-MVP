@@ -126,15 +126,17 @@ const HomePage = () => {
               <div className="animate-fade-in mb-64">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-8 tracking-tight">
                   <div className="space-y-4">
-                    {/* Row 1: Static text before rotating language */}
-                    {t('home.hero_title_before') && (
-                      <div className="text-gray-900">
-                        {t('home.hero_title_before')}
-                      </div>
-                    )}
+                    {/* Row 1: Fixed height for text before rotating language */}
+                    <div className="h-20 flex items-center justify-center">
+                      {t('home.hero_title_before') && (
+                        <div className="text-gray-900">
+                          {t('home.hero_title_before')}
+                        </div>
+                      )}
+                    </div>
                     
-                    {/* Row 2: Rotating language with color (always has consistent height) */}
-                    <div className="min-h-[1.2em] flex items-center justify-center">
+                    {/* Row 2: Fixed height for rotating language carousel - ALWAYS 120px */}
+                    <div className="h-32 flex items-center justify-center">
                       <LanguageCarousel 
                         className="language-text-shadow" 
                         onLanguageClick={handleLanguageClick}
@@ -149,12 +151,14 @@ const HomePage = () => {
                       />
                     </div>
                     
-                    {/* Row 3: Static text after rotating language */}
-                    {t('home.hero_title_after') && (
-                      <div className="text-gray-900">
-                        {t('home.hero_title_after')}
-                      </div>
-                    )}
+                    {/* Row 3: Fixed height for text after rotating language */}
+                    <div className="h-20 flex items-center justify-center">
+                      {t('home.hero_title_after') && (
+                        <div className="text-gray-900">
+                          {t('home.hero_title_after')}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </h1>
               </div>

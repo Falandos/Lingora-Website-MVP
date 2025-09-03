@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import useLanguageRotation, { languages } from '../../hooks/useLanguageRotation';
 
 interface Language {
@@ -18,12 +18,8 @@ interface LanguageCarouselProps {
 export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTitle, onLanguageClick }: LanguageCarouselProps) => {
   const { currentLanguage, currentIndex, isVisible, setIsPaused, goToNext, goToPrevious, goToLanguage } = useLanguageRotation(interval);
 
-  // Get dynamic height based on language script - Hindi needs extra space
-  const getHeightForLanguage = (langCode: string): string => {
-    if (langCode === 'hi') return '85px'; // Hindi needs extra height for Devanagari diacritics
-    const tallScripts = ['ar', 'ti', 'zgh']; // Arabic, Tigrinya, Berber 
-    return tallScripts.includes(langCode) ? '70px' : '65px';
-  };
+  // Fixed height for all languages to prevent layout shift
+  const FIXED_CAROUSEL_HEIGHT = '120px';
 
   // Get font size adjustment for specific languages
   const getFontSizeForLanguage = (langCode: string, isCurrent: boolean): string => {
@@ -88,7 +84,7 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
         className={`relative flex items-center ${className}`}
         style={{ 
           width: '800px', // Wider to accommodate buttons
-          height: getHeightForLanguage(currentLanguage.code),
+          height: FIXED_CAROUSEL_HEIGHT,
           margin: '0 auto'
         }}
       >
@@ -108,7 +104,7 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
           className="relative overflow-hidden flex-1"
           style={{ 
             width: '700px',
-            height: getHeightForLanguage(currentLanguage.code)
+            height: FIXED_CAROUSEL_HEIGHT
           }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -148,11 +144,13 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
                   <div 
                     className="flex items-center cursor-pointer"
                     style={{
-                      alignItems: lang.code === 'hi' ? 'center' : 'center',
-                      transform: lang.code === 'hi' ? 'translateY(5px)' : 'translateY(0px)',
                       height: '100%',
                       display: 'flex',
-                      justifyContent: 'center'
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      whiteSpace: 'nowrap',
+                      padding: '8px 12px',
+                      lineHeight: '1.2'
                     }}
                     onClick={() => {
                       if (onLanguageClick) {
@@ -222,7 +220,7 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0px)' : 'translateY(-10px)',
         direction: currentLanguage.rtl ? 'rtl' : 'ltr',
-        minHeight: getHeightForLanguage(currentLanguage.code),
+        minHeight: FIXED_CAROUSEL_HEIGHT,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'

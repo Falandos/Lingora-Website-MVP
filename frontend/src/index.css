@@ -586,5 +586,8 @@
   
   .language-text-shadow {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }

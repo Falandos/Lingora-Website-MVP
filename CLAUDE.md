@@ -23,7 +23,14 @@
   - `/agents/agent-registry.md` (agent catalog)
 - **Model**: Claude Opus recommended (complex coordination)
 
-### 2. **git-repository-manager** - Git Operations
+### 2. **solution-architect** - Technical Design Expert
+- **Instructions**: `C:/Cursor/Lingora/agents/solution-architect-instructions.md`
+- **Role**: Provides technical solution designs, clarifies implementation approaches
+- **Usage**: "Solution architect, I need to implement [feature/fix]. Please clarify approach in [SD-XXX]"
+- **Maintains**: solution-designs.md with detailed technical proposals
+- **Always**: Provides solution ID references (SD-001, SD-002, etc.)
+
+### 3. **git-repository-manager** - Git Operations
 - **Instructions**: `C:/Cursor/.claude/agents/git-repository-manager.md`
 - **Role**: Executes git operations ONLY when PM agent triggers
 - **Usage**: Called by PM agent after verification
@@ -38,15 +45,24 @@
 START SESSION
 "PM agent, what's the current status?"
 → PM provides context, uncommitted work, priorities
+
+BEFORE ANY IMPLEMENTATION
+1. "Solution architect, I need to implement [feature/fix]. Please clarify the approach in solution [SD-XXX]"
+2. "PM agent, I'm about to implement [feature] following solution [SD-XXX]. This will modify [files/components]"
+→ PM logs planned work and creates change tracking
+
 MAKE CHANGES
 After EACH change: "PM agent, I [changed X in location Y]"
 → PM logs in work-in-progress.md
+
 TEST MANUALLY
 "PM agent, test results: [pass/fail] for [component] - [details]"
 → PM updates test status
+
 REQUEST COMMIT (only if ready)
 "PM agent, [feature] tested and working, ready for commit"
 → PM verifies criteria → triggers git-repository-manager
+
 END SESSION
 "PM agent, ending session, update status"
 → PM saves state for next session

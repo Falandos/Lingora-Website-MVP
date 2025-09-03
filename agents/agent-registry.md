@@ -40,7 +40,58 @@ PM: [Acknowledges, updates tracking, provides status/routes request/controls com
 
 ---
 
-### 2. **git-repository-manager** - Git Operations Specialist  
+### 2. **solution-architect** - Technical Architecture & Implementation Specialist
+**Status**: ✅ Active  
+**Instructions**: `/agents/solution-architect-instructions.md` (technical leadership)  
+**Model Recommendation**: Claude Opus (complex technical analysis and architecture decisions)
+
+#### **Primary Role**
+Technical leadership for all architecture decisions, debugging, implementation guidance, and system design.
+
+#### **Core Responsibilities**
+- **Technical Architecture**: System design decisions, technology selection, implementation patterns
+- **Bug Analysis & Resolution**: Root cause analysis, debugging, technical problem solving
+- **Performance Optimization**: System performance analysis, optimization strategies
+- **Implementation Guidance**: Code review, technical best practices, development patterns
+- **System Integration**: API design, database architecture, service coordination
+- **Development Environment**: Technical setup, configuration, troubleshooting
+
+#### **Key Capabilities**
+- Analyze and resolve complex technical issues (AI service corruption, database problems)
+- Design scalable system architecture for multilingual platform
+- Provide implementation guidance for React/TypeScript/PHP/MySQL stack
+- Debug API integration issues, proxy configuration, authentication flows
+- Optimize search functionality, semantic AI integration, database queries
+- Guide development best practices and code quality standards
+
+#### **Usage Pattern**
+```
+PM Agent: "solution-architect, [technical issue/architecture question]"
+Solution Architect: [Analyzes, provides technical solution, implementation guidance]
+```
+
+#### **Technical Domain Coverage**
+- **Frontend**: React + TypeScript + Vite development and optimization
+- **Backend**: PHP 8.2 + MySQL architecture and performance
+- **AI Integration**: Semantic search service, embedding management
+- **DevOps**: XAMPP environment, service management, deployment
+- **Database**: MySQL design, query optimization, relationship management
+- **Authentication**: Security patterns, token management, authorization
+
+#### **Maintains These Files**
+- technical-development.md (primary technical knowledge base)
+- bugs-and-issues.md (technical bug analysis and resolution tracking)
+- Architecture documentation and technical specifications
+
+#### **Critical Rules**
+- ✅ **HANDLES ALL** technical issues routed from PM agent
+- ✅ **OWNS** technical decision making and implementation guidance
+- ✅ **MAINTAINS** technical knowledge base and troubleshooting guides
+- ✅ **COORDINATES** with PM agent on organizational impact of technical decisions
+
+---
+
+### 3. **git-repository-manager** - Git Operations Specialist  
 **Status**: ✅ Active  
 **Instructions**: `C:/Cursor/.claude/agents/git-repository-manager.md` (formerly GIT_WORKFLOW.md)  
 **Model Recommendation**: Any model (straightforward command execution)
@@ -88,6 +139,17 @@ Git Agent: [Executes git operations, reports results]
 8. PM Agent → Updates tracking files, confirms completion
 ```
 
+### **Technical Issue Flow** 🆕
+```
+User: "[Technical problem/question]"
+↓
+PM Agent: Routes to → "solution-architect, [technical issue]"
+↓
+Solution Architect: Analyzes → Provides technical solution
+↓
+PM Agent: Logs outcome in work-in-progress.md, updates organizational status
+```
+
 ### **Status Reporting Flow**
 ```
 User: "What's the current status?"
@@ -119,6 +181,14 @@ Urgent Commit Needed:
 - Test result communication
 - Commit authorization requests
 - Priority and planning discussions
+- **Routes technical issues to solution-architect**
+
+### **PM Agent → Solution Architect** (Technical Coordination) 🆕
+- Technical issue routing and escalation
+- Architecture decision coordination
+- Bug report forwarding and tracking
+- Technical implementation guidance requests
+- System health monitoring coordination
 
 ### **PM Agent → Git Agent** (Internal Coordination)
 - Commit execution after verification
@@ -138,11 +208,12 @@ Urgent Commit Needed:
 ## 🚫 Anti-Patterns to Avoid
 
 ### **DO NOT**
-- ❌ Call github-repository-manager directly (bypasses verification)
+- ❌ Call git-repository-manager directly (bypasses verification)
 - ❌ Make changes without reporting to PM Agent
 - ❌ Request commits without manual testing
 - ❌ Skip PM Agent for status updates
 - ❌ Create new .md files without PM tracking
+- ❌ Route technical issues incorrectly (always go through PM → solution-architect)
 
 ### **ALWAYS**
 - ✅ Start session with PM Agent status check
@@ -150,6 +221,7 @@ Urgent Commit Needed:
 - ✅ Provide explicit test results to PM Agent
 - ✅ Let PM Agent control commit timing
 - ✅ End session with PM Agent status update
+- ✅ Route technical issues: User → PM Agent → solution-architect
 
 ---
 
@@ -160,10 +232,10 @@ Urgent Commit Needed:
 **Usage**: Systematic code review and issue identification  
 **Trigger**: PM Agent routes code review requests
 
-### **solution-architect** (Planned)  
-**Role**: Technical solution design for complex problems  
-**Usage**: Architecture decisions and implementation planning
-**Trigger**: PM Agent routes design challenges
+### **solution-architect** (ACTIVE) ✅
+**Role**: Technical solution design and implementation leadership  
+**Usage**: All technical issues, architecture decisions, debugging, implementation planning
+**Trigger**: PM Agent routes ALL technical challenges immediately
 
 ### **developer** (Planned)
 **Role**: Code implementation and feature development  
@@ -223,8 +295,9 @@ Urgent Commit Needed:
 **Need status?** → PM Agent  
 **Made changes?** → Report to PM Agent  
 **Ready to commit?** → Request from PM Agent  
+**Technical issues?** → PM Agent → solution-architect 🆕  
 **Git issues?** → PM Agent → Git Agent  
-**Lost context?** → PM Agent (single source of truth)
+**Lost context?** → PM Agent (organizational) or solution-architect (technical)
 
 ---
 
