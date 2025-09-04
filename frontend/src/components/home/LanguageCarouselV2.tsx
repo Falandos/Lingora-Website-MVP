@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
-import useLanguageRotation, { languages } from '../../hooks/useLanguageRotation';
+import useLanguageRotationV2, { languagesV2 } from '../../hooks/useLanguageRotationV2';
 
 interface Language {
   code: string;
@@ -8,7 +8,7 @@ interface Language {
   rtl?: boolean;
 }
 
-interface LanguageCarouselProps {
+interface LanguageCarouselV2Props {
   className?: string;
   interval?: number; // milliseconds between language changes
   renderWithTitle?: (currentLanguage: Language) => React.ReactNode;
@@ -16,7 +16,7 @@ interface LanguageCarouselProps {
 }
 
 // Memoized Language Item Component for performance
-const LanguageItem = memo(({ 
+const LanguageItemV2 = memo(({ 
   lang, 
   index, 
   itemWidth, 
@@ -97,10 +97,10 @@ const LanguageItem = memo(({
   </div>
 ));
 
-export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTitle, onLanguageClick }: LanguageCarouselProps) => {
-  const { currentLanguage, currentIndex, isVisible, setIsPaused, goToNext, goToPrevious, goToLanguage } = useLanguageRotation(interval);
+export const LanguageCarouselV2 = ({ className = '', interval = 2500, renderWithTitle, onLanguageClick }: LanguageCarouselV2Props) => {
+  const { currentLanguage, currentIndex, visualIndex, isVisible, isTransitioning, setIsPaused, goToNext, goToPrevious, goToLanguage } = useLanguageRotationV2(interval);
 
-  // Fixed height for all languages to prevent layout shift - Reduced for better spacing
+  // Fixed height for all languages to prevent layout shift
   const FIXED_CAROUSEL_HEIGHT = '96px';
 
   // Get font size adjustment for specific languages
@@ -113,18 +113,9 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
     return baseSize;
   };
 
-  // Helper function to get language at specific offset from current
-  const getLanguageAtOffset = (offset: number) => {
-    if (languages.length === 0) {
-      return { code: 'en', native: 'Loading...', color: '#3B82F6' };
-    }
-    const index = (currentIndex + offset + languages.length) % languages.length;
-    return languages[index];
-  };
-
   // If renderWithTitle is provided, use it to render the content with the current language
   if (renderWithTitle) {
-    // Standardized spacing configuration as per SD-001
+    // Standardized spacing configuration with perfect centering
     const ITEM_CONFIG = {
       width: 320,           // Fixed width for each language item
       spacing: 0,           // No gaps - width includes all spacing
@@ -149,24 +140,15 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
       return `rgb(${lightR}, ${lightG}, ${lightB})`;
     };
     
-    // Don't render carousel if languages haven't loaded yet
-    if (languages.length === 0) {
-      return (
-        <div className={`relative flex items-center justify-center ${className}`}>
-          <div className="text-gray-500">Loading languages...</div>
-        </div>
-      );
-    }
-    
     // Create seamless infinite loop with triple content duplication
     const seamlessLanguages = [
-      ...languages, // Set 1: Main content
-      ...languages, // Set 2: Seamless continuation  
-      ...languages  // Set 3: Buffer for smooth reset
+      ...languagesV2, // Set 1: Main content
+      ...languagesV2, // Set 2: Seamless continuation  
+      ...languagesV2  // Set 3: Buffer for smooth reset
     ];
     
-    // Calculate display index within the first set for seamless transitions
-    const displayIndex = currentIndex;
+    // Use visual index for positioning
+    const displayIndex = visualIndex;
     
     return (
       <div 
@@ -200,13 +182,13 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
           role="status"
           aria-live="polite"
           aria-label={`Currently showing language: ${currentLanguage.native}`}
-          title={`Language: ${currentLanguage.native}`}
+          title={`Language: ${currentLanguage.native} - V2 Correct Order`}
         >
           {/* Sliding Languages Container */}
         <div 
-          className="flex items-center transition-transform duration-500 ease-out"
+          className={`flex items-center ease-out ${isTransitioning ? 'transition-transform duration-500' : 'transition-none'}`}
           style={{
-            transform: `translate3d(${centerOffset - (displayIndex + languages.length) * itemWidth - itemWidth / 2}px, 0, 0)`, // Center the current item properly
+            transform: `translate3d(${centerOffset - displayIndex * itemWidth - itemWidth / 2}px, 0, 0)`, // Use visual index directly
             width: `${seamlessLanguages.length * itemWidth}px`,
             willChange: 'transform',
             backfaceVisibility: 'hidden', // Prevent flickering
@@ -214,17 +196,13 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
           }}
         >
           {seamlessLanguages.map((lang, index) => {
-            // Calculate which set this item belongs to (0, 1, or 2)
-            const setIndex = Math.floor(index / languages.length);
-            const positionInSet = index % languages.length;
-            
-            // Determine if this item is currently active based on displayIndex
-            const isCurrent = positionInSet === displayIndex && setIndex === 1; // Active in middle set
-            const offset = positionInSet - displayIndex;
+            // Determine if this item is currently active based on visualIndex
+            const isCurrent = index === displayIndex; // Use visual index directly
+            const offset = index - displayIndex;
             const isAdjacent = Math.abs(offset) === 1;
             
             return (
-              <LanguageItem
+              <LanguageItemV2
                 key={`${lang.code}-${index}`}
                 lang={lang}
                 index={index}
@@ -236,7 +214,7 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
                 getFontSizeForLanguage={getFontSizeForLanguage}
                 lightenColor={lightenColor}
                 goToLanguage={goToLanguage}
-                languages={languages}
+                languages={languagesV2}
               />
             );
           })}
@@ -258,15 +236,6 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
   }
 
   // Default rendering for when used as standalone component
-  // Don't render if languages haven't loaded yet
-  if (languages.length === 0) {
-    return (
-      <span className={`inline-block min-w-[180px] text-center ${className}`}>
-        <div className="text-gray-500">Loading...</div>
-      </span>
-    );
-  }
-  
   return (
     <span 
       className={`inline-block min-w-[180px] sm:min-w-[220px] text-center transition-all duration-300 ${className}`}
@@ -285,11 +254,11 @@ export const LanguageCarousel = ({ className = '', interval = 2500, renderWithTi
       role="status"
       aria-live="polite"
       aria-label={`Currently showing language: ${currentLanguage.native}`}
-      title={`Language: ${currentLanguage.native}`}
+      title={`Language: ${currentLanguage.native} - V2 Correct Order`}
     >
       {currentLanguage.native}
     </span>
   );
 };
 
-export default LanguageCarousel;
+export default LanguageCarouselV2;

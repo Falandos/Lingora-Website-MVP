@@ -12,19 +12,22 @@ interface Language {
 const languageColors: Record<string, string> = {
   'nl': '#FF6B35', // Dutch orange
   'en': '#3B82F6', // Classic blue
+  'tr': '#DC2626', // Turkish red  
   'ar': '#059669', // Arabic green
-  'de': '#DC2626', // German red
-  'es': '#FBBF24', // Spanish yellow
-  'fr': '#6366F1', // French indigo
-  'pl': '#EF4444', // Polish red
   'uk': '#0EA5E9', // Ukrainian blue
+  'de': '#6B7280', // German gray
+  'pl': '#EF4444', // Polish red
+  'fr': '#6366F1', // French indigo
+  'es': '#FBBF24', // Spanish yellow
   'zh-Hans': '#DC2626', // Chinese red
-  'tr': '#059669', // Turkish green
   'hi': '#F97316', // Hindi orange
+  'pt': '#10B981', // Portuguese green
+  'it': '#059669', // Italian green
+  'ru': '#DC2626', // Russian red
+  'zgh': '#10B981', // Berber green
   'so': '#06B6D4', // Somali cyan
   'ti': '#8B5CF6', // Tigrinya purple
-  'yue': '#EC4899', // Cantonese pink
-  'zgh': '#10B981' // Berber green
+  'ur': '#059669' // Urdu green
 };
 
 // RTL languages
@@ -61,7 +64,8 @@ class LanguageRotationManager {
     try {
       const response = await fetch(`/api/languages?ui_lang=${uiLanguage}`);
       if (response.ok) {
-        const apiLanguages = await response.json();
+        const responseData = await response.json();
+        const apiLanguages = responseData.data || responseData; // Handle wrapped response format
         
         // Convert API format to our Language interface
         languages = apiLanguages.map((lang: any) => ({
@@ -171,7 +175,7 @@ class LanguageRotationManager {
     this.notifySubscribers();
   }
 
-  // Manual navigation methods - direct transitions, let component handle smoothness
+  // Manual navigation methods with seamless infinite loop support
   goToNext() {
     this.currentIndex = (this.currentIndex + 1) % languages.length;
     this.notifySubscribers();

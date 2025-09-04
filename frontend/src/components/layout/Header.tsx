@@ -4,17 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
+import { UI_LANGUAGES, getFlagUrl } from '../../constants/languages';
 
-// Get flag URL for language code (same as RecentProvidersCarousel)
-const getFlagUrl = (langCode: string) => {
-  const countryCodeMap: Record<string, string> = {
-    'nl': 'nl', 'en': 'gb', 'de': 'de', 'ar': 'sa', 'zgh': 'ma',
-    'uk': 'ua', 'pl': 'pl', 'zh-Hans': 'cn', 'yue': 'hk', 'es': 'es',
-    'hi': 'in', 'tr': 'tr', 'fr': 'fr', 'ti': 'er', 'so': 'so'
-  };
-  const countryCode = countryCodeMap[langCode] || 'un';
-  return `https://flagcdn.com/24x18/${countryCode}.png`;
-};
 
 const Header = () => {
   const { t, i18n } = useTranslation();
@@ -32,25 +23,7 @@ const Header = () => {
     navigate('/');
   };
 
-  const supportedLanguages = [
-    { code: 'nl', name: 'Nederlands', countryCode: 'NL' },
-    { code: 'en', name: 'English', countryCode: 'GB' },
-    { code: 'de', name: 'Deutsch', countryCode: 'DE' },
-    { code: 'ar', name: 'العربية', countryCode: 'SA' },
-    { code: 'zgh', name: 'ⵜⴰⵎⴰⵣⵉⵖⵜ', countryCode: 'MA' },
-    { code: 'uk', name: 'Українська', countryCode: 'UA' },
-    { code: 'pl', name: 'Polski', countryCode: 'PL' },
-    { code: 'zh-Hans', name: '中文', countryCode: 'CN' },
-    { code: 'yue', name: '廣東話', countryCode: 'HK' },
-    { code: 'es', name: 'Español', countryCode: 'ES' },
-    { code: 'hi', name: 'हिन्दी', countryCode: 'IN' },
-    { code: 'tr', name: 'Türkçe', countryCode: 'TR' },
-    { code: 'fr', name: 'Français', countryCode: 'FR' },
-    { code: 'ti', name: 'ትግርኛ', countryCode: 'ER' },
-    { code: 'so', name: 'Soomaali', countryCode: 'SO' },
-  ];
-
-  const currentLanguage = supportedLanguages.find(lang => lang.code === i18n.language) || supportedLanguages[0];
+  const currentLanguage = UI_LANGUAGES.find(lang => lang.code === i18n.language) || UI_LANGUAGES[0];
 
   return (
     <header className="bg-white/95 backdrop-blur-sm shadow-soft border-b border-gray-100 sticky top-0 z-50">
@@ -100,7 +73,7 @@ const Header = () => {
                   <div className="text-xs font-medium text-gray-500 px-3 py-2 border-b border-gray-100">
                     Select Language / Taal kiezen
                   </div>
-                  {supportedLanguages.map((lang) => (
+                  {UI_LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => changeLanguage(lang.code)}
@@ -239,7 +212,7 @@ const Header = () => {
               <div className="border-t border-gray-100 pt-4 px-4">
                 <div className="text-sm font-medium text-gray-900 mb-3">Language / Taal</div>
                 <div className="grid grid-cols-2 gap-2">
-                  {supportedLanguages.slice(0, 8).map((lang) => (
+                  {UI_LANGUAGES.slice(0, 8).map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => {

@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+type PlacementType = 'bottom-right' | 'top-right' | 'top-center' | 'below-search';
+
 interface LanguageSwitchSuggestionProps {
   detectedLanguage: string;
   currentUILanguage: string;
   onAccept: () => void;
   onDismiss: () => void;
+  placement?: PlacementType;
+  className?: string;
 }
 
 // Multilingual suggestion messages
@@ -86,7 +90,9 @@ const LanguageSwitchSuggestion: React.FC<LanguageSwitchSuggestionProps> = ({
   detectedLanguage,
   currentUILanguage,
   onAccept,
-  onDismiss
+  onDismiss,
+  placement = 'bottom-right',
+  className = ''
 }) => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(true);
@@ -114,8 +120,25 @@ const LanguageSwitchSuggestion: React.FC<LanguageSwitchSuggestionProps> = ({
     onDismiss();
   };
 
+  // Get positioning classes based on placement
+  const getPositionClasses = (): string => {
+    const baseClasses = 'z-50 animate-slide-in-up';
+    
+    switch (placement) {
+      case 'top-right':
+        return `fixed top-20 right-6 ${baseClasses} md:top-24 md:right-8`;
+      case 'top-center':
+        return `fixed top-20 left-1/2 -translate-x-1/2 ${baseClasses} md:top-24`;
+      case 'below-search':
+        return `relative mt-4 mx-auto max-w-sm ${baseClasses}`;
+      case 'bottom-right':
+      default:
+        return `fixed bottom-6 right-6 ${baseClasses} md:bottom-8 md:right-8`;
+    }
+  };
+
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-slide-in-up md:bottom-8 md:right-8">
+    <div className={`${getPositionClasses()} ${className}`}>
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm">
         <div className="flex items-start space-x-3">
           {/* Language Icon */}

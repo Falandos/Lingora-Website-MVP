@@ -4,18 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import useLanguageRotation from '../../hooks/useLanguageRotation';
+import useLanguageRotationV2 from '../../hooks/useLanguageRotationV2';
+import { UI_LANGUAGES, getFlagUrl } from '../../constants/languages';
 
-// Get flag URL for language code (same as RecentProvidersCarousel)
-const getFlagUrl = (langCode: string) => {
-  const countryCodeMap: Record<string, string> = {
-    'nl': 'nl', 'en': 'gb', 'de': 'de', 'ar': 'sa', 'zgh': 'ma',
-    'uk': 'ua', 'pl': 'pl', 'zh-Hans': 'cn', 'yue': 'hk', 'es': 'es',
-    'hi': 'in', 'tr': 'tr', 'fr': 'fr', 'ti': 'er', 'so': 'so'
-  };
-  const countryCode = countryCodeMap[langCode] || 'un';
-  return `https://flagcdn.com/16x12/${countryCode}.png`;
-};
 
 interface StickySearchBarProps {
   className?: string;
@@ -35,27 +26,30 @@ export const StickySearchBar = ({ className = '' }: StickySearchBarProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   
-  // Use shared language rotation (same timing as hero search bar)
-  const { currentLanguage, isVisible: isPlaceholderVisible } = useLanguageRotation(4500);
+  // Use V2 language rotation (same timing as V2 carousel)
+  const { currentLanguage, isVisible: isPlaceholderVisible } = useLanguageRotationV2(4500);
   
-  // Language-specific placeholder examples mapping (same as HeroSearchBar)
+  // Simplified V2 language-specific placeholder examples (same as HeroSearchBarV2)
   const getPlaceholderForLanguage = (langCode: string): string => {
     const languagePlaceholders: Record<string, string> = {
-      'nl': 'turkse advocaat amsterdam',
-      'en': 'arabic speaking doctor',
-      'ar': 'طبيب يتكلم عربي',
-      'de': 'türkischer anwalt amsterdam',
-      'es': 'médico que habla árabe',
-      'fr': 'médecin parlant arabe',
-      'pl': 'arabski mówiący lekarz',
-      'uk': 'арабськомовний лікар',
-      'zh-Hans': '会说阿拉伯语的医生',
-      'tr': 'türkçe konuşan doktor',
-      'hi': 'अरबी बोलने वाले डॉक्टर',
-      'so': 'dhakhtar ku hadla carabi',
-      'ti': 'ዓረባዊ ዝዛረብ ሓኪም',
-      'yue': '講阿拉伯文嘅醫生',
-      'zgh': 'ⴰⵎⴰⵔ ⵉⵜⵜⵎⴰⵙⵍⴰⵢ ⵜⴰⵄⵔⴰⴱⵜ'
+      'nl': 'Turkse advocaat Rotterdam',        // Turkish lawyer (cross-language)
+      'en': 'English lawyer Utrecht',           // Simple and direct
+      'tr': 'Türk doktor Amsterdam',           // Turkish doctor
+      'ar': 'طبيب عربي روتردام',                // Arabic doctor Rotterdam
+      'de': 'Deutscher Anwalt Den Haag',       // German lawyer
+      'fr': 'Médecin français Eindhoven',      // French doctor
+      'es': 'Dentista español Breda',          // Spanish dentist
+      'pl': 'Polski lekarz Tilburg',           // Polish doctor
+      'it': 'Avvocato italiano Utrecht',       // Italian lawyer
+      'pt': 'Dentista português Nijmegen',     // Portuguese dentist
+      'ru': 'Русский врач Гронинген',          // Russian doctor Groningen
+      'uk': 'Український юрист Арнем',         // Ukrainian lawyer Arnhem
+      'zh': '中国会计师阿姆斯特丹',               // Chinese accountant Amsterdam
+      'hi': 'हिंदी शिक्षक रॉटरडैम',            // Hindi teacher Rotterdam
+      'ur': 'اردو ڈاکٹر ہیگ',                  // Urdu doctor The Hague
+      'so': 'Dhakhtar Soomaali Utrecht',       // Somali doctor
+      'ro': 'Avocat român Eindhoven',          // Romanian lawyer
+      'bg': 'Български зъболекар Бреда'        // Bulgarian dentist Breda
     };
     
     return languagePlaceholders[langCode] || languagePlaceholders['en'];
@@ -153,14 +147,7 @@ export const StickySearchBar = ({ className = '' }: StickySearchBarProps) => {
     }
   };
 
-  const supportedLanguages = [
-    { code: 'nl', name: 'Nederlands', countryCode: 'NL' },
-    { code: 'en', name: 'English', countryCode: 'GB' },
-    { code: 'de', name: 'Deutsch', countryCode: 'DE' },
-    { code: 'ar', name: 'العربية', countryCode: 'SA' },
-  ];
-
-  const currentUILanguage = supportedLanguages.find(lang => lang.code === i18n.language) || supportedLanguages[0];
+  const currentUILanguage = UI_LANGUAGES.find(lang => lang.code === i18n.language) || UI_LANGUAGES[0];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -212,7 +199,7 @@ export const StickySearchBar = ({ className = '' }: StickySearchBarProps) => {
                       className="flex-1 px-4 py-2 text-base bg-transparent border-0 outline-none text-gray-900 transition-all duration-300 relative z-10"
                     />
                     
-                    {/* Animated Placeholder Overlay - Same as HeroSearchBar */}
+                    {/* Animated Placeholder Overlay - V2 Synced with RTL support */}
                     {!searchQuery && !isFocused && (
                       <div 
                         className={`
@@ -223,7 +210,8 @@ export const StickySearchBar = ({ className = '' }: StickySearchBarProps) => {
                         `}
                         style={{
                           transform: 'translateY(-50%)',
-                          lineHeight: '1.2'
+                          lineHeight: '1.2',
+                          direction: currentLanguage.rtl ? 'rtl' : 'ltr' // RTL support for Arabic/Urdu
                         }}
                       >
                         <span className="block">{getPlaceholderForLanguage(currentLanguage.code)}</span>
@@ -314,7 +302,7 @@ export const StickySearchBar = ({ className = '' }: StickySearchBarProps) => {
                     <div className="text-xs font-medium text-gray-500 px-3 py-2 border-b border-gray-100">
                       Select Language
                     </div>
-                    {supportedLanguages.map((lang) => (
+                    {UI_LANGUAGES.map((lang) => (
                       <button
                         key={lang.code}
                         onClick={() => changeLanguage(lang.code)}
@@ -325,7 +313,7 @@ export const StickySearchBar = ({ className = '' }: StickySearchBarProps) => {
                         }`}
                       >
                         <img 
-                          src={getFlagUrl(lang.code)} 
+                          src={getFlagUrl(lang.code, '16x12')} 
                           alt={`${lang.countryCode} flag`} 
                           className="w-3 h-2 rounded-sm" 
                           loading="lazy" 
