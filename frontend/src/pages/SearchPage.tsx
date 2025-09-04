@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLanguageTransitionContext } from '../contexts/LanguageTransitionContext';
 import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -64,6 +65,7 @@ const getFlagUrl = (langCode: string) => {
 
 const SearchPage = () => {
   const { t, i18n } = useTranslation();
+  const { triggerLanguageChange } = useLanguageTransitionContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [allProviders, setAllProviders] = useState<SearchResult[]>([]); // For map display
@@ -556,7 +558,10 @@ const SearchPage = () => {
 
   // Handle language suggestion acceptance
   const handleLanguageSuggestionAccept = (suggestedLanguage: string) => {
-    i18n.changeLanguage(suggestedLanguage);
+    triggerLanguageChange(suggestedLanguage, () => {
+      i18n.changeLanguage(suggestedLanguage);
+      localStorage.setItem('lingora-language', suggestedLanguage);
+    });
     setLanguageSuggestionDismissed(prev => new Set([...prev, suggestedLanguage]));
   };
 

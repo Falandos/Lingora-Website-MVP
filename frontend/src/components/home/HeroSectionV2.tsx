@@ -27,7 +27,7 @@ const HeroSectionV2 = ({ onLanguageClick, onShowHowItWorks }: HeroSectionV2Props
             {/* Main Headline */}
             <div className="animate-fade-in mb-32 lg:mb-40">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-8 tracking-tight">
-                <div className="space-y-4">
+                <div className="space-y-4 hero-text-container">
                   {/* Row 1: Fixed height for text before rotating language */}
                   <div className="h-20 flex items-center justify-center">
                     {t('home.hero_title_before') && (

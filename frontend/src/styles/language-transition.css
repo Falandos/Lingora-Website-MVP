@@ -1,0 +1,261 @@
+/* Language Transition Effects - Shimmer Fade System */
+
+/* Language-specific colors for accents */
+:root {
+  --language-nl: #FF6B35; /* Dutch orange */
+  --language-en: #0066CC; /* British blue */
+  --language-tr: #E30A17; /* Turkish red */
+  --language-ar: #006C35; /* Saudi green */
+  --language-de: #FFCC00; /* German yellow */
+  --language-fr: #0055A4; /* French blue */
+  --language-es: #AA151B; /* Spanish red */
+  --language-pl: #DC143C; /* Polish red */
+  --language-it: #009246; /* Italian green */
+  --language-pt: #006600; /* Portuguese green */
+  --language-ru: #0033A0; /* Russian blue */
+  --language-uk: #005BBB; /* Ukrainian blue */
+  --language-zh: #DE2910; /* Chinese red */
+  --language-hi: #FF9933; /* Hindi saffron */
+  --language-ur: #01411C; /* Urdu green */
+  --language-so: #4189DD; /* Somali blue */
+  --language-ro: #002B7F; /* Romanian blue */
+  --language-bg: #00966E; /* Bulgarian green */
+}
+
+/* Base transition class - no animation on root, only on text elements */
+.language-transitioning {
+  /* No animation on root element */
+}
+
+/* Shimmer fade animation */
+@keyframes shimmerFade {
+  0% { 
+    opacity: 1; 
+    filter: brightness(1) saturate(1);
+    transform: scale(1);
+  }
+  
+  15% { 
+    /* Shimmer effect - like sunlight passing over */
+    filter: brightness(1.2) saturate(1.1);
+    transform: scale(1.005);
+  }
+  
+  40% { 
+    /* Fade out with slight scale down */
+    opacity: 0.3; 
+    filter: brightness(0.8) saturate(0.8);
+    transform: scale(0.98);
+  }
+  
+  60% { 
+    /* Complete fade out at lowest point */
+    opacity: 0.1;
+    transform: scale(0.97);
+  }
+  
+  80% { 
+    /* Begin fade in with new content */
+    opacity: 0.7;
+    filter: brightness(1.1) saturate(1.05);
+    transform: scale(0.99);
+  }
+  
+  100% { 
+    /* Full restoration */
+    opacity: 1; 
+    filter: brightness(1) saturate(1);
+    transform: scale(1);
+  }
+}
+
+/* Language-specific accent classes (no global animation, only on text) */
+.language-accent-nl,
+.language-accent-en,
+.language-accent-tr,
+.language-accent-ar,
+.language-accent-de,
+.language-accent-fr,
+.language-accent-es,
+.language-accent-pl,
+.language-accent-it,
+.language-accent-pt,
+.language-accent-ru,
+.language-accent-uk,
+.language-accent-zh,
+.language-accent-hi,
+.language-accent-ur,
+.language-accent-so,
+.language-accent-ro,
+.language-accent-bg {
+  /* No global animation - only on text elements */
+}
+
+/* Language flash animation with dynamic color */
+@keyframes languageFlash {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 transparent;
+  }
+  
+  25% { 
+    box-shadow: 0 0 20px 2px var(--current-language-color, #3B82F6);
+  }
+  
+  50% { 
+    box-shadow: 0 0 30px 5px var(--current-language-color, #3B82F6);
+  }
+}
+
+/* Enhanced transitions for text elements - COMPREHENSIVE TEXT COVERAGE */
+.language-transitioning h1,
+.language-transitioning h2, 
+.language-transitioning h3,
+.language-transitioning h4,
+.language-transitioning h5,
+.language-transitioning h6,
+.language-transitioning p,
+.language-transitioning span:not([class*="icon"]):not([class*="svg"]):not([class*="w-"]):not([class*="h-"]),
+.language-transitioning div[class*="text-"],
+.language-transitioning a:not([class*="button"]),
+.language-transitioning label,
+.language-transitioning button span,
+.language-transitioning li,
+.language-transitioning td,
+.language-transitioning th,
+.language-transitioning .text-sm,
+.language-transitioning .text-xs,
+.language-transitioning .text-lg,
+.language-transitioning .text-xl,
+.language-transitioning .text-2xl,
+.language-transitioning .text-3xl,
+.language-transitioning .text-4xl,
+.language-transitioning [class*="font-"],
+.language-transitioning input[type="text"]::placeholder,
+.language-transitioning textarea::placeholder,
+.language-transitioning .line-clamp-2,
+.language-transitioning [class*="leading-"],
+.language-transitioning strong,
+.language-transitioning b,
+.language-transitioning em,
+.language-transitioning i,
+/* Additional comprehensive selectors for all sections */
+.language-transitioning section h2,
+.language-transitioning section h3,
+.language-transitioning section p,
+.language-transitioning article h3,
+.language-transitioning article p,
+.language-transitioning .card h3,
+.language-transitioning .card p,
+.language-transitioning .card span,
+.language-transitioning [data-testid] h1,
+.language-transitioning [data-testid] h2,
+.language-transitioning [data-testid] h3,
+.language-transitioning [data-testid] p,
+.language-transitioning [data-testid] span,
+.language-transitioning div:not([class*="w-"]):not([class*="h-"]):not([class*="bg-"]):not([class*="border"]) > span,
+.language-transitioning div:not([class*="w-"]):not([class*="h-"]):not([class*="bg-"]):not([class*="border"]) > p {
+  animation: textShimmer 600ms ease-out;
+}
+
+/* Exclude entire hero text section (all 3 rows) from transitions */
+.language-transitioning .hero-text-container,
+.language-transitioning .hero-text-container *,
+.language-transitioning .language-text-shadow,
+.language-transitioning div[class*="language-text-shadow"],
+.language-transitioning .language-text-shadow *,
+.language-transitioning div[class*="language-text-shadow"] * {
+  animation: none !important;
+  opacity: 1 !important;
+  transition: none !important;
+}
+
+@keyframes textShimmer {
+  0% { 
+    opacity: 1; 
+    text-shadow: 0 0 0 transparent;
+  }
+  
+  20% { 
+    /* Subtle text glow during shimmer */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    opacity: 0.95;
+  }
+  
+  45% { 
+    opacity: 0.2;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  65% { 
+    opacity: 0.1;
+  }
+  
+  85% { 
+    opacity: 0.8;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.2);
+  }
+  
+  100% { 
+    opacity: 1; 
+    text-shadow: 0 0 0 transparent;
+  }
+}
+
+/* Hero section - no container animation, only text within it fades */
+/* Text elements in hero section will inherit the textShimmer animation */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .language-transitioning,
+  .language-transitioning * {
+    animation-duration: 200ms !important;
+    animation-timing-function: ease !important;
+  }
+  
+  @keyframes shimmerFade {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+  
+  @keyframes textShimmer {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+}
+
+/* Mobile optimization - only text elements get faster animation */
+@media (max-width: 768px) {
+  .language-transitioning h1,
+  .language-transitioning h2, 
+  .language-transitioning h3,
+  .language-transitioning h4,
+  .language-transitioning h5,
+  .language-transitioning h6,
+  .language-transitioning p,
+  .language-transitioning span:not([class*="icon"]):not([class*="svg"]):not([class*="w-"]):not([class*="h-"]),
+  .language-transitioning div[class*="text-"],
+  .language-transitioning a,
+  .language-transitioning label,
+  .language-transitioning button span,
+  .language-transitioning li,
+  .language-transitioning td,
+  .language-transitioning th,
+  .language-transitioning .text-sm,
+  .language-transitioning .text-xs,
+  .language-transitioning .text-lg,
+  .language-transitioning .text-xl,
+  .language-transitioning .text-2xl,
+  .language-transitioning .text-3xl,
+  .language-transitioning .text-4xl,
+  .language-transitioning [class*="font-"],
+  .language-transitioning .line-clamp-2,
+  .language-transitioning [class*="leading-"],
+  .language-transitioning strong,
+  .language-transitioning b,
+  .language-transitioning em,
+  .language-transitioning i {
+    animation-duration: 400ms; /* Faster on mobile */
+  }
+}

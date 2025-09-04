@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLanguageTransitionContext } from '../contexts/LanguageTransitionContext';
 import StatisticsBar from '../components/home/StatisticsBar';
 import RecentProvidersCarousel from '../components/home/RecentProvidersCarousel';
 import YourPathForwardSection from '../components/home/YourPathForwardSection';
@@ -25,6 +26,7 @@ interface Category {
 
 const HomePage = () => {
   const { t, i18n } = useTranslation();
+  const { triggerLanguageChange } = useLanguageTransitionContext();
   const [categories, setCategories] = useState<Category[]>([]);
   const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
   const [showLanguageSwitchSuggestion, setShowLanguageSwitchSuggestion] = useState(false);
@@ -63,7 +65,10 @@ const HomePage = () => {
 
   const handleLanguageSwitch = () => {
     if (suggestedLanguage) {
-      i18n.changeLanguage(suggestedLanguage);
+      triggerLanguageChange(suggestedLanguage, () => {
+        i18n.changeLanguage(suggestedLanguage);
+        localStorage.setItem('lingora-language', suggestedLanguage);
+      });
     }
     setShowLanguageSwitchSuggestion(false);
   };
@@ -94,13 +99,13 @@ const HomePage = () => {
       
       {/* Back to Top Button */}
       <BackToTopButton />
-      
-      {/* How It Works Modal - Rendered at page level */}
-      <HowItWorksModal 
-        isOpen={showHowItWorksModal}
-        onClose={() => setShowHowItWorksModal(false)}
-      />
-      
+    
+    {/* How It Works Modal - Rendered at page level */}
+    <HowItWorksModal 
+      isOpen={showHowItWorksModal}
+      onClose={() => setShowHowItWorksModal(false)}
+    />
+    
       {/* Language Switch Suggestion - Using top-right placement for homepage */}
       {showLanguageSwitchSuggestion && (
         <LanguageSwitchSuggestion

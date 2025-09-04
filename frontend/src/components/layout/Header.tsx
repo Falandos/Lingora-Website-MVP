@@ -5,17 +5,24 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { UI_LANGUAGES, getFlagUrl } from '../../constants/languages';
+import { useLanguageTransitionContext } from '../../contexts/LanguageTransitionContext';
 
 
 const Header = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
+  const { triggerLanguageChange, isTransitioning } = useLanguageTransitionContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    localStorage.setItem('lingora-language', lng);
+    if (lng === i18n.language) return;
+    
+    // Use the elegant shimmer fade transition
+    triggerLanguageChange(lng, () => {
+      i18n.changeLanguage(lng);
+      localStorage.setItem('lingora-language', lng);
+    });
   };
 
   const handleLogout = () => {
