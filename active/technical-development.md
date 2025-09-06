@@ -1,6 +1,6 @@
 # Technical Development Reference - Lingora
 *Architecture decisions, implementation patterns, and critical technical knowledge*
-*Created: 2025-08-30 | Last Updated: 2025-09-02*
+*Created: 2025-08-30 | Last Updated: 2025-09-06*
 
 ## 🚨 CRITICAL: AI Service Troubleshooting & Common Issues
 
@@ -8,7 +8,7 @@
 
 **ALWAYS Check These Issues Before Debugging AI Service Problems!**
 
-### 🔴 CRITICAL ISSUE #1: Semantic Search Service Corruption (RECURRING) - RESOLVED SEPTEMBER 3, 2025
+### 🔴 CRITICAL ISSUE #1: Semantic Search Service Corruption (RECURRING) - UPDATED SEPTEMBER 6, 2025
 
 **Symptoms:**
 - Semantic search completely stops working (searching for "dokter" returns no results)
@@ -18,8 +18,9 @@
 - Service appears functional but fails on real queries
 
 **Root Cause:**
-- Python embedding service (embedding_service.py) corrupts after running 12+ hours
+- Python embedding service (embedding_service.py) corrupts after extended runtime
 - Service gets into internal corrupted state but health endpoint still responds
+- **CONFIRMED**: Also corrupts when frontend dev server stops running
 - **THIS HAS HAPPENED MULTIPLE TIMES** - well-documented recurring issue
 
 **✅ LATEST RESOLUTION (September 3, 2025):**
@@ -69,7 +70,55 @@
    ```
    Should return actual search results instead of error.
 
+## 🚨 MANDATORY SESSION STARTUP PROTOCOL (UPDATED SEPTEMBER 6, 2025)
+
+**CRITICAL UPDATE**: Based on today's incident resolution, this procedure must be executed at the START of every development session to prevent the "no providers" issue.
+
+### **NEW MANDATORY SESSION STARTUP REQUIREMENTS:**
+
+**Root Cause Confirmed**: Python embedding service becomes corrupted after extended runtime AND when frontend dev server stops running, causing "no providers" appearance.
+
+**REQUIRED FOR EVERY NEW SESSION:**
+1. **Always restart the AI embedding service at session start**
+2. **Always ensure frontend dev server is running**
+
+### **SD-005: Enhanced AI Service Restart Procedure - Session Management Protocol**
+
+#### **STEP 1: Kill Any Existing Python Processes**
+```powershell
+# Find and kill all Python embedding processes
+Get-Process python* | Select-Object Id, ProcessName, Path
+taskkill //F //PID [process_id]
+```
+
+#### **STEP 2: Start Fresh Embedding Service**
+```bash
+cd C:/cursor/lingora/backend/ai_services
+python embedding_service.py
+# Should show: "Service initialization complete - ready to serve requests"
+```
+
+#### **STEP 3: Start Frontend Dev Server**
+```bash
+cd /c/cursor/lingora/frontend
+npm run dev
+# Should show: "Local: http://localhost:5178/"
+```
+
+#### **STEP 4: Verify Full Stack**
+```bash
+# Test embedding service health
+curl http://localhost:5001/health
+
+# Test search functionality
+curl -X GET "http://localhost:5178/api/search?keyword=dokter&ui_lang=en"
+# Should return 3 results with semantic scores
+```
+
+**CRITICAL**: This procedure must be executed at the START of every development session to prevent the "no providers" issue.
+
 **Prevention & Monitoring:**
+- **MANDATORY**: Execute session startup protocol for every new session
 - Restart embedding service daily during active development
 - Consider implementing automatic service restart/monitoring
 - Always test actual search functionality, not just health endpoint
@@ -127,34 +176,44 @@
 
 ### 🛠️ TROUBLESHOOTING CHECKLIST
 
+**⚠️ BEFORE TROUBLESHOOTING: Execute SD-005 Session Startup Protocol (Updated Sept 6, 2025)**
+
 **When Semantic Search Fails, Check In This Order:**
 
-1. ✅ **Service Corruption** (Most Common - Issue #1 above) - **RESOLVED SEP 3, 2025**
+1. ✅ **FIRST: Execute Mandatory Session Startup Protocol** - **NEW REQUIREMENT SEP 6, 2025**
+   - **ALWAYS** restart AI embedding service at session start
+   - **ALWAYS** ensure frontend dev server is running
+   - Root cause: Service corrupts after extended runtime + frontend stops
+   - Solution: Follow SD-005 4-step protocol above
+
+2. ✅ **Service Corruption** (Most Common - Issue #1 above) - **RESOLVED SEP 3, 2025**
    - Health check says "healthy" BUT search returns errors
    - **Latest Fix**: Killed PID 24460, restarted service, "dokter" now finds 3 providers
    - Solution: Kill and restart embedding service
 
-2. ✅ **Port Conflicts** (Second Most Common - Issue #2 above)  
+3. ✅ **Port Conflicts** (Second Most Common - Issue #2 above)  
    - Multiple processes on port 5001
    - Solution: Kill duplicate processes
 
-3. ✅ **Service Not Running**
+4. ✅ **Service Not Running**
    - No response at http://localhost:5001/health
    - Solution: Start embedding service
 
-4. ✅ **Backend API Issues**
+5. ✅ **Backend API Issues**
    - Embedding service works but search API fails
    - Check backend/api/search/index.php logs
 
-5. ✅ **Frontend Integration**
+6. ✅ **Frontend Integration**
    - APIs work but frontend shows no results
    - Check browser console for errors
 
-**✅ CURRENT STATUS (September 3, 2025):**
+**✅ CURRENT STATUS (September 6, 2025):**
 - All semantic search functionality restored and operational
 - "dokter" search working perfectly with 3 results
 - Embedding service healthy on port 5001
-- No known issues with search system
+- **NEW**: Mandatory session startup protocol established to prevent "no providers" issue
+- **REQUIREMENT**: SD-005 protocol must be executed at start of every development session
+- No known issues with search system when protocol is followed
 
 ---
 
@@ -346,12 +405,22 @@ const ComponentName = () => {
 
 ## 🛠️ Development Environment & Setup
 
+### **MANDATORY SESSION STARTUP PROTOCOL (September 6, 2025)**
+
+**⚠️ CRITICAL: Execute SD-005 protocol BEFORE starting any development work**
+
+**Required for Every New Session:**
+1. Kill any existing Python processes
+2. Start fresh embedding service on port 5001
+3. Start frontend dev server on port 5178
+4. Verify full stack functionality
+
 ### **Current Working Environment**
 
 **Frontend Development:**
 ```bash
 # Vite development server with hot reload
-http://localhost:5174
+http://localhost:5178  # Updated port from session
 
 # React + TypeScript + Tailwind CSS
 # react-i18next for translations
@@ -376,6 +445,7 @@ http://localhost:5001
 # Multilingual embedding model
 # Semantic similarity calculations
 # API integration with main backend
+# MUST restart at every session start (SD-005 protocol)
 ```
 
 ### **Critical Configuration Details**
@@ -740,7 +810,7 @@ HAVING COUNT(DISTINCT language_code) = ?
 
 **Development vs Production:**
 - Always test with XAMPP running (Apache + MySQL)
-- Verify Vite dev server on localhost:5174
+- Verify Vite dev server on localhost:5178
 - Check AI service running on localhost:5001
 - Ensure proper CORS configuration for production
 
@@ -791,7 +861,7 @@ HAVING COUNT(DISTINCT language_code) = ?
 ### **Current Environment Status**
 
 **Development Stack (Working):**
-- **Frontend**: Vite dev server with hot reload (localhost:5174)
+- **Frontend**: Vite dev server with hot reload (localhost:5178)
 - **Backend**: XAMPP Apache + MySQL (localhost/lingora/backend/public)
 - **AI Service**: Flask semantic search (localhost:5001)
 - **Database**: MySQL with comprehensive test data
@@ -982,7 +1052,7 @@ transform: `translateX(${-adjustedIndex * itemWidth + centerOffset - itemWidth /
 #### 🛠️ **CURRENT TECHNICAL ENVIRONMENT STATUS**
 
 **Development Stack (Operational):**
-- **Frontend**: Vite dev server with hot reload (localhost:5174)
+- **Frontend**: Vite dev server with hot reload (localhost:5178)
 - **Backend**: XAMPP Apache + MySQL (localhost/lingora/backend/public)
 - **AI Service**: Flask semantic search (localhost:5001) - **HEALTHY**
 - **Database**: MySQL with comprehensive test data (18 providers, 15 languages)

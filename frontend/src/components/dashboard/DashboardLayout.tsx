@@ -78,7 +78,8 @@ const getNavigationItems = (userRole: string | undefined, providerSlug: string |
       { name: 'Profile', href: '/dashboard/profile', icon: ProfileIcon, current: currentPath.startsWith('/dashboard/profile') },
       { name: 'Services', href: '/dashboard/services', icon: ServicesIcon, current: currentPath.startsWith('/dashboard/services') },
       { name: 'Staff', href: '/dashboard/staff', icon: StaffIcon, current: currentPath.startsWith('/dashboard/staff') },
-      { name: 'Messages', href: '/dashboard/messages', icon: MessageIcon, current: currentPath.startsWith('/dashboard/messages') }
+      { name: 'Messages', href: '/dashboard/messages', icon: MessageIcon, current: currentPath.startsWith('/dashboard/messages') },
+      { name: 'Settings', href: '/dashboard/settings', icon: SettingsIcon, current: currentPath.startsWith('/dashboard/settings') }
     ];
 
     // Special action - Edit Public Page (if available)

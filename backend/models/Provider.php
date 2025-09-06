@@ -344,5 +344,117 @@ class Provider {
         
         return $score;
     }
+    
+    public function getAnalytics($providerId, $days = 30) {
+        // Calculate date range
+        $endDate = date('Y-m-d');
+        $startDate = date('Y-m-d', strtotime("-{$days} days"));
+        
+        // Base query for provider's views within date range
+        $dateFilter = "pv.created_at >= ? AND pv.created_at <= CONCAT(?, ' 23:59:59') AND pv.provider_id = ?";
+        
+        // 1. Overview statistics
+        $overviewSql = "SELECT 
+            COUNT(*) as total_views,
+            COUNT(DISTINCT pv.session_id) as unique_visitors,
+            ROUND(COUNT(*) / ?, 1) as avg_views_per_day
+            FROM page_views pv 
+            WHERE {$dateFilter}";
+        
+        $overview = $this->db->fetchOne($overviewSql, [$days, $startDate, $endDate, $providerId]);
+        
+        // 2. Language breakdown
+        $languageSql = "SELECT 
+            COALESCE(pv.viewer_language, 'unknown') as language,
+            COUNT(*) as views,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM page_views WHERE {$dateFilter}), 1) as percentage
+            FROM page_views pv 
+            WHERE {$dateFilter}
+            GROUP BY pv.viewer_language 
+            ORDER BY views DESC";
+        
+        $languageBreakdown = $this->db->fetchAll($languageSql, [$startDate, $endDate, $providerId, $startDate, $endDate, $providerId]);
+        
+        // 3. Peak times (hourly breakdown)
+        $peakTimesSql = "SELECT 
+            HOUR(pv.created_at) as hour,
+            CONCAT(
+                CASE 
+                    WHEN HOUR(pv.created_at) = 0 THEN '12 AM'
+                    WHEN HOUR(pv.created_at) < 12 THEN CONCAT(HOUR(pv.created_at), ' AM')
+                    WHEN HOUR(pv.created_at) = 12 THEN '12 PM'
+                    ELSE CONCAT(HOUR(pv.created_at) - 12, ' PM')
+                END
+            ) as time_label,
+            COUNT(*) as views
+            FROM page_views pv 
+            WHERE {$dateFilter}
+            GROUP BY HOUR(pv.created_at)
+            ORDER BY views DESC";
+            
+        $peakTimes = $this->db->fetchAll($peakTimesSql, [$startDate, $endDate, $providerId]);
+        
+        // 4. Daily trend
+        $dailyTrendSql = "SELECT 
+            DATE(pv.created_at) as date,
+            COUNT(*) as views
+            FROM page_views pv 
+            WHERE {$dateFilter}
+            GROUP BY DATE(pv.created_at)
+            ORDER BY date ASC";
+            
+        $dailyTrend = $this->db->fetchAll($dailyTrendSql, [$startDate, $endDate, $providerId]);
+        
+        // 5. Section breakdown
+        $sectionSql = "SELECT 
+            COALESCE(pv.page_section, 'main') as section,
+            COUNT(*) as views
+            FROM page_views pv 
+            WHERE {$dateFilter}
+            GROUP BY pv.page_section
+            ORDER BY views DESC";
+            
+        $sectionBreakdown = $this->db->fetchAll($sectionSql, [$startDate, $endDate, $providerId]);
+        
+        // Format the response
+        return [
+            'period' => [
+                'days' => (int)$days,
+                'start_date' => $startDate,
+                'end_date' => $endDate
+            ],
+            'overview' => [
+                'total_views' => (int)($overview['total_views'] ?? 0),
+                'unique_visitors' => (int)($overview['unique_visitors'] ?? 0),
+                'avg_views_per_day' => (float)($overview['avg_views_per_day'] ?? 0)
+            ],
+            'language_breakdown' => array_map(function($item) {
+                return [
+                    'language' => $item['language'] ?? 'unknown',
+                    'views' => (int)$item['views'],
+                    'percentage' => (float)$item['percentage']
+                ];
+            }, $languageBreakdown),
+            'peak_times' => array_map(function($item) {
+                return [
+                    'hour' => (int)$item['hour'],
+                    'time_label' => $item['time_label'],
+                    'views' => (int)$item['views']
+                ];
+            }, $peakTimes),
+            'daily_trend' => array_map(function($item) {
+                return [
+                    'date' => $item['date'],
+                    'views' => (int)$item['views']
+                ];
+            }, $dailyTrend),
+            'section_breakdown' => array_map(function($item) {
+                return [
+                    'section' => $item['section'] ?? 'main',
+                    'views' => (int)$item['views']
+                ];
+            }, $sectionBreakdown)
+        ];
+    }
 }
 ?>

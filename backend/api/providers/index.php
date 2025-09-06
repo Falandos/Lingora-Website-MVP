@@ -148,6 +148,43 @@ switch ($method) {
             
             response($provider);
             
+        } elseif ($action === 'analytics') {
+            // Get analytics data for current provider
+            $user = $jwt->requireAuth('provider');
+            $provider = $providerModel->findByUserId($user['id']);
+            
+            if (!$provider) {
+                error_response('Provider profile not found', 404);
+            }
+            
+            $days = isset($_GET['days']) ? min(max((int)$_GET['days'], 1), 365) : 30;
+            
+            try {
+                $analytics = $providerModel->getAnalytics($provider['id'], $days);
+                response($analytics);
+                
+            } catch (Exception $e) {
+                error_response('Failed to fetch analytics: ' . $e->getMessage(), 500);
+            }
+            
+        } elseif ($action === 'settings') {
+            // Get settings for current provider
+            $user = $jwt->requireAuth('provider');
+            $provider = $providerModel->findByUserId($user['id']);
+            
+            if (!$provider) {
+                error_response('Provider profile not found', 404);
+            }
+            
+            try {
+                $settingsModel = new ProviderSettings();
+                $settings = $settingsModel->getSettings($provider['id']);
+                response($settings);
+                
+            } catch (Exception $e) {
+                error_response('Failed to fetch settings: ' . $e->getMessage(), 500);
+            }
+            
         } else {
             // Get provider by slug (public view)
             $provider = $providerModel->findBySlug($action);
@@ -229,6 +266,33 @@ switch ($method) {
                 error_response($e->getMessage(), 400);
             }
             
+        } elseif ($action === 'settings') {
+            // Update provider settings
+            $user = $jwt->requireAuth('provider');
+            $provider = $providerModel->findByUserId($user['id']);
+            
+            if (!$provider) {
+                error_response('Provider profile not found', 404);
+            }
+            
+            $data = json_decode(file_get_contents('php://input'), true) ?? [];
+            
+            try {
+                $settingsModel = new ProviderSettings();
+                
+                // Validate settings data
+                $errors = $settingsModel->validateSettings($data);
+                if (!empty($errors)) {
+                    error_response('Validation failed', 400, $errors);
+                }
+                
+                $settings = $settingsModel->updateSettings($provider['id'], $data);
+                response($settings);
+                
+            } catch (Exception $e) {
+                error_response('Failed to update settings: ' . $e->getMessage(), 500);
+            }
+            
         } else {
             error_response('Invalid action', 400);
         }
@@ -273,6 +337,24 @@ switch ($method) {
             // TODO: Handle file upload
             
             response(['message' => 'Image upload functionality to be implemented']);
+            
+        } elseif ($action === 'settings' && $id === 'reset') {
+            // Reset settings to defaults
+            $user = $jwt->requireAuth('provider');
+            $provider = $providerModel->findByUserId($user['id']);
+            
+            if (!$provider) {
+                error_response('Provider profile not found', 404);
+            }
+            
+            try {
+                $settingsModel = new ProviderSettings();
+                $settings = $settingsModel->resetToDefaults($provider['id']);
+                response($settings);
+                
+            } catch (Exception $e) {
+                error_response('Failed to reset settings: ' . $e->getMessage(), 500);
+            }
             
         } else {
             error_response('Invalid action', 400);

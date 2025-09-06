@@ -103,7 +103,8 @@ $cors = [
         'http://localhost:5174', 
         'http://localhost:5175',
         'http://localhost:5176',
-        'http://localhost:5177'
+        'http://localhost:5177',
+        'http://localhost:5178'
     ], // Vite dev server
     'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     'allowed_headers' => ['Content-Type', 'Authorization'],
