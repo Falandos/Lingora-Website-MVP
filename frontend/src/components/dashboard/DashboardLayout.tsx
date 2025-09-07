@@ -35,6 +35,12 @@ const SettingsIcon = () => (
   </svg>
 );
 
+const SupportIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5zm-1.5 4.5h3m-3 6h3" />
+  </svg>
+);
+
 const SecurityIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -86,6 +92,7 @@ const getNavigationItems = (userRole: string | undefined, providerSlug: string |
       { name: 'Services', href: '/dashboard/services', icon: ServicesIcon, current: currentPath.startsWith('/dashboard/services') },
       { name: 'Staff', href: '/dashboard/staff', icon: StaffIcon, current: currentPath.startsWith('/dashboard/staff') },
       { name: 'Messages', href: '/dashboard/messages', icon: MessageIcon, current: currentPath.startsWith('/dashboard/messages') },
+      { name: 'Support Tickets', href: '/dashboard/tickets', icon: SupportIcon, current: currentPath.startsWith('/dashboard/tickets') },
       { name: 'Settings', href: '/dashboard/settings', icon: SettingsIcon, current: currentPath === '/dashboard/settings' },
       { name: 'Security', href: '/dashboard/security', icon: SecurityIcon, current: currentPath.startsWith('/dashboard/security') }
     ];

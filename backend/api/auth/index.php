@@ -2,7 +2,22 @@
 // Authentication API endpoints
 // Handles login, register, password reset, etc.
 
-global $method, $action, $database, $jwt, $config;
+// Load config and dependencies
+require_once '../../config/config.php';
+
+// Parse URI to get action
+$method = $_SERVER['REQUEST_METHOD'];
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = preg_replace('/^\/lingora\/backend\/public\/api/', '', $uri);
+$uri = preg_replace('/^\/api/', '', $uri);
+$uri = trim($uri, '/');
+$segments = $uri ? explode('/', $uri) : [];
+$action = $segments[1] ?? null;
+
+// Initialize dependencies
+$config = $GLOBALS['config'] ?? [];
+$database = $GLOBALS['database'] ?? new Database();
+$jwt = $GLOBALS['jwt'] ?? new JWTService($config['jwt']['secret'] ?? 'default-secret', $config['jwt']['algorithm'] ?? 'HS256');
 
 $userModel = new User();
 

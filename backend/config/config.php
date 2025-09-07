@@ -130,6 +130,7 @@ spl_autoload_register(function ($class) {
 
 // Global functions
 
+if (!function_exists('response')) {
 function response($data = [], $status = 200, $message = '') {
     http_response_code($status);
     header('Content-Type: application/json');
@@ -150,7 +151,9 @@ function response($data = [], $status = 200, $message = '') {
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
     exit;
 }
+}
 
+if (!function_exists('error_response')) {
 function error_response($message, $status = 400, $errors = []) {
     http_response_code($status);
     header('Content-Type: application/json');
@@ -168,7 +171,9 @@ function error_response($message, $status = 400, $errors = []) {
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
     exit;
 }
+}
 
+if (!function_exists('validate_required_fields')) {
 function validate_required_fields($data, $required_fields) {
     $errors = [];
     
@@ -180,13 +185,17 @@ function validate_required_fields($data, $required_fields) {
     
     return $errors;
 }
+}
 
+if (!function_exists('generate_slug')) {
 function generate_slug($text) {
     // Remove special characters and convert to lowercase
     $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $text)));
     return trim($slug, '-');
 }
+}
 
+if (!function_exists('get_client_ip')) {
 function get_client_ip() {
     $ip_keys = ['HTTP_CF_CONNECTING_IP', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'];
     
@@ -202,8 +211,10 @@ function get_client_ip() {
     
     return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
+}
 
 // Handle CORS for API requests
+if (!function_exists('handle_cors')) {
 function handle_cors() {
     global $cors;
     
@@ -225,6 +236,7 @@ function handle_cors() {
         http_response_code(200);
         exit;
     }
+}
 }
 
 // Initialize CORS handling for API requests

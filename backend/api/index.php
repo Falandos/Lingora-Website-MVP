@@ -70,6 +70,10 @@ try {
             require_once 'languages/index.php';
             break;
 
+        case 'support':
+            require_once 'support/index.php';
+            break;
+
         case 'test':
             require_once 'test/index.php';
             break;

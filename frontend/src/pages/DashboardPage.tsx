@@ -8,6 +8,7 @@ import StaffPage from './dashboard/StaffPage';
 import Settings from './dashboard/Settings';
 import SecuritySettings from './dashboard/SecuritySettings';
 import EmailTemplates from './dashboard/EmailTemplates';
+import TicketsPage from './dashboard/TicketsPage';
 
 // Import auth context for role checking
 import { useAuth } from '../contexts/AuthContext';
@@ -201,6 +202,7 @@ const DashboardPage = () => {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="services" element={<ServicesPage />} />
         <Route path="staff" element={<StaffPage />} />
+        <Route path="tickets" element={<TicketsPage />} />
       </Routes>
     </DashboardLayout>
   );

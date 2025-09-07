@@ -27,7 +27,7 @@ interface RegisterResponse {
 }
 
 export class AuthService {
-  private static readonly API_BASE = '/api';
+  private static readonly API_BASE = 'http://localhost:8000/api';
   
   static async login(email: string, password: string): Promise<LoginResponse> {
     try {
@@ -41,23 +41,23 @@ export class AuthService {
 
       const data = await response.json();
 
-      // Handle backend response format: {token, user} directly or {error}
-      if (response.ok && data.token && data.user) {
+      // Handle backend response format: {success: true, data: {token, user}}
+      if (response.ok && data.success && data.data?.token && data.data?.user) {
         // Store token and user data
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
         
         return {
           success: true,
           data: {
-            token: data.token,
-            user: data.user
+            token: data.data.token,
+            user: data.data.user
           }
         };
       } else {
         return {
           success: false,
-          message: data.error || data.message || 'Login failed'
+          message: data.message || data.error || 'Login failed'
         };
       }
     } catch (error) {
