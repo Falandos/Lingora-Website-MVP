@@ -1,17 +1,23 @@
 import React from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import PasswordChangeForm from '../../components/dashboard/PasswordChangeForm';
+import EmailChangeForm from '../../components/dashboard/EmailChangeForm';
 
 export const SecuritySettings: React.FC = () => {
+  const { user } = useAuth();
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Security Settings</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Manage your account security and password settings
+          Manage your account security and authentication settings
         </p>
       </div>
 
       <PasswordChangeForm />
+      
+      {user?.email && <EmailChangeForm currentEmail={user.email} />}
       
       {/* Future security features can be added here */}
       <div className="bg-white rounded-lg shadow p-6">

@@ -80,6 +80,7 @@ const getNavigationItems = (userRole: string | undefined, providerSlug: string |
       { name: 'Overview', href: '/dashboard', icon: HomeIcon, current: currentPath === '/dashboard' },
       { name: 'Providers', href: '/dashboard/providers', icon: UsersIcon, current: currentPath.startsWith('/dashboard/providers') },
       { name: 'Messages', href: '/dashboard/messages', icon: MessageIcon, current: currentPath.startsWith('/dashboard/messages') },
+      { name: 'Support Tickets', href: '/dashboard/tickets', icon: SupportIcon, current: currentPath.startsWith('/dashboard/tickets') },
       { name: 'Statistics', href: '/dashboard/stats', icon: ChartIcon, current: currentPath.startsWith('/dashboard/stats') },
       { name: 'Settings', href: '/dashboard/settings', icon: SettingsIcon, current: currentPath === '/dashboard/settings' },
       { name: 'Security', href: '/dashboard/security', icon: SecurityIcon, current: currentPath.startsWith('/dashboard/security') },

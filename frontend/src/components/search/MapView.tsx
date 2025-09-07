@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -13,23 +13,28 @@ L.Icon.Default.mergeOptions({
 });
 
 interface Provider {
-  provider: {
-    id: number;
-    slug: string;
-    name: string;
-    city: string;
-    lat: number;
-    lng: number;
-  };
-  languages: string[];
+  id: number;
+  business_name: string;
+  slug: string;
+  city: string;
+  address: string;
+  bio_nl: string;
+  bio_en: string;
+  latitude: string;
+  longitude: string;
+  profile_completeness_score: number;
+  gallery: any[];
+  languages: Array<{
+    language_code: string;
+    cefr_level: string;
+    name_en: string;
+    name_native: string;
+  }>;
   services: Array<{
     title: string;
-    category_id: number;
-    price_min: number;
-    price_max: number;
+    service_mode: string;
+    category_name: string;
   }>;
-  distance_km?: number;
-  media?: Array<{ url: string }>;
 }
 
 interface MapViewProps {
@@ -46,8 +51,14 @@ function MapBounds({ providers }: { providers: Provider[] }) {
 
   useEffect(() => {
     if (providers.length > 0) {
-      const bounds = L.latLngBounds(
-        providers.map(p => [p.provider.lat, p.provider.lng] as [number, number])
+      console.log(`MapBounds: Setting bounds for ${providers.length} providers`);
+      const coordinates = providers.map(p => {
+        const coords = [parseFloat(p.latitude), parseFloat(p.longitude)] as [number, number];
+        console.log(`Provider ${p.business_name} coordinates:`, coords);
+        return coords;
+      });
+      
+      const bounds = L.latLngBounds(coordinates
       );
       
       // Add padding and fit to bounds
@@ -70,10 +81,18 @@ const MapView = ({
 }: MapViewProps) => {
   const mapRef = useRef<L.Map>(null);
 
-  // PLACEHOLDER: Mock coordinates for providers
-  // TODO: In production, these will come from geocoding API or database
+  // Get provider coordinates from API data
   const getProviderCoordinates = (provider: Provider): [number, number] => {
-    return [provider.provider.lat, provider.provider.lng];
+    const lat = parseFloat(provider.latitude);
+    const lng = parseFloat(provider.longitude);
+    
+    // Validate coordinates are valid numbers
+    if (isNaN(lat) || isNaN(lng)) {
+      console.warn(`Invalid coordinates for provider ${provider.business_name}:`, provider.latitude, provider.longitude);
+      return [52.1326, 5.2913]; // Default to Netherlands center
+    }
+    
+    return [lat, lng];
   };
 
   // Create custom icons for different provider types
@@ -94,7 +113,7 @@ const MapView = ({
         font-weight: bold;
         font-size: 12px;
       ">
-        ${provider.provider.name.charAt(0)}
+        ${provider.business_name.charAt(0)}
       </div>
     `;
 
@@ -113,6 +132,7 @@ const MapView = ({
         zoom={zoom}
         style={{ height: '100%', width: '100%', borderRadius: '12px' }}
         ref={mapRef}
+        zoomControl={false}
       >
         {/* OpenStreetMap tiles - Free and no API key required */}
         <TileLayer
@@ -120,6 +140,9 @@ const MapView = ({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
+        {/* Add zoom controls */}
+        <ZoomControl position="topright" />
+        
         {/* Fit bounds to show all providers */}
         <MapBounds providers={providers} />
 
@@ -127,9 +150,12 @@ const MapView = ({
         {providers.map((provider) => {
           const position = getProviderCoordinates(provider);
           
+          // Debug logging
+          console.log(`Rendering marker for ${provider.business_name} at position:`, position);
+          
           return (
             <Marker
-              key={provider.provider.id}
+              key={provider.id}
               position={position}
               icon={createProviderIcon(provider)}
               eventHandlers={{
@@ -143,10 +169,10 @@ const MapView = ({
               <Popup closeButton={true} offset={[0, -10]}>
                 <div className="min-w-[250px]">
                   {/* Provider image */}
-                  {provider.media && provider.media.length > 0 && (
+                  {provider.gallery && provider.gallery.length > 0 && (
                     <img
-                      src={provider.media[0].url}
-                      alt={provider.provider.name}
+                      src={provider.gallery[0].url}
+                      alt={provider.business_name}
                       className="w-full h-32 object-cover rounded-lg mb-3"
                     />
                   )}
@@ -154,13 +180,10 @@ const MapView = ({
                   {/* Provider info */}
                   <div className="space-y-2">
                     <h3 className="font-bold text-lg text-gray-900">
-                      {provider.provider.name}
+                      {provider.business_name}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      📍 {provider.provider.city}
-                      {provider.distance_km && (
-                        <span className="ml-2">• {Math.round(provider.distance_km)}km away</span>
-                      )}
+                      📍 {provider.city}
                     </p>
 
                     {/* Services */}

@@ -27,7 +27,7 @@ interface RegisterResponse {
 }
 
 export class AuthService {
-  private static readonly API_BASE = 'http://localhost:8000/api';
+  private static readonly API_BASE = '/api';
   
   static async login(email: string, password: string): Promise<LoginResponse> {
     try {
@@ -110,7 +110,10 @@ export class AuthService {
 
       if (response.ok) {
         const data = await response.json();
-        // Handle backend response format: user object directly or {error}
+        // Handle backend response format: {success: true, data: {user}}
+        if (data.success && data.data) {
+          return data.data;
+        }
         return data.email ? data : null;
       } else {
         // Token is invalid, clear it

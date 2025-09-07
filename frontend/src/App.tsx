@@ -23,6 +23,8 @@ import RegisterUserPage from './pages/RegisterUserPage';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import ConfirmCurrentEmailPage from './pages/ConfirmCurrentEmailPage';
+import VerifyNewEmailPage from './pages/VerifyNewEmailPage';
 import LegalPage from './pages/LegalPage';
 
 function App() {
@@ -71,6 +73,8 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/confirm-current-email" element={<ConfirmCurrentEmailPage />} />
+              <Route path="/verify-new-email" element={<VerifyNewEmailPage />} />
               <Route path="/terms" element={<LegalPage type="terms" />} />
               <Route path="/privacy" element={<LegalPage type="privacy" />} />
               <Route path="/cookies" element={<LegalPage type="cookies" />} />

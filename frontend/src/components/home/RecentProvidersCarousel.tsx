@@ -65,7 +65,7 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
         const response = await fetch('/api/providers/recent');
         if (response.ok) {
           const data = await response.json();
-          setProviders(data.providers || []);
+          setProviders(data.data?.providers || []);
         } else {
           // Fallback to three recent providers if API fails
           setProviders([
@@ -109,7 +109,45 @@ export const RecentProvidersCarousel = ({ className = '' }: RecentProvidersCarou
         }
       } catch (error) {
         console.error('Failed to fetch recent providers:', error);
-        // Fallback data here if needed
+        // Fallback to three recent providers if network error
+        setProviders([
+          {
+            id: 33,
+            business_name: 'Medisch Centrum Multicultureel Tilburg',
+            slug: 'medisch-centrum-tilburg',
+            city: 'Tilburg',
+            created_at: '2025-08-26T01:31:05Z',
+            languages: ['ar', 'de', 'en', 'es', 'fr', 'nl', 'tr'],
+            bio_en: 'Healthcare for everyone. Doctors and specialists who speak your language.',
+            primary_category: 'Healthcare',
+            category_id: 1,
+            kvk_verified: true
+          },
+          {
+            id: 34,
+            business_name: 'Juridisch Adviesbureau Nijmegen International',
+            slug: 'juridisch-adviesbureau-nijmegen',
+            city: 'Nijmegen',
+            created_at: '2025-08-26T01:31:05Z',
+            languages: ['de', 'en', 'es', 'nl', 'yue', 'zh-Hans'],
+            bio_en: 'Legal advice for international students and professionals.',
+            primary_category: 'Legal Services',
+            category_id: 2,
+            kvk_verified: true
+          },
+          {
+            id: 35,
+            business_name: 'Taalinstituut Haarlem International',
+            slug: 'taalinstituut-haarlem',
+            city: 'Haarlem',
+            created_at: '2025-08-26T01:31:05Z',
+            languages: ['ar', 'de', 'en', 'fr', 'nl', 'uk'],
+            bio_en: 'Language lessons and interpreters in the heart of North Holland.',
+            primary_category: 'Education',
+            category_id: 3,
+            kvk_verified: true
+          }
+        ]);
       } finally {
         setLoading(false);
       }

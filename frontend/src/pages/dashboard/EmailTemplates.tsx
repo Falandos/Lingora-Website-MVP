@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../../components/ui/Button';
+import RichTextEditor from '../../components/ui/RichTextEditor';
 
 interface EmailTemplate {
   id: number;
@@ -274,17 +275,16 @@ export const EmailTemplates: React.FC = () => {
                   {/* Body HTML */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Body (HTML)
+                      Email Body
                     </label>
-                    <textarea
+                    <RichTextEditor
                       value={selectedTemplate.body_html}
-                      onChange={(e) => setSelectedTemplate({
+                      onChange={(value) => setSelectedTemplate({
                         ...selectedTemplate,
-                        body_html: e.target.value
+                        body_html: value
                       })}
-                      rows={15}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                      placeholder="HTML content with {variables}"
+                      variables={Array.isArray(selectedTemplate.variables) ? selectedTemplate.variables : []}
+                      placeholder="Start typing your email content..."
                     />
                   </div>
 
@@ -386,8 +386,37 @@ export const EmailTemplates: React.FC = () => {
               </div>
               <div 
                 className="border border-gray-200 rounded p-4 bg-gray-50"
-                dangerouslySetInnerHTML={{ __html: previewData.body }}
-              />
+                style={{
+                  lineHeight: '1.6',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }}
+              >
+                <div 
+                  dangerouslySetInnerHTML={{ __html: previewData.body }}
+                  style={{
+                    // Fix button and text overlap issues
+                  }}
+                />
+                <style>{`
+                  .bg-gray-50 a[style*="background"] {
+                    display: inline-block !important;
+                    margin: 12px 8px 12px 0 !important;
+                    padding: 12px 24px !important;
+                    clear: left !important;
+                    float: none !important;
+                    vertical-align: baseline !important;
+                  }
+                  .bg-gray-50 p {
+                    margin: 16px 0 !important;
+                    clear: both !important;
+                  }
+                  .bg-gray-50 div[style*="background"] {
+                    margin: 16px 0 !important;
+                    padding: 16px !important;
+                    clear: both !important;
+                  }
+                `}</style>
+              </div>
             </div>
           </div>
         </div>

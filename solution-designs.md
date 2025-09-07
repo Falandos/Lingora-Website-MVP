@@ -4,6 +4,150 @@ This document tracks comprehensive technical solutions for Lingora platform feat
 
 ---
 
+## SD-005: Clean Restart Procedure for Development Environment
+
+**Date:** September 7, 2025  
+**Priority:** Medium  
+**Category:** Development Operations & Environment Management  
+
+### Problem Statement
+
+Multiple development processes running simultaneously cause port conflicts, preventing proper testing of new features. Current issues include:
+- Frontend npm dev running on port 5175 instead of preferred 5173
+- Missing "Recent providers" functionality on homepage
+- Port conflicts causing confusion between testing environments
+- Need clean environment to test newest admin ticket system changes
+
+### Current System Analysis
+
+**Services Identified:**
+- ✅ Frontend: React dev server (npm run dev) - multiple instances running
+- ✅ Backend: PHP development server on localhost:8000
+- ✅ AI Services: Python Flask embedding service on localhost:5001
+- ✅ Database: XAMPP MySQL service
+- ❌ Port conflicts on 5173, 5174, 5175
+- ❌ Syntax errors in TicketsPage.tsx preventing clean startup
+
+### Technical Solution
+
+#### 1. Clean Process Shutdown Procedure
+
+```bash
+# Kill all Node.js processes (Windows)
+taskkill /F /IM node.exe
+taskkill /F /IM npm.exe
+
+# Kill specific development processes
+netstat -ano | findstr ":5173\|:5174\|:5175\|:8000\|:5001"
+# Note PIDs and kill if needed: taskkill /F /PID [PID_NUMBER]
+
+# Alternative: Kill background bash shells if using integrated terminal
+```
+
+#### 2. Service Restart Sequence
+
+**Step 1: Start Backend Services**
+```bash
+# Navigate to backend directory
+cd C:\Cursor\Lingora\backend
+
+# Start PHP development server
+php -S localhost:8000
+```
+
+**Step 2: Start AI Services**
+```bash
+# Navigate to AI services directory  
+cd C:\Cursor\Lingora\backend\ai_services
+
+# Start Python embedding service
+./start_service.bat
+# Should start on http://localhost:5001
+```
+
+**Step 3: Start Frontend (Last)**
+```bash
+# Navigate to frontend directory
+cd C:\Cursor\Lingora\frontend
+
+# Install dependencies if needed
+npm install
+
+# Start development server on preferred port
+npm run dev -- --port 5173
+```
+
+#### 3. Verification Steps
+
+**Backend Verification:**
+- ✅ PHP server responds at `http://localhost:8000`
+- ✅ API endpoints accessible (e.g., `http://localhost:8000/api/providers`)
+
+**AI Services Verification:**
+- ✅ Health check: `http://localhost:5001/health`
+- ✅ Service logs show "ready to serve requests"
+
+**Frontend Verification:**
+- ✅ React app loads at `http://localhost:5173`
+- ✅ Homepage displays "Recent providers" section
+- ✅ Admin dashboard accessible via login
+- ✅ Ticket system functionality working
+
+**Database Verification:**
+- ✅ XAMPP MySQL running
+- ✅ Database connection successful in AI service logs
+
+#### 4. Common Issues & Troubleshooting
+
+**Port Conflicts:**
+- Use `netstat -ano | findstr ":5173"` to identify conflicting processes
+- Kill specific PIDs: `taskkill /F /PID [PID_NUMBER]`
+
+**Syntax Errors:**
+- Check for JSX syntax errors in React components
+- Ensure all imports resolve correctly
+- Fix CreateTicketModal import path if needed
+
+**Service Dependencies:**
+- Start backend before frontend (API dependency)
+- Ensure database is running before starting AI services
+- AI services require database connection for embeddings
+
+#### 5. Success Criteria
+
+1. ✅ Frontend accessible on clean port 5173
+2. ✅ Homepage "Recent providers" section displays correctly
+3. ✅ Admin login and ticket system fully functional
+4. ✅ All services running without port conflicts
+5. ✅ Clean development environment for testing
+
+#### 6. Post-Restart Testing URLs
+
+- **Homepage:** `http://localhost:5173/`
+- **Admin Login:** `http://localhost:5173/admin/login`
+- **Provider Dashboard:** `http://localhost:5173/dashboard`
+- **Tickets Page:** `http://localhost:5173/dashboard/tickets`
+- **API Health:** `http://localhost:8000/api/providers`
+- **AI Health:** `http://localhost:5001/health`
+
+#### 7. Implementation Notes
+
+**Environment Requirements:**
+- Node.js and npm for frontend
+- PHP 8+ for backend API
+- Python 3.8+ for AI services
+- XAMPP for MySQL database
+
+**Development Best Practices:**
+- Always use specified ports for consistency
+- Kill processes cleanly to prevent orphaned instances
+- Verify all services before testing features
+- Monitor service logs for startup errors
+
+This procedure ensures a clean, conflict-free development environment for testing new features and resolving bugs.
+
+---
+
 ## SD-011: Password Reset/Change Functionality
 
 **Date:** September 7, 2025  
