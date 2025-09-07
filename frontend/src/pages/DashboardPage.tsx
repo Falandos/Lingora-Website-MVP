@@ -6,6 +6,7 @@ import ProfilePage from './dashboard/ProfilePage';
 import ServicesPage from './dashboard/ServicesPage';
 import StaffPage from './dashboard/StaffPage';
 import Settings from './dashboard/Settings';
+import EmailTemplates from './dashboard/EmailTemplates';
 
 // Import auth context for role checking
 import { useAuth } from '../contexts/AuthContext';
@@ -192,6 +193,7 @@ const DashboardPage = () => {
         <Route index element={<DashboardHome />} />
         <Route path="providers" element={<ProvidersPage />} />
         <Route path="messages" element={<MessagesPage />} />
+        <Route path="email-templates" element={<EmailTemplates />} />
         <Route path="stats" element={<StatsPage />} />
         <Route path="settings" element={<Settings />} />
         <Route path="profile" element={<ProfilePage />} />

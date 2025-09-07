@@ -269,7 +269,7 @@ const DashboardHome = () => {
     return (
       <div className="bg-white shadow rounded-lg p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <a
             href="/dashboard/providers"
             className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
@@ -290,6 +290,17 @@ const DashboardHome = () => {
             </div>
             <span className="text-xs font-medium text-gray-900 group-hover:text-green-600 text-center">
               View Messages
+            </span>
+          </a>
+          <a
+            href="/dashboard/email-templates"
+            className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
+          >
+            <div className="w-6 h-6 text-gray-400 group-hover:text-indigo-500 mb-2">
+              <MessageIcon />
+            </div>
+            <span className="text-xs font-medium text-gray-900 group-hover:text-indigo-600 text-center">
+              Email Templates
             </span>
           </a>
           <a
