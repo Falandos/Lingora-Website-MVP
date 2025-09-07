@@ -10,39 +10,33 @@ interface SettingsData {
   sms_notifications: boolean;
   newsletter_subscription: boolean;
   
-  // Display Preferences
-  language: string;
+  // Display Preferences (Coming Soon)
   timezone: string;
   date_format: string;
   currency: string;
   
   // Dashboard Preferences
-  dashboard_layout: string;
-  items_per_page: number;
   show_analytics: boolean;
-  compact_view: boolean;
   
   // Privacy Settings
   profile_visibility: 'public' | 'unlisted' | 'private';
   show_contact_info: boolean;
   allow_messages: boolean;
+  show_staff_contact_info?: boolean;
 }
 
 const defaultSettings: SettingsData = {
   email_notifications: true,
   sms_notifications: false,
   newsletter_subscription: true,
-  language: 'en',
   timezone: 'Europe/Amsterdam',
   date_format: 'DD/MM/YYYY',
   currency: 'EUR',
-  dashboard_layout: 'grid',
-  items_per_page: 20,
   show_analytics: true,
-  compact_view: false,
   profile_visibility: 'public',
   show_contact_info: true,
   allow_messages: true,
+  show_staff_contact_info: true,
 };
 
 export const Settings: React.FC = () => {
@@ -231,17 +225,15 @@ export const Settings: React.FC = () => {
                 checked={settings.email_notifications}
                 onChange={(value) => handleChange('email_notifications', value)}
               />
-              <ToggleField
+              <ComingSoonField
                 label="SMS Notifications"
                 description="Receive notifications via SMS"
-                checked={settings.sms_notifications}
-                onChange={(value) => handleChange('sms_notifications', value)}
+                type="toggle"
               />
-              <ToggleField
+              <ComingSoonField
                 label="Newsletter Subscription"
                 description="Receive our newsletter and updates"
-                checked={settings.newsletter_subscription}
-                onChange={(value) => handleChange('newsletter_subscription', value)}
+                type="toggle"
               />
             </div>
           </section>
@@ -250,48 +242,23 @@ export const Settings: React.FC = () => {
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Display Preferences</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SelectField
-                label="Language"
-                value={settings.language}
-                options={[
-                  { value: 'en', label: 'English' },
-                  { value: 'nl', label: 'Nederlands' },
-                  { value: 'de', label: 'Deutsch' },
-                  { value: 'fr', label: 'Français' },
-                  { value: 'es', label: 'Español' },
-                ]}
-                onChange={(value) => handleChange('language', value)}
-              />
-              <SelectField
+              <ComingSoonField
                 label="Timezone"
-                value={settings.timezone}
-                options={[
-                  { value: 'Europe/Amsterdam', label: 'Europe/Amsterdam' },
-                  { value: 'Europe/London', label: 'Europe/London' },
-                  { value: 'Europe/Berlin', label: 'Europe/Berlin' },
-                  { value: 'Europe/Paris', label: 'Europe/Paris' },
-                ]}
-                onChange={(value) => handleChange('timezone', value)}
+                description="Set your preferred timezone"
+                type="select"
+                currentValue="Europe/Amsterdam"
               />
-              <SelectField
+              <ComingSoonField
                 label="Date Format"
-                value={settings.date_format}
-                options={[
-                  { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
-                  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
-                  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
-                ]}
-                onChange={(value) => handleChange('date_format', value)}
+                description="Choose your preferred date format"
+                type="select"
+                currentValue="DD/MM/YYYY"
               />
-              <SelectField
+              <ComingSoonField
                 label="Currency"
-                value={settings.currency}
-                options={[
-                  { value: 'EUR', label: 'EUR (€)' },
-                  { value: 'USD', label: 'USD ($)' },
-                  { value: 'GBP', label: 'GBP (£)' },
-                ]}
-                onChange={(value) => handleChange('currency', value)}
+                description="Set your preferred currency display"
+                type="select"
+                currentValue="EUR (€)"
               />
             </div>
           </section>
@@ -300,34 +267,18 @@ export const Settings: React.FC = () => {
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Dashboard Preferences</h2>
             <div className="space-y-4">
-              <SelectField
-                label="Dashboard Layout"
-                value={settings.dashboard_layout}
-                options={[
-                  { value: 'grid', label: 'Grid View' },
-                  { value: 'list', label: 'List View' },
-                  { value: 'compact', label: 'Compact View' },
-                ]}
-                onChange={(value) => handleChange('dashboard_layout', value)}
-              />
-              <NumberField
-                label="Items per Page"
-                value={settings.items_per_page}
-                min={5}
-                max={100}
-                onChange={(value) => handleChange('items_per_page', value)}
-              />
               <ToggleField
-                label="Show Analytics"
+                label={
+                  <div className="flex items-center gap-2">
+                    Show Analytics
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      NEW
+                    </span>
+                  </div>
+                }
                 description="Display analytics widget on dashboard"
                 checked={settings.show_analytics}
                 onChange={(value) => handleChange('show_analytics', value)}
-              />
-              <ToggleField
-                label="Compact View"
-                description="Use compact layout for better space utilization"
-                checked={settings.compact_view}
-                onChange={(value) => handleChange('compact_view', value)}
               />
             </div>
           </section>
@@ -358,6 +309,12 @@ export const Settings: React.FC = () => {
                 checked={settings.allow_messages}
                 onChange={(value) => handleChange('allow_messages', value)}
               />
+              <ToggleField
+                label="Show Staff Contact Information"
+                description="Display contact details for your team members on your public profile"
+                checked={settings.show_staff_contact_info ?? true}
+                onChange={(value) => handleChange('show_staff_contact_info', value)}
+              />
             </div>
           </section>
 
@@ -385,8 +342,48 @@ export const Settings: React.FC = () => {
 };
 
 // Helper Components
-interface ToggleFieldProps {
+interface ComingSoonFieldProps {
   label: string;
+  description: string;
+  currentValue?: string;
+  type?: 'toggle' | 'select';
+  options?: { value: string; label: string }[];
+}
+
+const ComingSoonField: React.FC<ComingSoonFieldProps> = ({ 
+  label, 
+  description, 
+  currentValue, 
+  type = 'toggle',
+  options 
+}) => (
+  <div className="opacity-60">
+    <div className="flex items-center justify-between">
+      <div>
+        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+          {label}
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            COMING SOON
+          </span>
+        </label>
+        <p className="text-xs text-gray-500">{description}</p>
+      </div>
+      {currentValue && (
+        <span className="text-sm text-gray-400">
+          Current: {currentValue}
+        </span>
+      )}
+      {type === 'toggle' && !currentValue && (
+        <div className="bg-gray-200 relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent opacity-50">
+          <span className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0"></span>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+interface ToggleFieldProps {
+  label: string | React.ReactNode;
   description?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;

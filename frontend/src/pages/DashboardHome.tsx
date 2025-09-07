@@ -96,6 +96,7 @@ const DashboardHome = () => {
   const [providerStats, setProviderStats] = useState<ProviderStats | null>(null);
   const [provider, setProvider] = useState<any>(null);
   const [recentMessages, setRecentMessages] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -120,6 +121,15 @@ const DashboardHome = () => {
           if (providerResponse.ok) {
             const providerData = await providerResponse.json();
             setProvider(providerData.data || providerData);
+          }
+          
+          // Fetch provider settings
+          const settingsResponse = await fetch('/api/providers/settings', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (settingsResponse.ok) {
+            const settingsData = await settingsResponse.json();
+            setSettings(settingsData);
           }
           
           // Fetch recent messages
@@ -520,7 +530,7 @@ const DashboardHome = () => {
         )}
 
         {/* Analytics Widget - Providers only */}
-        {user?.role === 'provider' && (
+        {user?.role === 'provider' && (settings?.show_analytics === true || settings?.show_analytics === 1 || settings?.show_analytics === '1') && (
           <AnalyticsWidget />
         )}
 

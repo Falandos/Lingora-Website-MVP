@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
-import { Card, CardBody } from '../ui/Card';
+// Removed Card imports - using plain divs for proper styling
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -67,6 +67,7 @@ const ContactModal = ({ isOpen, onClose, providerId, providerName }: ContactModa
 
       if (result.success) {
         setSuccess(true);
+        setError(''); // Clear any previous errors
         // Reset form
         setFormData({
           sender_name: '',
@@ -117,8 +118,8 @@ const ContactModal = ({ isOpen, onClose, providerId, providerName }: ContactModa
 
         <div className="p-6">
           {success ? (
-            <Card className="border-green-200 bg-green-50">
-              <CardBody className="text-center p-8">
+            <div className="border border-green-200 bg-green-50 rounded-lg">
+              <div className="text-center p-8">
                 <div className="text-green-600 text-5xl mb-4">✅</div>
                 <h3 className="text-lg font-semibold text-green-800 mb-2">
                   Message Sent Successfully!
@@ -129,8 +130,8 @@ const ContactModal = ({ isOpen, onClose, providerId, providerName }: ContactModa
                 <Button onClick={handleClose} variant="primary">
                   Close
                 </Button>
-              </CardBody>
-            </Card>
+              </div>
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
