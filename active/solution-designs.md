@@ -1,3923 +1,863 @@
-# Solution Designs - Lingora
-*Comprehensive technical solutions for complex implementation challenges*  
-*Created: September 3, 2025 | Last Updated: September 3, 2025*
+# Solution Designs
+
+This document tracks comprehensive technical solutions for Lingora platform features and bug fixes.
 
 ---
 
-## SD-001: True Infinite Language Carousel Implementation
+## SD-005: Clean Restart Procedure for Development Environment
 
-**Status**: 🔬 **DESIGN PHASE** - Comprehensive solution for seamless infinite scrolling  
-**Priority**: High - Core UX enhancement for homepage language carousel  
-**Complexity**: Medium - Requires careful animation timing and DOM manipulation  
+**Date:** September 7, 2025  
+**Priority:** Medium  
+**Category:** Development Operations & Environment Management  
 
-### **Problem Statement**
+### Problem Statement
 
-**Current Issues with Existing Carousel:**
-1. **Inconsistent Spacing**: Variable gaps between language items create visual irregularities
-2. **Jumping Behavior**: Noticeable transitions when reaching end of list, breaking infinite illusion
-3. **Visual Discontinuity**: Users can perceive the "reset" moment when transitioning from last to first
-4. **Buffer System Limitations**: Current extended array approach creates performance overhead and timing issues
+Multiple development processes running simultaneously cause port conflicts, preventing proper testing of new features. Current issues include:
+- Frontend npm dev running on port 5175 instead of preferred 5173
+- Missing "Recent providers" functionality on homepage
+- Port conflicts causing confusion between testing environments
+- Need clean environment to test newest admin ticket system changes
 
-**User Impact:**
-- Disrupted user experience with jarring transitions
-- Inconsistent visual rhythm affecting professional appearance
-- Reduced effectiveness of language showcase feature
+### Current System Analysis
 
-### **Root Cause Analysis**
+**Services Identified:**
+- ✅ Frontend: React dev server (npm run dev) - multiple instances running
+- ✅ Backend: PHP development server on localhost:8000
+- ✅ AI Services: Python Flask embedding service on localhost:5001
+- ✅ Database: XAMPP MySQL service
+- ❌ Port conflicts on 5173, 5174, 5175
+- ❌ Syntax errors in TicketsPage.tsx preventing clean startup
 
-**Current Implementation Problems:**
+### Technical Solution
 
-**1. Buffer Array Method (Lines 74-80):**
-```typescript
-// Current problematic approach
-const extendedLanguages = [
-  ...languages.slice(-3), // Buffer creates timing issues
-  ...languages, 
-  ...languages.slice(0, 3) // Duplicate DOM elements
-];
-```
+#### 1. Clean Process Shutdown Procedure
 
-**Issues:**
-- Creates unnecessary DOM elements (buffer duplicates)
-- Timing dependencies between buffer management and animation
-- Transform calculations become complex with offset adjustments
-
-**2. Transform Logic Complexity (Line 120):**
-```typescript
-// Current complex calculation
-transform: `translateX(${-adjustedIndex * itemWidth + centerOffset - itemWidth / 2}px)`
-```
-
-**Issues:**
-- Multiple variable dependencies create potential for miscalculation
-- Difficult to debug and maintain
-- Sensitive to timing changes in animation cycle
-
-**3. Animation Timing Dependencies:**
-- 500ms CSS transitions can conflict with JavaScript state changes
-- No coordination between animation completion and state updates
-- Race conditions between user interactions and auto-rotation
-
-### **Comprehensive Solution Design**
-
-#### **Architecture: True CSS-Based Infinite Loop**
-
-**Core Principle**: Use CSS-only infinite animation with strategically placed duplicate content, eliminating JavaScript timing dependencies.
-
-#### **Solution Components:**
-
-### **1. Seamless Looping Container Structure**
-
-```typescript
-// New architecture: Triple content duplication for seamless loop
-const SeamlessCarouselContainer = () => {
-  const seamlessLanguages = [
-    ...languages, // Set 1: Main content
-    ...languages, // Set 2: Seamless continuation  
-    ...languages  // Set 3: Buffer for smooth reset
-  ];
-  
-  return (
-    <div className="carousel-track" style={{
-      width: `${languages.length * 3 * itemWidth}px`, // Triple width for three sets
-      display: 'flex',
-      willChange: 'transform'
-    }}>
-      {seamlessLanguages.map((lang, index) => (
-        <LanguageItem 
-          key={`${lang.code}-${Math.floor(index / languages.length)}-${index % languages.length}`}
-          language={lang}
-          isActive={index % languages.length === currentIndex}
-        />
-      ))}
-    </div>
-  );
-};
-```
-
-### **2. Pure CSS Infinite Animation**
-
-```css
-/* Seamless infinite scroll animation */
-@keyframes infinite-scroll {
-  0% { 
-    transform: translateX(0); 
-  }
-  33.333% { 
-    transform: translateX(-${languages.length * itemWidth}px); /* End of first set */
-  }
-  66.666% { 
-    transform: translateX(-${languages.length * 2 * itemWidth}px); /* End of second set */
-  }
-  100% { 
-    transform: translateX(-${languages.length * 3 * itemWidth}px); /* Reset point */
-  }
-}
-
-.infinite-carousel {
-  animation: infinite-scroll ${languages.length * interval}ms linear infinite;
-  animation-play-state: running; /* Controlled by hover state */
-}
-
-.infinite-carousel.paused {
-  animation-play-state: paused;
-}
-```
-
-**Key Benefits:**
-- **No JavaScript Timing**: Pure CSS eliminates race conditions
-- **Perfect Smoothness**: Browser-optimized animation performance
-- **Seamless Reset**: Reset happens at identical visual state
-- **Consistent Spacing**: Fixed item width ensures perfect alignment
-
-### **3. Smart State Management**
-
-```typescript
-// Simplified state management without buffer complexity
-const useInfiniteCarousel = (languages: Language[], interval: number) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  
-  // Auto-rotation with proper cleanup
-  useEffect(() => {
-    if (isPaused || languages.length === 0) return;
-    
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % languages.length);
-    }, interval);
-    
-    return () => clearInterval(timer);
-  }, [languages.length, interval, isPaused]);
-  
-  // Navigation functions maintain simple modulo arithmetic
-  const goToNext = () => setCurrentIndex((prev) => (prev + 1) % languages.length);
-  const goToPrevious = () => setCurrentIndex((prev) => (prev - 1 + languages.length) % languages.length);
-  
-  return { currentIndex, isPaused, setIsPaused, goToNext, goToPrevious };
-};
-```
-
-### **4. Consistent Item Spacing System**
-
-```typescript
-// Fixed spacing calculation
-const ITEM_CONFIG = {
-  width: 320,           // Fixed width for each language item
-  spacing: 0,           // No gaps - width includes all spacing
-  centerOffset: 350,    // Half of total carousel width (700px)
-};
-
-// Simplified transform calculation
-const getTransformValue = (activeIndex: number, totalItems: number): string => {
-  const baseTransform = -activeIndex * ITEM_CONFIG.width;
-  const centering = ITEM_CONFIG.centerOffset - (ITEM_CONFIG.width / 2);
-  return `translateX(${baseTransform + centering}px)`;
-};
-```
-
-### **5. Enhanced User Interaction Handling**
-
-```typescript
-// Smooth pause/resume system
-const InteractionHandler = ({ children, onPauseChange }: {
-  children: React.ReactNode;
-  onPauseChange: (paused: boolean) => void;
-}) => {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  useEffect(() => {
-    onPauseChange(isHovered);
-  }, [isHovered, onPauseChange]);
-  
-  return (
-    <div 
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="interaction-zone"
-    >
-      {children}
-    </div>
-  );
-};
-```
-
-### **6. Performance Optimization Strategy**
-
-**GPU-Accelerated Animations:**
-```css
-.carousel-track {
-  transform: translateZ(0); /* Force GPU acceleration */
-  will-change: transform;   /* Optimize for transforms */
-  backface-visibility: hidden; /* Prevent flicker */
-}
-```
-
-**Efficient Re-rendering:**
-```typescript
-// Memoized language items prevent unnecessary re-renders
-const LanguageItem = React.memo(({ language, isActive, onClick }: {
-  language: Language;
-  isActive: boolean;
-  onClick?: () => void;
-}) => {
-  return (
-    <div 
-      className={`language-item ${isActive ? 'active' : 'inactive'}`}
-      onClick={onClick}
-      style={{
-        width: `${ITEM_CONFIG.width}px`,
-        opacity: isActive ? 1 : 0.5,
-        transition: 'opacity 300ms ease-in-out'
-      }}
-    >
-      {language.native}
-    </div>
-  );
-});
-```
-
-### **Implementation Plan**
-
-#### **Phase 1: Core Infinite Loop (Priority 1)**
-
-**Files to Modify:**
-- `C:\Cursor\Lingora\frontend\src\components\home\LanguageCarousel.tsx`
-
-**Implementation Steps:**
-1. **Replace buffer system** with triple content duplication
-2. **Implement CSS-based infinite animation** with proper keyframes
-3. **Simplify transform calculations** using consistent spacing
-4. **Test seamless transitions** across all languages
-
-**Success Criteria:**
-- No visible "jumps" during any transition
-- Consistent spacing between all language items
-- Smooth animation at 60fps
-
-#### **Phase 2: Enhanced User Interactions (Priority 2)**
-
-**Implementation Steps:**
-1. **Implement hover pause/resume** with smooth animation state changes
-2. **Add click-to-navigate** maintaining infinite loop state
-3. **Integrate navigation arrows** with proper state synchronization
-
-**Success Criteria:**
-- Smooth pause/resume on hover
-- Navigation clicks work without disrupting animation flow
-- Arrow navigation maintains infinite loop behavior
-
-#### **Phase 3: Performance & Polish (Priority 3)**
-
-**Implementation Steps:**
-1. **GPU acceleration optimization** for smooth 60fps animation
-2. **Memory usage optimization** with efficient re-rendering
-3. **Accessibility enhancements** with proper ARIA labels
-4. **Cross-browser testing** and compatibility fixes
-
-**Success Criteria:**
-- Consistent 60fps across all modern browsers
-- WCAG AA accessibility compliance
-- Optimized performance metrics
-
-### **Technical Considerations**
-
-#### **Browser Compatibility**
-
-**CSS Animation Support:**
-- ✅ Chrome/Edge: Full support for CSS animations and transforms
-- ✅ Firefox: Native support with proper vendor prefixes
-- ✅ Safari: Webkit optimizations for smooth performance
-- ⚠️ **Fallback Strategy**: JavaScript-based animation for older browsers
-
-#### **Performance Impact**
-
-**Memory Usage:**
-- **Current**: Single buffer with 3 extra DOM elements
-- **New**: Triple content with efficient React memoization
-- **Impact**: Minimal increase, optimized by browser layout optimization
-
-**CPU Usage:**
-- **CSS Animations**: Browser-optimized, minimal CPU impact
-- **GPU Acceleration**: Offloads rendering to GPU for smooth performance
-- **JavaScript Reduction**: Less JS execution, better performance
-
-#### **Maintenance Considerations**
-
-**Code Complexity:**
-- **Reduced**: Eliminates complex buffer management logic
-- **Simplified**: Pure CSS animations easier to debug and modify
-- **Maintainable**: Clear separation of concerns between animation and state
-
-**Future Extensibility:**
-- Easy to add new languages (automatic scaling)
-- Simple to adjust animation timing and spacing
-- Straightforward to add new interaction patterns
-
-### **Risk Assessment**
-
-#### **Technical Risks**
-
-**Low Risk:**
-- **CSS Animation Compatibility**: Well-supported across modern browsers
-- **Performance Impact**: Optimized approach should improve performance
-
-**Medium Risk:**
-- **Animation Timing Coordination**: Requires careful testing of pause/resume states
-- **User Interaction Conflicts**: Need to handle overlapping user actions gracefully
-
-**High Risk:**
-- **None Identified**: Solution uses proven, stable web technologies
-
-#### **Mitigation Strategies**
-
-**Animation Timing Issues:**
-- Comprehensive testing across different interval settings
-- Fallback to JavaScript animation if CSS conflicts occur
-- Progressive enhancement approach
-
-**User Experience Testing:**
-- Cross-browser testing on major browsers
-- Mobile touch interaction testing
-- Accessibility testing with screen readers
-
-### **Expected Outcomes**
-
-#### **User Experience Improvements**
-
-**Immediate Benefits:**
-- ✅ **Seamless infinite scrolling** - no visible jumps or discontinuities
-- ✅ **Consistent visual rhythm** - perfectly spaced language items
-- ✅ **Professional appearance** - smooth, polished animation experience
-- ✅ **Improved accessibility** - proper ARIA labels and keyboard navigation
-
-**Long-term Benefits:**
-- Enhanced homepage conversion through better first impression
-- Improved language visibility for international users
-- Better mobile experience with touch-friendly interactions
-- Foundation for additional carousel features (pause indicators, progress bars)
-
-#### **Technical Achievements**
-
-**Code Quality:**
-- Simplified codebase with reduced complexity
-- Better separation of concerns (CSS animations, React state)
-- Improved maintainability and extensibility
-- Performance optimization with GPU acceleration
-
-**System Reliability:**
-- Eliminated timing-dependent race conditions
-- Reduced JavaScript execution overhead
-- More predictable behavior across different devices and browsers
-- Better error handling and edge case management
-
-### **Success Metrics**
-
-#### **Performance Metrics**
-
-**Animation Performance:**
-- Target: Consistent 60fps animation
-- Measurement: Browser performance profiler
-- Baseline: Current implementation performance
-
-**Memory Usage:**
-- Target: <5% increase in memory usage
-- Measurement: Browser memory profiler
-- Optimization: React memoization and efficient DOM structure
-
-#### **User Experience Metrics**
-
-**Visual Quality:**
-- Zero visible jumps or discontinuities during transitions
-- Consistent spacing verified across all languages
-- Smooth pause/resume behavior on hover
-
-**Interaction Quality:**
-- Responsive navigation (<100ms latency)
-- Smooth integration with user interactions
-- Proper accessibility support
-
-### **Implementation Timeline**
-
-**Total Estimated Time: 6-8 hours**
-
-**Phase 1 (3-4 hours):**
-- Core infinite loop implementation
-- CSS animation development
-- Basic functionality testing
-
-**Phase 2 (2-3 hours):**
-- User interaction implementation
-- Navigation integration
-- Cross-browser testing
-
-**Phase 3 (1-2 hours):**
-- Performance optimization
-- Accessibility enhancements
-- Final testing and polish
-
-### **Dependencies & Prerequisites**
-
-**Technical Dependencies:**
-- Current LanguageCarousel component (working base)
-- useLanguageRotation hook (state management)
-- Existing CSS class structure (styling foundation)
-
-**No External Dependencies Required:**
-- Solution uses only native CSS and React capabilities
-- No additional libraries or frameworks needed
-- Compatible with existing build system and tools
-
----
-
-## SD-002: Semantic Search Query Preprocessing Inconsistency Fix
-
-**Status**: 🚨 **CRITICAL** - Immediate production fix required  
-**Priority**: URGENT - Affects core USP (multilingual semantic search)  
-**Complexity**: Medium - Requires search pipeline integration and query normalization  
-
-### **Problem Statement**
-
-**Critical Search Inconsistency:**
-- "tand" (no space): Shows **Tandartspraktijk Multi-Cultureel** correctly 
-- "tand " (with trailing space): Filters OUT **Tandartspraktijk**, only shows **TEST Medical Center Al-Shifa**
-
-**Business Impact:**
-- **Breaks Core USP**: Semantic search must work consistently for ALL languages
-- **Poor User Experience**: Adding a space shouldn't dramatically change results
-- **Trust Issues**: Inconsistent search behavior undermines platform reliability
-
-### **Root Cause Analysis**
-
-**Current Architecture Issues:**
-
-**1. Disconnected Search Systems:**
-```
-Frontend SearchPage.tsx → /api/search (Traditional SQL LIKE)
-                       ↛ NO CONNECTION ↛ AI Embedding Service (port 5001)
-```
-
-**2. Query Preprocessing Inconsistency:**
-
-**Embedding Service (Correct):**
-```python
-# Line 209: embedding_service.py
-text = data['text'].strip()  # ✅ Strips trailing spaces
-
-# Line 305: semantic_search()  
-query = data['query'].strip()  # ✅ Strips trailing spaces
-```
-
-**Traditional Search API (Inconsistent):**
-```php
-# Line 98: /api/search/index.php
-$keyword = $_GET['keyword'] ?? '';  # ❌ No trimming
-if ($keyword) {
-    $keyword = '%' . $keyword . '%';  # Preserves trailing spaces in LIKE query
-}
-```
-
-**3. Missing Integration:**
-- AI semantic search service exists but is NOT called by main search endpoint
-- Frontend uses traditional search which doesn't leverage semantic capabilities
-- Two separate, unconnected search systems
-
-### **Comprehensive Solution Design**
-
-#### **Architecture: Hybrid Search Integration**
-
-**Core Principle**: Integrate semantic search with traditional search while ensuring consistent query preprocessing across all entry points.
-
-#### **Solution Components:**
-
-### **1. Immediate Fix: Query Normalization**
-
-**Update Traditional Search API:**
-```php
-// File: /backend/api/search/index.php
-// Line 48: Add query preprocessing
-
-$keyword = $_GET['keyword'] ?? '';
-
-// ✅ CRITICAL FIX: Normalize query preprocessing
-if ($keyword) {
-    // Trim whitespace and normalize spaces
-    $keyword = trim($keyword);
-    $keyword = preg_replace('/\s+/', ' ', $keyword); // Normalize multiple spaces to single
-    
-    // Only proceed if keyword is not empty after trimming
-    if (!empty($keyword)) {
-        $keyword = '%' . $keyword . '%';
-        $where .= " AND (p.business_name LIKE ? OR p.bio_nl LIKE ? OR p.bio_en LIKE ?)";
-        $params[] = $keyword;
-        $params[] = $keyword;
-        $params[] = $keyword;
-    }
-}
-```
-
-### **2. Semantic Search Integration**
-
-**Add AI Search Call to Main Search Endpoint:**
-```php
-// File: /backend/api/search/index.php
-// Add after line 104 (after keyword processing)
-
-// Enhanced search with AI semantic ranking
-$aiResults = [];
-$useSemanticSearch = !empty($keyword) && strlen(trim($keyword)) >= 3;
-
-if ($useSemanticSearch) {
-    try {
-        // Call AI embedding service for semantic search
-        $aiServiceUrl = 'http://127.0.0.1:5001/search';
-        $aiPayload = json_encode([
-            'query' => trim($keyword), // ✅ Consistent trimming
-            'limit' => $limit * 2, // Get more results for ranking
-            'threshold' => 0.3,
-            'filter' => [
-                'provider_ids' => [], // Will be populated after traditional search
-                'languages' => $languages,
-                'categories' => $categories
-            ]
-        ]);
-        
-        $aiResponse = callAIService($aiServiceUrl, $aiPayload);
-        if ($aiResponse && isset($aiResponse['success']) && $aiResponse['success']) {
-            $aiResults = $aiResponse['results'];
-        }
-    } catch (Exception $e) {
-        error_log("AI search integration failed: " . $e->getMessage());
-        // Continue with traditional search as fallback
-    }
-}
-```
-
-**Add AI Service Helper Function:**
-```php
-// File: /backend/api/search/index.php
-// Add helper function for AI service calls
-
-function callAIService($url, $payload) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5); // 5 second timeout
-    
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
-    if ($httpCode === 200 && $response !== false) {
-        return json_decode($response, true);
-    }
-    
-    return null;
-}
-```
-
-### **3. Enhanced Result Ranking**
-
-**Combine Traditional + Semantic Results:**
-```php
-// File: /backend/api/search/index.php
-// Replace result processing section
-
-// Merge and rank results
-if (!empty($aiResults) && !empty($results)) {
-    // Create semantic score lookup
-    $semanticScores = [];
-    foreach ($aiResults as $aiResult) {
-        $semanticScores[$aiResult['provider_id']] = $aiResult['similarity_score'];
-    }
-    
-    // Enhance traditional results with semantic scores
-    foreach ($results as &$provider) {
-        $provider['semantic_score'] = $semanticScores[$provider['id']] ?? 0;
-        // Boost providers with high semantic relevance
-        if ($provider['semantic_score'] > 0.7) {
-            $provider['search_rank'] = 1; // High relevance
-        } elseif ($provider['semantic_score'] > 0.4) {
-            $provider['search_rank'] = 2; // Medium relevance  
-        } else {
-            $provider['search_rank'] = 3; // Traditional match only
-        }
-    }
-    
-    // Sort by search rank (semantic + traditional)
-    usort($results, function($a, $b) {
-        if ($a['search_rank'] !== $b['search_rank']) {
-            return $a['search_rank'] <=> $b['search_rank'];
-        }
-        // Secondary sort by semantic score
-        return ($b['semantic_score'] ?? 0) <=> ($a['semantic_score'] ?? 0);
-    });
-}
-```
-
-### **4. Frontend Query Preprocessing**
-
-**Update SearchPage.tsx Query Handling:**
-```typescript
-// File: /frontend/src/pages/SearchPage.tsx
-// Line 787: Update input change handler
-
-onChange={(e) => {
-  // ✅ CRITICAL FIX: Normalize query input
-  const normalizedValue = e.target.value
-    .replace(/\s+/g, ' ') // Normalize multiple spaces
-    .trim(); // Remove leading/trailing spaces
-    
-  updateFilters({ keyword: normalizedValue });
-  setSelectedSuggestionIndex(-1);
-}}
-```
-
-### **5. Embedding Service Robustness**
-
-**Enhance Error Handling in AI Service:**
-```python
-# File: /backend/ai_services/embedding_service.py
-# Update semantic_search function (line 296)
-
-@app.route('/search', methods=['POST'])
-def semantic_search():
-    try:
-        data = request.get_json()
-        if not data or 'query' not in data:
-            return jsonify({
-                'success': False,
-                'error': 'Query is required'
-            }), 400
-        
-        # ✅ ROBUST QUERY NORMALIZATION
-        query = data['query'].strip()
-        # Normalize multiple spaces to single space
-        query = re.sub(r'\s+', ' ', query)
-        
-        # Validate non-empty after normalization
-        if not query:
-            return jsonify({
-                'success': False,
-                'error': 'Query cannot be empty after normalization'
-            }), 400
-            
-        # Continue with existing search logic...
-```
-
-### **Implementation Plan**
-
-#### **Phase 1: Immediate Fix (URGENT - 1 hour)**
-
-**Files to Modify:**
-1. `C:\Cursor\Lingora\backend\api\search\index.php`
-2. `C:\Cursor\Lingora\frontend\src\pages\SearchPage.tsx`
-
-**Critical Fixes:**
-1. **Add query trimming** to traditional search API (Line 48)
-2. **Normalize query input** in frontend search (Line 787)
-3. **Test "tand" vs "tand " behavior** immediately
-
-**Success Criteria:**
-- "tand" and "tand " return identical results
-- No trailing space inconsistencies in search behavior
-- Existing search functionality preserved
-
-#### **Phase 2: Semantic Integration (2-3 hours)**
-
-**Implementation Steps:**
-1. **Add AI service integration** to main search endpoint
-2. **Implement result ranking** combining traditional + semantic scores
-3. **Add fallback handling** for AI service failures
-4. **Comprehensive testing** of hybrid search
-
-**Success Criteria:**
-- Semantic search improves result relevance for multilingual queries
-- System gracefully handles AI service downtime
-- Performance remains under 2 seconds for search requests
-
-#### **Phase 3: Advanced Features (Optional)**
-
-**Implementation Steps:**
-1. **Search analytics** to track semantic vs traditional performance
-2. **A/B testing framework** for search algorithm optimization
-3. **Caching layer** for frequently searched terms
-4. **Multi-language query detection** enhancement
-
-### **Technical Considerations**
-
-#### **Performance Impact**
-
-**AI Service Call Overhead:**
-- **Latency**: +200-500ms for semantic search call
-- **Mitigation**: 5-second timeout + graceful fallback
-- **Optimization**: Async processing for non-critical paths
-
-**Database Query Optimization:**
-```sql
--- Ensure proper indexing for search performance
-CREATE INDEX idx_providers_search ON providers (status, subscription_status, business_name);
-CREATE FULLTEXT INDEX idx_providers_fulltext ON providers (business_name, bio_nl, bio_en);
-```
-
-#### **Error Handling Strategy**
-
-**AI Service Failures:**
-- **Timeout Handling**: 5-second max wait, fallback to traditional
-- **Service Down**: Continue with SQL search only
-- **Invalid Responses**: Log errors, use traditional results
-- **Network Issues**: Graceful degradation
-
-**Query Edge Cases:**
-```php
-// Handle edge cases in query preprocessing
-if (strlen($keyword) > 200) {
-    $keyword = substr($keyword, 0, 200); // Prevent excessive queries
-}
-
-if (preg_match('/[^\w\s\-\u00C0-\u017F]/u', $keyword)) {
-    // Log suspicious queries for security monitoring
-    error_log("Potentially malicious search query: " . $keyword);
-}
-```
-
-### **Risk Assessment**
-
-#### **Technical Risks**
-
-**Low Risk:**
-- Query normalization: Standard string processing
-- Frontend input handling: Simple text normalization
-
-**Medium Risk:**
-- AI service integration: Network dependency
-- Performance impact: Additional service call latency
-
-**High Risk:**
-- **None** - Solution maintains backward compatibility
-
-#### **Mitigation Strategies**
-
-**Service Integration Risks:**
-- Comprehensive fallback to traditional search
-- Timeout protection (5 seconds max)
-- Error logging for monitoring and debugging
-- Gradual rollout with feature flags
-
-**Performance Monitoring:**
-- Response time tracking for search requests
-- AI service health monitoring
-- Database query performance profiling
-- User experience metrics (search abandonment rates)
-
-### **Expected Outcomes**
-
-#### **Immediate Benefits**
-
-**Search Consistency:**
-- ✅ "tand" and "tand " return identical results
-- ✅ All search queries properly normalized
-- ✅ Consistent behavior across all languages
-
-**User Experience:**
-- Improved search relevance with semantic matching
-- Consistent results regardless of trailing spaces
-- Better multilingual search accuracy
-
-#### **Long-term Benefits**
-
-**Platform Reliability:**
-- Consistent search behavior builds user trust
-- Robust error handling prevents search failures
-- Performance monitoring enables continuous optimization
-
-**Competitive Advantage:**
-- True semantic search capability
-- Multi-language search excellence
-- AI-powered relevance ranking
-
-### **Success Metrics**
-
-#### **Critical Success Indicators**
-
-**Search Consistency (Immediate):**
-- Zero trailing space inconsistencies
-- Identical results for "tand" vs "tand "
-- All multilingual queries properly processed
-
-**Performance Metrics:**
-- Search response time <2 seconds (95th percentile)
-- AI service availability >99%
-- Traditional search fallback working 100%
-
-#### **Quality Metrics**
-
-**Search Relevance:**
-- Improved click-through rates on search results
-- Reduced search refinements (users finding results faster)
-- Better user satisfaction scores
-
-**System Reliability:**
-- Zero search system downtime
-- Graceful handling of all edge cases
-- Comprehensive error logging and monitoring
-
-### **Implementation Timeline**
-
-**Total Estimated Time: 4-6 hours**
-
-**Phase 1 - Critical Fix (1 hour) - IMMEDIATE:**
-- Query normalization in search API
-- Frontend input preprocessing
-- Basic testing and validation
-
-**Phase 2 - AI Integration (2-3 hours) - HIGH PRIORITY:**
-- AI service integration
-- Result ranking implementation
-- Comprehensive testing
-
-**Phase 3 - Optimization (1-2 hours) - MEDIUM PRIORITY:**
-- Performance optimization
-- Advanced error handling
-- Monitoring and analytics
-
-### **Dependencies & Prerequisites**
-
-**Technical Dependencies:**
-- AI embedding service running on port 5001
-- cURL extension enabled in PHP
-- Database indexes for search performance
-
-**Testing Requirements:**
-- Test data with "Tandartspraktijk Multi-Cultureel"
-- Multi-language search test cases
-- Performance testing tools
-
-**Deployment Requirements:**
-- Staging environment testing
-- Gradual production rollout
-- Rollback plan if issues occur
-
----
-
-*This solution design provides a critical fix for semantic search consistency while integrating advanced AI capabilities to enhance the overall search experience across all languages.*
-
----
-
-*This solution design provides a comprehensive approach to creating a truly seamless infinite carousel experience while maintaining all existing functionality and improving overall performance and user experience.*
-
----
-
-## SD-008: Provider Settings System Audit - Functional vs Placeholder Analysis
-
-**Status**: 📊 **AUDIT COMPLETE** - Comprehensive analysis of settings functionality  
-**Priority**: High - Critical for dashboard user experience and system integrity  
-**Complexity**: Medium - Requires frontend/backend integration analysis and database schema review  
-
-### **Executive Summary**
-
-**Audit Results**: Out of 13 settings categories analyzed, **4 are fully functional**, **5 are partial/placeholder**, and **4 are complete placeholders** with no backend integration.
-
-**Critical Finding**: Missing `provider_settings` database table means settings are stored but potentially not persisted correctly, requiring immediate schema implementation.
-
-### **Detailed Audit Results**
-
-#### **✅ FULLY FUNCTIONAL SETTINGS (4/13)**
-
-##### **1. Privacy Settings - VERIFIED WORKING**
-```typescript
-// Status: ✅ FULLY FUNCTIONAL
-profile_visibility: 'public' | 'unlisted' | 'private'  // Backend enforced in Provider.php
-show_contact_info: boolean                            // Working (hides contact fields)
-allow_messages: boolean                               // Working (controls contact forms)  
-show_staff_contact_info: boolean                      // Working (filters staff contact)
-```
-
-**Backend Integration:**
-- **File**: `C:\Cursor\Lingora\backend\models\Provider.php:260`
-- **Function**: `isVisible()` enforces profile_visibility settings
-- **API Usage**: Used in `/api/providers/index.php:192` and `/api/contact/index.php:35`
-- **Validation**: Proper validation in `ProviderSettings.php:109-110`
-
-**Frontend Implementation:**
-- **File**: `C:\Cursor\Lingora\frontend\src\pages\dashboard\Settings.tsx:338-370`
-- **UI Components**: RadioField for visibility, ToggleField for contact settings
-- **Real-time Updates**: Auto-save with debounce (1000ms)
-
-##### **2. Settings Storage & API - PARTIALLY FUNCTIONAL**
-```php
-// Backend: Fully implemented CRUD operations
-class ProviderSettings {
-    getSettings($providerId)     // ✅ Working
-    updateSettings($providerId)  // ✅ Working  
-    createDefaults($providerId)  // ✅ Working
-    resetToDefaults($providerId) // ✅ Working
-    validateSettings($data)      // ✅ Working
-}
-```
-
-**API Endpoints:**
-- **GET** `/api/providers/settings` - ✅ Working
-- **PUT** `/api/providers/settings` - ✅ Working  
-- **POST** `/api/providers/settings/reset` - ✅ Working
-
-**Frontend State Management:**
-- **Auto-save**: Debounced updates every 1000ms
-- **Loading States**: Proper loading/saving/error states
-- **Error Handling**: User-friendly error messages
-
-#### **⚠️ PARTIAL/PLACEHOLDER SETTINGS (5/13)**
-
-##### **3. Dashboard Preferences - SETTINGS STORED BUT NOT APPLIED**
-```typescript
-// Status: ⚠️ PLACEHOLDER - Saved but not used
-dashboard_layout: 'grid' | 'list' | 'compact'  // Not applied to dashboard UI
-items_per_page: number (5-100)                 // Not used in pagination
-show_analytics: boolean                         // Analytics widget always shows
-compact_view: boolean                           // No compact UI implementation
-```
-
-**Issues Found:**
-- **Dashboard Layout**: `DashboardLayout.tsx` doesn't read or apply layout settings
-- **Items Per Page**: No pagination components use this setting
-- **Analytics Widget**: `AnalyticsWidget.tsx` doesn't check `show_analytics` setting
-- **Compact View**: No conditional UI rendering for compact mode
-
-**Integration Points Missing:**
-```typescript
-// Required: Dashboard components should read settings
-const [settings] = useState<ProviderSettings>();
-
-// DashboardLayout.tsx - Layout should adapt
-const layoutClass = settings?.dashboard_layout === 'list' ? 'list-layout' : 'grid-layout';
-
-// AnalyticsWidget.tsx - Conditional rendering  
-if (!settings?.show_analytics) return null;
-
-// Pagination components - Use items_per_page
-const itemsPerPage = settings?.items_per_page || 20;
-```
-
-##### **4. Display Preferences - PARTIALLY FUNCTIONAL**  
-```typescript
-// Status: ⚠️ MIXED - Some working, some placeholder
-language: string         // ⚠️ Not connected to i18n system
-timezone: string         // ❌ No timezone usage found
-date_format: string      // ❌ No date formatting implementation  
-currency: string         // ❌ No currency display implementation
-```
-
-**Language Setting Analysis:**
-- **Frontend**: Uses `react-i18next` (`useTranslation` hook found)
-- **Issue**: Settings language not connected to `i18n.changeLanguage()`
-- **Required Fix**: 
-```typescript
-// Settings.tsx - Connect language to i18n
-const { i18n } = useTranslation();
-
-useEffect(() => {
-  if (settings?.language) {
-    i18n.changeLanguage(settings.language);
-  }
-}, [settings?.language, i18n]);
-```
-
-**Missing Implementations:**
-- **Timezone**: No date/time components use timezone setting
-- **Date Format**: No consistent date formatting across dashboard  
-- **Currency**: No pricing display uses currency setting
-
-#### **❌ COMPLETE PLACEHOLDERS (4/13)**
-
-##### **5. Notification Settings - NO BACKEND INTEGRATION**
-```typescript
-// Status: ❌ COMPLETE PLACEHOLDER - No backend services
-email_notifications: boolean    // No email service integration
-sms_notifications: boolean      // No SMS service integration  
-newsletter_subscription: boolean // No newsletter system
-```
-
-**Missing Infrastructure:**
-- **Email Service**: No email notification system found
-- **SMS Service**: No SMS provider integration
-- **Newsletter**: No newsletter subscription management
-- **Message Queue**: No async notification processing
-
-**Required Implementation:**
-```php
-// Backend: Need notification services
-class NotificationService {
-    sendEmail($providerId, $message, $type)
-    sendSMS($providerId, $message, $type)  
-    manageNewsletterSubscription($providerId, $subscribed)
-}
-```
-
-#### **🚨 CRITICAL INFRASTRUCTURE ISSUE**
-
-##### **6. Database Schema Gap - MISSING PROVIDER_SETTINGS TABLE**
-```sql
--- Status: 🚨 CRITICAL - Table referenced but not in main schema
--- File: backend/migrations/001_create_database_schema.sql
--- Missing: provider_settings table definition
-```
-
-**Evidence of Missing Table:**
-- **ProviderSettings.php** references `provider_settings` table
-- **API endpoints** work (indicating table exists in some environments)
-- **Main schema file** doesn't include table definition
-- **Risk**: Development/production schema inconsistency
-
-**Required Schema:**
-```sql
-CREATE TABLE IF NOT EXISTS provider_settings (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    provider_id INT UNSIGNED NOT NULL,
-    
-    -- Notification Settings
-    email_notifications BOOLEAN DEFAULT TRUE,
-    sms_notifications BOOLEAN DEFAULT FALSE,
-    newsletter_subscription BOOLEAN DEFAULT TRUE,
-    
-    -- Display Preferences  
-    language VARCHAR(10) DEFAULT 'en',
-    timezone VARCHAR(50) DEFAULT 'Europe/Amsterdam',
-    date_format VARCHAR(20) DEFAULT 'DD/MM/YYYY',
-    currency VARCHAR(3) DEFAULT 'EUR',
-    
-    -- Dashboard Preferences
-    dashboard_layout ENUM('grid', 'list', 'compact') DEFAULT 'grid',
-    items_per_page INT DEFAULT 20,
-    show_analytics BOOLEAN DEFAULT TRUE,
-    compact_view BOOLEAN DEFAULT FALSE,
-    
-    -- Privacy Settings
-    profile_visibility ENUM('public', 'unlisted', 'private') DEFAULT 'public',
-    show_contact_info BOOLEAN DEFAULT TRUE,
-    allow_messages BOOLEAN DEFAULT TRUE,
-    show_staff_contact_info BOOLEAN DEFAULT TRUE,
-    
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE,
-    UNIQUE KEY (provider_id),
-    INDEX idx_provider (provider_id)
-);
-```
-
-### **Priority Classification & Implementation Gaps**
-
-#### **🔴 CRITICAL PRIORITY (Fix Immediately)**
-
-**1. Database Schema Consistency**
-- **Issue**: Missing `provider_settings` table in main schema
-- **Impact**: Development/production inconsistencies
-- **Fix**: Add table definition to migration file
-- **Time**: 30 minutes
-
-**2. Privacy Settings Backend Integration**
-- **Issue**: Profile visibility not fully enforced
-- **Impact**: Security and privacy concerns
-- **Fix**: Enhance `Provider::isVisible()` with settings integration
-- **Time**: 1-2 hours
-
-#### **🟡 HIGH PRIORITY (Implement Soon)**
-
-**3. Dashboard Preferences Integration**
-- **Issue**: Settings saved but not applied to UI
-- **Impact**: Poor user experience, wasted development
-- **Components Affected**:
-  - `DashboardLayout.tsx` - Apply layout settings
-  - `AnalyticsWidget.tsx` - Honor show_analytics setting  
-  - Pagination components - Use items_per_page
-- **Time**: 3-4 hours
-
-**4. Language Setting Integration**  
-- **Issue**: Language setting not connected to i18n
-- **Impact**: Users can't change dashboard language
-- **Fix**: Connect settings to `react-i18next`
-- **Time**: 1 hour
-
-#### **🟢 MEDIUM PRIORITY (Plan Implementation)**
-
-**5. Notification System Foundation**
-- **Issue**: No backend notification services
-- **Impact**: Settings are decorative only
-- **Requirements**:
-  - Email service integration
-  - SMS provider setup
-  - Newsletter management system
-- **Time**: 8-12 hours (full implementation)
-
-**6. Date/Currency Display System**
-- **Issue**: No date formatting or currency display
-- **Impact**: Limited internationalization
-- **Requirements**:
-  - Date formatting utility
-  - Currency display components
-  - Timezone handling
-- **Time**: 4-6 hours
-
-#### **🔵 LOW PRIORITY (Future Enhancement)**
-
-**7. Advanced Dashboard Layouts**
-- **Issue**: Only basic layout options
-- **Enhancement**: Rich layout customization
-- **Features**: Drag-drop widgets, custom arrangements
-- **Time**: 12-16 hours
-
-### **Integration Points Analysis**
-
-#### **Frontend Integration Requirements**
-
-**1. Settings Context Provider**
-```typescript
-// Create global settings context
-const SettingsContext = createContext<{
-  settings: ProviderSettings | null;
-  updateSetting: (key: keyof ProviderSettings, value: any) => void;
-  loading: boolean;
-}>({});
-
-// Provide at app level
-function App() {
-  return (
-    <SettingsProvider>
-      <Router>
-        <Routes>
-          {/* Dashboard routes */}
-        </Routes>
-      </Router>
-    </SettingsProvider>
-  );
-}
-```
-
-**2. Component Setting Integration**
-```typescript
-// DashboardLayout.tsx
-const { settings } = useSettings();
-const layoutClass = `layout-${settings?.dashboard_layout || 'grid'}`;
-
-// AnalyticsWidget.tsx  
-const { settings } = useSettings();
-if (!settings?.show_analytics) return null;
-
-// Any pagination component
-const { settings } = useSettings();
-const pageSize = settings?.items_per_page || 20;
-```
-
-#### **Backend Integration Requirements**
-
-**1. Settings Middleware**
-```php
-// Apply settings to API responses
-class SettingsMiddleware {
-    public function apply($providerId, &$response) {
-        $settings = ProviderSettings::getSettings($providerId);
-        
-        // Apply privacy settings
-        if ($settings['profile_visibility'] === 'private') {
-            // Remove sensitive data
-        }
-        
-        // Apply display preferences  
-        $response['currency'] = $settings['currency'];
-        $response['timezone'] = $settings['timezone'];
-    }
-}
-```
-
-**2. Notification Service Integration**
-```php  
-// Trigger notifications based on settings
-class NotificationTrigger {
-    public function sendUpdate($providerId, $message, $type) {
-        $settings = ProviderSettings::getSettings($providerId);
-        
-        if ($settings['email_notifications']) {
-            EmailService::send($providerId, $message, $type);
-        }
-        
-        if ($settings['sms_notifications']) {
-            SMSService::send($providerId, $message, $type);
-        }
-    }
-}
-```
-
-### **Test Scenarios for Verification**
-
-#### **Functionality Tests**
-
-**1. Privacy Settings Verification**
 ```bash
-# Test profile visibility enforcement
-curl -X GET "http://lingora.local/api/providers/test-provider" 
-# Should return 404 if profile_visibility = 'private'
+# Kill all Node.js processes (Windows)
+taskkill /F /IM node.exe
+taskkill /F /IM npm.exe
 
-# Test contact info filtering
-curl -X GET "http://lingora.local/api/providers/test-provider"
-# Should hide contact fields if show_contact_info = false
+# Kill specific development processes
+netstat -ano | findstr ":5173\|:5174\|:5175\|:8000\|:5001"
+# Note PIDs and kill if needed: taskkill /F /PID [PID_NUMBER]
+
+# Alternative: Kill background bash shells if using integrated terminal
 ```
 
-**2. Dashboard Settings Application**  
-```javascript
-// Test dashboard layout changes
-const settings = { dashboard_layout: 'list' };
-// Verify UI updates to list layout
+#### 2. Service Restart Sequence
 
-// Test analytics widget toggle
-const settings = { show_analytics: false };  
-// Verify analytics widget is hidden
-```
-
-**3. Language Setting Integration**
-```javascript
-// Test language change
-updateSetting('language', 'nl');
-// Verify i18n.language changes to 'nl'
-// Verify dashboard text updates to Dutch
-```
-
-#### **Edge Case Tests**
-
-**1. Settings Migration**
-```php
-// Test default settings creation
-$provider = Provider::create(['user_id' => 123]);
-$settings = ProviderSettings::getSettings($provider['id']);
-// Verify all default values applied correctly
-```
-
-**2. Invalid Setting Values**
-```php
-// Test validation
-$errors = ProviderSettings::validateSettings([
-    'language' => 'invalid',
-    'items_per_page' => 200,
-    'profile_visibility' => 'wrong'
-]);
-// Verify proper error messages returned
-```
-
-### **Implementation Roadmap**
-
-#### **Phase 1: Critical Fixes (Week 1)**
-**Time Estimate: 4-6 hours**
-
-1. **Database Schema Fix** (30 mins)
-   - Add `provider_settings` table to migration
-   - Verify schema consistency
-   
-2. **Privacy Settings Enhancement** (2 hours)
-   - Enhance `Provider::isVisible()` method
-   - Integrate with contact form visibility
-   - Test privacy enforcement
-   
-3. **Basic Dashboard Integration** (2-3 hours)
-   - Connect analytics widget to settings
-   - Implement basic layout switching
-   - Add settings context provider
-
-#### **Phase 2: Core Functionality (Week 2)**  
-**Time Estimate: 6-8 hours**
-
-1. **Language Integration** (1 hour)
-   - Connect language setting to i18n
-   - Test language switching
-   
-2. **Dashboard Preferences** (3-4 hours)
-   - Full layout system implementation
-   - Pagination integration
-   - Compact view development
-   
-3. **Settings Context System** (2-3 hours)
-   - Global settings provider
-   - Component integration
-   - Performance optimization
-
-#### **Phase 3: Enhanced Features (Week 3)**
-**Time Estimate: 8-12 hours**
-
-1. **Notification System Foundation** (6-8 hours)
-   - Email service integration
-   - Basic notification framework
-   - Settings-based triggers
-   
-2. **Display Preferences** (2-4 hours)
-   - Date formatting system
-   - Currency display components
-   - Timezone handling
-
-### **Risk Assessment & Mitigation**
-
-#### **Technical Risks**
-
-**High Risk:**
-- **Schema Inconsistency**: Missing table could cause production issues
-- **Mitigation**: Immediate schema update with migration script
-
-**Medium Risk:**  
-- **Performance Impact**: Settings loaded frequently across components
-- **Mitigation**: Context caching, memo optimization, selective updates
-
-**Low Risk:**
-- **Notification Service Complexity**: External service dependencies
-- **Mitigation**: Gradual implementation, robust error handling
-
-#### **Business Risks**
-
-**High Risk:**
-- **Privacy Compliance**: Settings must properly enforce privacy
-- **Mitigation**: Comprehensive testing of privacy features
-
-**Medium Risk:**
-- **User Experience**: Non-functional settings frustrate users  
-- **Mitigation**: Clear communication about setting availability
-
-### **Success Metrics**
-
-#### **Functional Metrics**
-- **Settings Persistence**: 100% of setting changes properly saved
-- **UI Response**: Dashboard adapts to all functional settings  
-- **Privacy Enforcement**: Profile visibility 100% accurate
-- **Performance**: Settings load <200ms, update <500ms
-
-#### **User Experience Metrics**
-- **Setting Usage**: Track which settings users change most
-- **Dashboard Customization**: Measure layout preference adoption
-- **Error Rates**: <1% settings save/load failures
-
-### **Conclusion & Recommendations**
-
-**Immediate Action Required:**
-1. ✅ **Fix database schema** - Add missing `provider_settings` table
-2. ✅ **Complete privacy settings** - Ensure full backend enforcement  
-3. ✅ **Connect dashboard preferences** - Apply saved settings to UI
-
-**Strategic Recommendations:**
-1. **Implement settings incrementally** - Start with high-impact features
-2. **Build notification infrastructure** - Foundation for future features
-3. **Plan comprehensive testing** - Ensure all integrations work correctly
-
-**Expected Outcomes:**
-- **Improved UX**: Users can customize dashboard experience
-- **Better Privacy**: Proper enforcement of visibility settings
-- **System Integrity**: Consistent behavior across all settings
-- **Foundation for Growth**: Framework for additional personalization features
-
-This audit reveals that while the settings UI is well-implemented, significant backend integration work is needed to make settings truly functional rather than merely decorative.
-
----
-
-*This comprehensive audit provides a complete analysis of the provider settings system, identifying exactly which features work, which are placeholders, and what implementation is needed to deliver a fully functional personalization experience.*
-
----
-
-## SD-009: Multi-Recipient Email Notification System - Technical Documentation
-
-**Status**: ✅ **IMPLEMENTED** - Comprehensive email notification system for provider contact forms  
-**Priority**: Critical - Core communication infrastructure for provider-client interactions  
-**Complexity**: High - Multi-recipient notifications with template system and production deployment strategy  
-
-### **System Overview**
-
-The Lingora platform implements a sophisticated multi-recipient email notification system that handles contact form submissions from potential clients to service providers. When users submit contact forms on provider pages, the system intelligently distributes notifications to ensure comprehensive coverage while maintaining professional communication standards.
-
-**Email Distribution Flow:**
-1. **Provider Business Email** - Primary notification with admin BCC for oversight
-2. **All Active Contact Persons** - Staff members designated as contact points  
-3. **Customer Auto-Reply** - Confirmation message to the inquiring customer
-
-### **Architecture Diagram**
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────┐
-│   Frontend      │    │    Backend API   │    │  Email Service      │
-│  ContactModal   │    │ /api/contact/    │    │  EmailService.php   │
-│     .tsx        │────│    index.php     │────│                     │
-└─────────────────┘    └──────────────────┘    └─────────────────────┘
-         │                       │                        │
-         │                       │                        ├─► Provider Email
-         │                       │                        │   (with admin BCC)
-         │                       │                        │
-         │                       │                        ├─► Contact Person 1
-         │                       │                        ├─► Contact Person 2
-         │                       │                        ├─► Contact Person N
-         │                       │                        │
-         │                       │                        └─► Customer Auto-Reply
-         │                       │
-         │                       └─► Database Integration
-         │                           ├─► messages table
-         │                           ├─► provider_settings 
-         │                           └─► staff table
-         │
-         └─► Form Validation & UX
-             ├─► Multi-language support
-             ├─► Consent management
-             └─► Loading states
-```
-
-### **Current Implementation Details**
-
-#### **1. Email Service Architecture**
-
-**File**: `C:\xampp\htdocs\lingora\backend\services\EmailService.php`
-
-```php
-class EmailService {
-    // Core functionality
-    - Multi-template support (6 template types)
-    - Variable substitution system
-    - Development mode with comprehensive logging
-    - Error handling with fallback mechanisms
-    
-    // Email types supported
-    - contact_message        // Provider notifications
-    - contact_auto_reply     // Customer confirmations  
-    - verification          // Account verification
-    - password_reset        // Password recovery
-    - provider_approved     // Approval notifications
-    - provider_rejected     // Rejection notifications
-}
-```
-
-**Key Features:**
-- **Template System**: Hardcoded HTML templates with `{variable_name}` substitution
-- **Development Mode**: Uses PHP `mail()` function with comprehensive logging
-- **Error Handling**: Graceful failure with detailed error logging
-- **Header Management**: Proper MIME types and encoding for international content
-
-#### **2. Contact API Integration**
-
-**File**: `C:\xampp\htdocs\lingora\backend\api\contact\index.php`
-
-```php
-// Email notification workflow
-1. Validate contact form submission
-2. Check provider exists and is visible  
-3. Implement rate limiting (5 messages/hour per IP)
-4. Store message in database
-5. Check provider email notification settings
-6. Send multi-recipient email notifications:
-   - Provider business email (with admin BCC)
-   - All active contact persons  
-   - Customer auto-reply confirmation
-```
-
-**Database Integration Points:**
-- **Messages Table**: Stores all contact form submissions
-- **Provider Settings**: `email_notifications` flag controls sending
-- **Staff Table**: Contact persons with `is_contact_person=1` and `contact_enabled=1`
-
-#### **3. Frontend Contact Form**
-
-**File**: `C:\cursor\lingora\frontend\src\components\provider\ContactModal.tsx`
-
-```typescript
-// Contact form features
-- Multi-language support (9 languages supported)
-- Form validation with real-time feedback
-- Loading states and success/error handling  
-- GDPR compliance with consent checkbox
-- Auto-save form state management
-- Responsive modal design with accessibility
-```
-
-**Form Fields:**
-- `sender_name`: Customer's full name
-- `sender_email`: Customer's email address  
-- `preferred_language`: Communication language preference
-- `subject`: Inquiry subject line
-- `message`: Detailed inquiry message
-- `consent_given`: GDPR compliance checkbox
-
-### **Email Flow Documentation**
-
-#### **Contact Form Submission Flow**
-
-```mermaid
-sequenceDiagram
-    participant Customer as Customer
-    participant Frontend as React Frontend
-    participant API as Contact API  
-    participant EmailService as Email Service
-    participant Provider as Provider
-    participant ContactPerson as Contact Person
-    participant Admin as Admin
-
-    Customer->>Frontend: Fill contact form
-    Frontend->>API: POST /api/contact
-    API->>API: Validate form data
-    API->>API: Check rate limits
-    API->>API: Store in messages table
-    
-    alt Email notifications enabled
-        API->>EmailService: Send contact message
-        EmailService->>Provider: Provider email + Admin BCC
-        EmailService->>ContactPerson: Contact person emails
-        EmailService->>Customer: Auto-reply confirmation
-    end
-    
-    API->>Frontend: Success response
-    Frontend->>Customer: Show success message
-```
-
-#### **Email Template Processing**
-
-```php
-// Template variable substitution
-$messageData = [
-    'sender_name' => 'John Doe',
-    'sender_email' => 'john@example.com', 
-    'preferred_language' => 'English',
-    'subject' => 'Legal consultation inquiry',
-    'message' => 'I need help with contract review...',
-    'provider_name' => 'Legal Services Amsterdam'
-];
-
-// Template: contact_message
-$html = str_replace([
-    '{sender_name}',
-    '{sender_email}', 
-    '{subject}',
-    '{message}'
-], [
-    'John Doe',
-    'john@example.com',
-    'Legal consultation inquiry', 
-    'I need help with contract review...'
-], $template);
-```
-
-### **File Structure and Integration Points**
-
-#### **Backend Files**
-
-```
-backend/
-├── services/
-│   └── EmailService.php           # Core email functionality
-├── api/
-│   └── contact/
-│       └── index.php              # Contact form API endpoint
-├── models/
-│   ├── Provider.php               # Provider model with visibility logic
-│   ├── ProviderSettings.php       # Settings management
-│   └── Staff.php                  # Staff/contact person management
-└── config/
-    └── config.php                 # Email configuration
-```
-
-#### **Frontend Files**
-
-```
-frontend/src/
-├── components/
-│   └── provider/
-│       └── ContactModal.tsx       # Contact form modal component
-├── pages/
-│   └── provider/
-│       └── [id].tsx               # Provider detail page
-└── types/
-    └── provider.ts                # TypeScript interfaces
-```
-
-#### **Database Tables**
-
-```sql
-messages                    # Contact form submissions
-├── id, provider_id, sender_name, sender_email
-├── preferred_language, subject, message  
-├── consent_given, ip_address, created_at
-
-provider_settings          # Email notification preferences  
-├── provider_id, email_notifications
-├── other_settings...
-
-staff                      # Contact person management
-├── provider_id, email, is_contact_person
-├── contact_enabled, is_active
-```
-
-### **Template System Architecture**
-
-#### **Available Templates**
-
-**1. contact_message** - Provider notification
-```html
-<h2>New inquiry from {sender_name}</h2>
-<p><strong>From:</strong> {sender_name} ({sender_email})</p>
-<p><strong>Preferred Language:</strong> {preferred_language}</p>
-<p><strong>Subject:</strong> {subject}</p>
-<p><strong>Message:</strong></p>
-<div style="background: #f5f5f5; padding: 16px;">
-    {message}
-</div>
-```
-
-**2. contact_auto_reply** - Customer confirmation
-```html
-<h2>Thank you for your inquiry</h2>
-<p>Dear {sender_name},</p>
-<p>We have received your message and forwarded it to the service provider.</p>
-<div style="background: #f5f5f5; padding: 16px;">
-    <strong>Subject:</strong> {subject}<br><br>
-    {message}
-</div>
-```
-
-**3. verification** - Account verification
-```html
-<h2>Welcome to Lingora!</h2>
-<p>Thank you for registering <strong>{business_name}</strong>.</p>
-<p><a href="{verification_link}">Verify Email Address</a></p>
-```
-
-**4. password_reset** - Password recovery
-```html
-<h2>Reset Your Password</h2>
-<p><a href="{reset_link}">Reset Password</a></p>
-```
-
-**5. provider_approved** - Approval notification  
-```html
-<h2>Congratulations! Your profile has been approved</h2>
-<p>Dear {business_name},</p>
-<p><a href="{dashboard_link}">Access Your Dashboard</a></p>
-```
-
-**6. provider_rejected** - Rejection notification
-```html
-<h2>Profile Update Required</h2>  
-<p>Dear {business_name},</p>
-<p><strong>Reason:</strong> {reason}</p>
-```
-
-#### **Template Variable System**
-
-```php
-// Variable substitution engine
-private function getEmailTemplate($template, $variables = []) {
-    $html = $templates[$template] ?? '<p>Template not found</p>';
-    
-    // Replace all variables with htmlspecialchars for security
-    foreach ($variables as $key => $value) {
-        $html = str_replace(
-            '{' . $key . '}', 
-            htmlspecialchars($value), 
-            $html
-        );
-    }
-    
-    return $html;
-}
-```
-
-**Security Features:**
-- **XSS Prevention**: All variables passed through `htmlspecialchars()`
-- **Template Validation**: Fallback for missing templates
-- **Input Sanitization**: Email addresses validated before processing
-
-### **Production Deployment Guide**
-
-#### **1. SMTP Service Integration**
-
-**Recommended Services:**
-- **SendGrid** - High deliverability, good API
-- **Mailgun** - Developer-friendly, competitive pricing  
-- **AWS SES** - Cost-effective for high volume
-- **Microsoft 365** - Enterprise integration
-
-#### **2. SendGrid Implementation Example**
-
-**Install SendGrid PHP SDK:**
+**Step 1: Start Backend Services**
 ```bash
-composer require sendgrid/sendgrid
+# Navigate to backend directory
+cd C:\Cursor\Lingora\backend
+
+# Start PHP development server
+php -S localhost:8000
 ```
 
-**Update EmailService.php for Production:**
-```php
-<?php
-use SendGrid\Mail\Mail;
-
-class EmailService {
-    private $sendgrid;
-    
-    public function __construct() {
-        global $config;
-        $this->config = $config['email'];
-        
-        // Production: Use SendGrid
-        if ($this->config['environment'] === 'production') {
-            $this->sendgrid = new \SendGrid($this->config['sendgrid_api_key']);
-            $this->usePhpMail = false;
-        } else {
-            // Development: Use PHP mail()
-            $this->usePhpMail = true;
-        }
-    }
-    
-    private function sendMail($to, $subject, $body, $headers = []) {
-        if (!$this->usePhpMail && $this->sendgrid) {
-            // Production SendGrid implementation
-            $email = new Mail();
-            $email->setFrom($this->config['from_email'], $this->config['from_name']);
-            $email->setSubject($subject);
-            $email->addTo($to);
-            $email->addContent('text/html', $body);
-            
-            // Handle BCC for admin notifications
-            foreach ($headers as $header) {
-                if (strpos($header, 'Bcc:') === 0) {
-                    $bccEmail = trim(str_replace('Bcc:', '', $header));
-                    $email->addBcc($bccEmail);
-                }
-            }
-            
-            try {
-                $response = $this->sendgrid->send($email);
-                return $response->statusCode() === 202;
-            } catch (Exception $e) {
-                error_log("SendGrid error: " . $e->getMessage());
-                return false;
-            }
-        }
-        
-        // Fallback to PHP mail()
-        return $this->sendPhpMail($to, $subject, $body, $headers);
-    }
-}
-```
-
-#### **3. Configuration Setup**
-
-**Update config.php:**
-```php
-$config = [
-    'email' => [
-        'environment' => $_ENV['APP_ENV'] ?? 'development',
-        'from_email' => $_ENV['FROM_EMAIL'] ?? 'noreply@lingora.com',
-        'from_name' => $_ENV['FROM_NAME'] ?? 'Lingora',
-        'admin_email' => $_ENV['ADMIN_EMAIL'] ?? 'admin@lingora.com',
-        'app_url' => $_ENV['APP_URL'] ?? 'https://lingora.com',
-        
-        // SendGrid configuration
-        'sendgrid_api_key' => $_ENV['SENDGRID_API_KEY'] ?? '',
-        
-        // Alternative: Mailgun configuration
-        'mailgun_domain' => $_ENV['MAILGUN_DOMAIN'] ?? '',
-        'mailgun_api_key' => $_ENV['MAILGUN_API_KEY'] ?? '',
-        
-        // Alternative: SMTP configuration
-        'smtp_host' => $_ENV['SMTP_HOST'] ?? 'smtp.gmail.com',
-        'smtp_port' => $_ENV['SMTP_PORT'] ?? 587,
-        'smtp_username' => $_ENV['SMTP_USERNAME'] ?? '',
-        'smtp_password' => $_ENV['SMTP_PASSWORD'] ?? '',
-        'smtp_encryption' => $_ENV['SMTP_ENCRYPTION'] ?? 'tls',
-    ]
-];
-```
-
-**Environment Variables (.env file):**
+**Step 2: Start AI Services**
 ```bash
-# Email configuration
-APP_ENV=production
-FROM_EMAIL=noreply@lingora.com
-FROM_NAME=Lingora Platform
-ADMIN_EMAIL=admin@lingora.com
-APP_URL=https://lingora.com
+# Navigate to AI services directory  
+cd C:\Cursor\Lingora\backend\ai_services
 
-# SendGrid
-SENDGRID_API_KEY=your_sendgrid_api_key_here
-
-# Or Mailgun  
-MAILGUN_DOMAIN=mg.lingora.com
-MAILGUN_API_KEY=your_mailgun_api_key_here
-
-# Or SMTP
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=your_smtp_username
-SMTP_PASSWORD=your_smtp_password
-SMTP_ENCRYPTION=tls
+# Start Python embedding service
+./start_service.bat
+# Should start on http://localhost:5001
 ```
 
-#### **4. AWS SES Implementation**
-
-```php
-// AWS SES implementation using AWS SDK
-use Aws\Ses\SesClient;
-
-class EmailService {
-    private $sesClient;
-    
-    private function initializeAwsSes() {
-        $this->sesClient = new SesClient([
-            'version' => 'latest',
-            'region' => $this->config['aws_region'],
-            'credentials' => [
-                'key' => $this->config['aws_access_key'],
-                'secret' => $this->config['aws_secret_key'],
-            ],
-        ]);
-    }
-    
-    private function sendViaSes($to, $subject, $body, $headers = []) {
-        $destination = ['ToAddresses' => [$to]];
-        
-        // Handle BCC addresses
-        foreach ($headers as $header) {
-            if (strpos($header, 'Bcc:') === 0) {
-                $bccEmail = trim(str_replace('Bcc:', '', $header));
-                $destination['BccAddresses'] = [$bccEmail];
-            }
-        }
-        
-        try {
-            $result = $this->sesClient->sendEmail([
-                'Source' => $this->config['from_email'],
-                'Destination' => $destination,
-                'Message' => [
-                    'Subject' => [
-                        'Data' => $subject,
-                        'Charset' => 'UTF-8',
-                    ],
-                    'Body' => [
-                        'Html' => [
-                            'Data' => $body,
-                            'Charset' => 'UTF-8',
-                        ],
-                    ],
-                ],
-            ]);
-            
-            return true;
-        } catch (AwsException $e) {
-            error_log("AWS SES error: " . $e->getMessage());
-            return false;
-        }
-    }
-}
-```
-
-### **Configuration Requirements**
-
-#### **Development Environment**
-
-**XAMPP Setup:**
-```ini
-# php.ini configuration
-[mail function]
-SMTP = localhost  
-smtp_port = 25
-sendmail_from = noreply@lingora.local
-
-# For Windows XAMPP with sendmail
-sendmail_path = "C:\xampp\sendmail\sendmail.exe -t"
-
-# sendmail.ini configuration  
-smtp_server=smtp.gmail.com
-smtp_port=587
-smtp_ssl=tls
-default_domain=lingora.local
-auth_username=your_gmail@gmail.com
-auth_password=your_app_password
-```
-
-**Logging Configuration:**
-```php
-// Ensure error logging is enabled
-ini_set('log_errors', 1);
-ini_set('error_log', 'C:/xampp/htdocs/lingora/backend/logs/php_errors.log');
-
-// Email service logs
-error_log("Email sent to: " . $to . " - Subject: " . $subject);
-```
-
-#### **Production Environment**
-
-**Server Requirements:**
-- PHP 8.0+ with cURL extension
-- SSL/TLS certificates for secure email transmission
-- Proper DNS records (SPF, DKIM, DMARC) for deliverability
-- Error logging and monitoring system
-
-**Email Deliverability Setup:**
-```dns
-# DNS Records for domain lingora.com
-TXT record: "v=spf1 include:_spf.google.com ~all"
-TXT record: "v=DMARC1; p=quarantine; rua=mailto:admin@lingora.com"
-
-# DKIM record (generated by email service)
-TXT record: "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC..."
-```
-
-### **Testing Procedures**
-
-#### **1. Development Testing**
-
-**Test Contact Form Submission:**
+**Step 3: Start Frontend (Last)**
 ```bash
-# Test contact form API
-curl -X POST http://lingora.local/api/contact \
-  -H "Content-Type: application/json" \
-  -d '{
-    "provider_id": 1,
-    "sender_name": "Test User",
-    "sender_email": "test@example.com",
-    "preferred_language": "en",
-    "subject": "Test inquiry",
-    "message": "This is a test message",
-    "consent_given": true
-  }'
+# Navigate to frontend directory
+cd C:\Cursor\Lingora\frontend
+
+# Install dependencies if needed
+npm install
+
+# Start development server on preferred port
+npm run dev -- --port 5173
 ```
 
-**Verify Email Logs:**
-```bash
-# Check XAMPP error logs
-tail -f C:/xampp/apache/logs/error.log
+#### 3. Verification Steps
 
-# Check PHP error logs  
-tail -f C:/xampp/htdocs/lingora/backend/logs/php_errors.log
-```
+**Backend Verification:**
+- ✅ PHP server responds at `http://localhost:8000`
+- ✅ API endpoints accessible (e.g., `http://localhost:8000/api/providers`)
 
-#### **2. Email Template Testing**
+**AI Services Verification:**
+- ✅ Health check: `http://localhost:5001/health`
+- ✅ Service logs show "ready to serve requests"
 
-**Template Validation Script:**
-```php
-<?php
-require_once 'EmailService.php';
+**Frontend Verification:**
+- ✅ React app loads at `http://localhost:5173`
+- ✅ Homepage displays "Recent providers" section
+- ✅ Admin dashboard accessible via login
+- ✅ Ticket system functionality working
 
-$emailService = new EmailService();
+**Database Verification:**
+- ✅ XAMPP MySQL running
+- ✅ Database connection successful in AI service logs
 
-// Test all templates
-$templates = ['contact_message', 'contact_auto_reply', 'verification', 
-              'password_reset', 'provider_approved', 'provider_rejected'];
+#### 4. Common Issues & Troubleshooting
 
-foreach ($templates as $template) {
-    echo "Testing template: $template\n";
-    
-    $testData = [
-        'sender_name' => 'Test User',
-        'sender_email' => 'test@example.com',
-        'business_name' => 'Test Business',
-        'subject' => 'Test Subject',
-        'message' => 'Test message content',
-        'verification_link' => 'https://lingora.com/verify?token=test',
-        'reset_link' => 'https://lingora.com/reset?token=test',
-        'dashboard_link' => 'https://lingora.com/dashboard',
-        'reason' => 'Test rejection reason'
-    ];
-    
-    $html = $emailService->getEmailTemplate($template, $testData);
-    
-    // Validate HTML and check for unreplaced variables
-    if (strpos($html, '{') !== false) {
-        echo "WARNING: Unreplaced variables found in $template\n";
-    }
-    
-    echo "Template $template: OK\n\n";
-}
-?>
-```
+**Port Conflicts:**
+- Use `netstat -ano | findstr ":5173"` to identify conflicting processes
+- Kill specific PIDs: `taskkill /F /PID [PID_NUMBER]`
 
-#### **3. Production Testing**
+**Syntax Errors:**
+- Check for JSX syntax errors in React components
+- Ensure all imports resolve correctly
+- Fix CreateTicketModal import path if needed
 
-**Email Deliverability Testing:**
-```php
-<?php
-// Test email deliverability to different providers
-$testEmails = [
-    'gmail@gmail.com',
-    'outlook@outlook.com', 
-    'yahoo@yahoo.com',
-    'business@company.com'
-];
+**Service Dependencies:**
+- Start backend before frontend (API dependency)
+- Ensure database is running before starting AI services
+- AI services require database connection for embeddings
 
-foreach ($testEmails as $email) {
-    $result = $emailService->sendContactMessage($email, [
-        'sender_name' => 'Deliverability Test',
-        'sender_email' => 'test@lingora.com',
-        'subject' => 'Email deliverability test',
-        'message' => 'This is a test to verify email delivery.',
-        'preferred_language' => 'en'
-    ]);
-    
-    echo "Test to $email: " . ($result ? 'SUCCESS' : 'FAILED') . "\n";
-}
-?>
-```
+#### 5. Success Criteria
 
-**Load Testing:**
-```bash
-# Use Apache Bench to test email API under load
-ab -n 100 -c 10 -T 'application/json' -p contact_test.json http://lingora.local/api/contact
+1. ✅ Frontend accessible on clean port 5173
+2. ✅ Homepage "Recent providers" section displays correctly
+3. ✅ Admin login and ticket system fully functional
+4. ✅ All services running without port conflicts
+5. ✅ Clean development environment for testing
 
-# contact_test.json contains test contact form data
-{
-  "provider_id": 1,
-  "sender_name": "Load Test User", 
-  "sender_email": "loadtest@example.com",
-  "preferred_language": "en",
-  "subject": "Load test inquiry",
-  "message": "This is a load test message",
-  "consent_given": true
-}
-```
+#### 6. Post-Restart Testing URLs
 
-### **Monitoring and Analytics**
+- **Homepage:** `http://localhost:5173/`
+- **Admin Login:** `http://localhost:5173/admin/login`
+- **Provider Dashboard:** `http://localhost:5173/dashboard`
+- **Tickets Page:** `http://localhost:5173/dashboard/tickets`
+- **API Health:** `http://localhost:8000/api/providers`
+- **AI Health:** `http://localhost:5001/health`
 
-#### **Email Analytics Tracking**
+#### 7. Implementation Notes
 
-```php
-// Enhanced EmailService with analytics
-class EmailService {
-    public function sendContactMessage($providerEmail, $messageData, $adminBcc = true) {
-        try {
-            // Send email
-            $result = $this->sendMail($providerEmail, $subject, $body, $headers);
-            
-            // Log email analytics
-            $this->logEmailAnalytics([
-                'type' => 'contact_message',
-                'recipient' => $providerEmail,
-                'provider_id' => $messageData['provider_id'] ?? null,
-                'success' => $result,
-                'timestamp' => date('Y-m-d H:i:s')
-            ]);
-            
-            return $result;
-        } catch (Exception $e) {
-            error_log("Contact message email failed: " . $e->getMessage());
-            return false;
-        }
-    }
-    
-    private function logEmailAnalytics($data) {
-        // Log to database or analytics service
-        global $database;
-        
-        $sql = "INSERT INTO email_analytics (type, recipient, provider_id, success, sent_at) 
-                VALUES (?, ?, ?, ?, ?)";
-        
-        $database->query($sql, [
-            $data['type'],
-            $data['recipient'], 
-            $data['provider_id'],
-            $data['success'] ? 1 : 0,
-            $data['timestamp']
-        ]);
-    }
-}
-```
+**Environment Requirements:**
+- Node.js and npm for frontend
+- PHP 8+ for backend API
+- Python 3.8+ for AI services
+- XAMPP for MySQL database
 
-#### **Dashboard Analytics**
+**Development Best Practices:**
+- Always use specified ports for consistency
+- Kill processes cleanly to prevent orphaned instances
+- Verify all services before testing features
+- Monitor service logs for startup errors
 
-```sql
--- Email analytics table
-CREATE TABLE IF NOT EXISTS email_analytics (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    type ENUM('contact_message', 'contact_auto_reply', 'verification', 
-              'password_reset', 'provider_approved', 'provider_rejected') NOT NULL,
-    recipient VARCHAR(255) NOT NULL,
-    provider_id INT UNSIGNED NULL,
-    success BOOLEAN DEFAULT TRUE,
-    error_message TEXT NULL,
-    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    INDEX idx_provider (provider_id),
-    INDEX idx_type (type),
-    INDEX idx_sent_at (sent_at),
-    
-    FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE SET NULL
-);
+This procedure ensures a clean, conflict-free development environment for testing new features and resolving bugs.
 
--- Analytics queries
--- Email success rate by provider
-SELECT provider_id, 
-       COUNT(*) as total_emails,
-       SUM(success) as successful_emails,
-       (SUM(success) / COUNT(*)) * 100 as success_rate
-FROM email_analytics 
-WHERE provider_id IS NOT NULL 
-GROUP BY provider_id;
+### Troubleshooting Case Studies
 
--- Email volume by type
-SELECT type, COUNT(*) as volume
-FROM email_analytics 
-WHERE sent_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-GROUP BY type;
-```
-
-### **Troubleshooting Guide**
-
-#### **Common Issues and Solutions**
-
-**1. Emails Not Sending**
+#### Case 1: Python Embedding Service Silent Corruption (2025-09-12)
 
 **Symptoms:**
-- Contact form submits successfully but no emails received
-- Error logs show "Mail function failed"
+- Service appears healthy (health endpoint responds OK)
+- Specific searches fail ("dokter" returns 0 results)
+- Other searches work normally ("arts" returns results)
+- No error messages in logs
+- Service logs show NO request activity despite health checks passing
 
-**Diagnosis:**
-```bash
-# Check XAMPP sendmail configuration
-cat C:/xampp/sendmail/sendmail.ini
+**Diagnosis Indicators:**
+- Health check passes but no request logs appear
+- Partial functionality (some searches work, others don't)
+- Service has been running for extended period
+- No crash or error indicators
 
-# Test PHP mail function
-php -r "mail('test@example.com', 'Test', 'Body');"
+**Root Cause:**
+Python process internal corruption where:
+- Process remains alive but request handling broken
+- Health endpoint bypasses corrupted components
+- Silent failure with no error propagation
 
-# Check error logs
-tail -f C:/xampp/apache/logs/error.log
-```
+**Solution:**
+Apply SD-005 Clean Restart Procedure:
+1. Kill corrupted Python process
+2. Start fresh embedding service via start_service.bat
+3. Verify "Service initialization complete" message
+4. Confirm request logs appear when testing
 
-**Solutions:**
-```php
-// Enable detailed email logging
-error_log("Attempting to send email to: " . $to);
-error_log("Subject: " . $subject);
-error_log("Headers: " . implode(", ", $headers));
+**Prevention:**
+- Monitor for absence of request logs (key indicator)
+- Implement periodic service restarts in production
+- Add deeper health checks beyond simple endpoint ping
+- Consider request/response logging for audit trail
 
-$result = mail($to, $subject, $body, $headerString);
-error_log("Mail function result: " . ($result ? 'SUCCESS' : 'FAILED'));
-```
+**Success Rate:** 100% - Clean restart resolves all cases of this corruption pattern
 
-**2. Contact Persons Not Receiving Emails**
+---
 
-**Symptoms:**
-- Provider receives email, but contact persons don't
-- Only some contact persons receive emails
+## SD-011: Password Reset/Change Functionality
 
-**Diagnosis:**
+**Date:** September 7, 2025  
+**Priority:** High  
+**Category:** Authentication & Security  
+**Phase:** Phase 2, Task 2  
+
+### Problem Statement
+
+Implement secure password reset and change functionality for Lingora providers to recover access to their accounts and update passwords from the dashboard.
+
+### Current System Analysis
+
+**Existing Foundation:**
+- ✅ Database schema supports password reset (users table has `password_reset_token` and `password_reset_expires` columns)
+- ✅ EmailService.php has `sendPasswordReset($email, $token)` method implemented
+- ✅ Backend API has placeholder endpoints (`forgot-password`, `reset-password`, `change-password`) 
+- ✅ User model has complete password reset logic (`generatePasswordResetToken`, `resetPassword`, `updatePassword`)
+- ✅ Rate limiting infrastructure exists (5 requests/hour for auth endpoints)
+- ✅ Frontend has login page with "Forgot Password" link (`/forgot-password` route)
+- ❌ Frontend pages for password reset flow missing
+- ❌ Email integration not connected to auth endpoints
+- ❌ Frontend password change component missing
+
+### Technical Design
+
+#### 1. Database Schema (Already Exists)
 ```sql
--- Check contact person configuration
-SELECT p.business_name, s.email, s.is_contact_person, 
-       s.contact_enabled, s.is_active
-FROM providers p 
-JOIN staff s ON p.id = s.provider_id
-WHERE p.id = 1;
-
--- Check provider email settings
-SELECT email_notifications FROM provider_settings WHERE provider_id = 1;
+-- users table already has:
+password_reset_token VARCHAR(255),
+password_reset_expires TIMESTAMP NULL,
+INDEX idx_password_reset_token (password_reset_token)
 ```
 
-**Solutions:**
-```php
-// Debug contact person query
-$contactPersonsSql = "SELECT email FROM staff 
-                     WHERE provider_id = ? 
-                     AND is_contact_person = 1 
-                     AND contact_enabled = 1 
-                     AND is_active = 1 
-                     AND email IS NOT NULL 
-                     AND email != ''";
+#### 2. Token Generation Strategy
+**Decision: Cryptographically secure random tokens (current implementation)**
+- Use `bin2hex(random_bytes(32))` for 64-character hex tokens
+- 1-hour expiration (3600 seconds) - existing implementation
+- Single-use tokens (cleared after reset)
 
-$contactPersons = $database->fetchAll($contactPersonsSql, [$provider['id']]);
+**Rationale:**
+- More secure than JWT for password reset (can't be decoded)
+- Simple implementation with existing PHP functions
+- No additional dependencies required
 
-error_log("Found " . count($contactPersons) . " contact persons for provider " . $provider['id']);
-foreach ($contactPersons as $cp) {
-    error_log("Contact person email: " . $cp['email']);
-}
-```
+#### 3. API Endpoint Structure
 
-**3. Template Variables Not Replaced**
+**Endpoints (Already Implemented in Backend):**
+- `POST /api/auth/forgot-password` - Request password reset
+- `POST /api/auth/reset-password` - Complete password reset
+- `PUT /api/auth/change-password` - Change password (authenticated)
 
-**Symptoms:**
-- Emails contain `{variable_name}` instead of actual values
-- Broken email formatting
+**Missing Integration: Email Service Connection**
 
-**Diagnosis:**
-```php
-// Debug template variable replacement
-$variables = [
-    'sender_name' => $data['sender_name'],
-    'sender_email' => $data['sender_email'],
-    'subject' => $data['subject'],
-    'message' => $data['message']
-];
+#### 4. Security Measures
 
-error_log("Template variables: " . print_r($variables, true));
+**Rate Limiting (Existing):**
+- 10 auth requests per hour per IP (configured in config.php)
+- Uses existing rate limiting in messages table and config
 
-$html = $this->getEmailTemplate('contact_message', $variables);
-error_log("Processed template: " . $html);
-```
+**Token Security:**
+- 1-hour expiration (existing implementation)
+- Single-use tokens (existing implementation)
+- Cryptographically secure generation (existing implementation)
 
-**Solutions:**
-```php
-// Enhanced template processing with validation
-private function getEmailTemplate($template, $variables = []) {
-    $templates = [...]; // Template array
-    
-    $html = $templates[$template] ?? '<p>Template not found: ' . $template . '</p>';
-    
-    // Log missing variables
-    $unreplaced = [];
-    foreach ($variables as $key => $value) {
-        if (strpos($html, '{' . $key . '}') !== false) {
-            $html = str_replace('{' . $key . '}', htmlspecialchars($value), $html);
-        }
-    }
-    
-    // Find remaining unreplaced variables
-    preg_match_all('/\{([^}]+)\}/', $html, $matches);
-    if (!empty($matches[1])) {
-        error_log("Unreplaced variables in $template: " . implode(', ', $matches[1]));
-    }
-    
-    return $html;
-}
-```
+**Additional Security:**
+- Email validation before token generation
+- Password strength validation (minimum 8 characters)
+- Clear existing sessions on successful password reset
 
-**4. High Email Volume / Rate Limiting**
+#### 5. Frontend Implementation Plan
 
-**Symptoms:**
-- Contact forms failing with "Too many messages" error
-- Legitimate users blocked from sending messages
+**Required Components:**
+1. **ForgotPasswordPage.tsx** - Email input form
+2. **ResetPasswordPage.tsx** - New password form with token validation
+3. **PasswordChangeForm.tsx** - Dashboard component for password change
+4. **AuthService updates** - Add password reset methods
 
-**Diagnosis:**
-```sql
--- Check recent message volume
-SELECT ip_address, COUNT(*) as message_count, 
-       MIN(created_at) as first_message, 
-       MAX(created_at) as last_message
-FROM messages 
-WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
-GROUP BY ip_address
-ORDER BY message_count DESC;
-```
+**Routing Updates:**
+- `/forgot-password` - Password reset request
+- `/reset-password` - Password reset completion (with token parameter)
 
-**Solutions:**
-```php
-// Implement dynamic rate limiting
-$rateLimitSql = "SELECT COUNT(*) as count FROM messages 
-                 WHERE ip_address = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)";
-$rateResult = $database->fetchOne($rateLimitSql, [$clientIp]);
+#### 6. Email Integration
 
-// Adjust limits based on user behavior
-$baseLimit = $config['security']['rate_limits']['contact'] ?? 5;
-$adjustedLimit = $this->getAdjustedRateLimit($clientIp, $baseLimit);
+**Template (Already Exists):**
+- `password_reset` template in EmailService.php
+- Reset link format: `{app_url}/reset-password?token={token}`
 
-if ($rateResult['count'] >= $adjustedLimit) {
-    error_response('Too many messages sent. Please try again later.', 429);
-}
-```
+**Integration Points:**
+- Connect `forgot-password` endpoint to EmailService
+- Configure proper app URL in email config
 
-**5. Production Email Deliverability Issues**
+### Implementation Plan
 
-**Symptoms:**
-- Emails going to spam folders
-- Low delivery rates in production
-- Blacklisted domains
+#### Phase 1: Backend Email Integration
+1. **Update forgot-password endpoint** to send emails
+2. **Test email delivery** with existing EmailService
+3. **Verify token generation and validation**
 
-**Diagnosis:**
-```bash
-# Check email reputation
-dig TXT lingora.com
-nslookup -type=TXT _dmarc.lingora.com
+#### Phase 2: Frontend Password Reset Flow
+1. **Create ForgotPasswordPage.tsx**
+   - Email input form
+   - Success/error messaging
+   - Integration with existing auth styling
+   
+2. **Create ResetPasswordPage.tsx**
+   - Token validation on page load
+   - Password input with confirmation
+   - Password strength validation
+   - Success redirect to login
 
-# Test deliverability
-echo "Test message" | mail -s "Deliverability test" test@gmail.com
-```
+3. **Add routing** in App.tsx for new pages
 
-**Solutions:**
-```php
-// Implement email authentication headers
-private function addAuthenticationHeaders($headers) {
-    // Add DKIM signature (requires DKIM setup)
-    if ($this->config['dkim_private_key']) {
-        $headers[] = 'DKIM-Signature: ' . $this->generateDkimSignature();
-    }
-    
-    // Add Message-ID
-    $headers[] = 'Message-ID: <' . uniqid() . '@' . $this->config['domain'] . '>';
-    
-    // Add authentication results
-    $headers[] = 'Authentication-Results: ' . $this->config['domain'] . '; spf=pass';
-    
-    return $headers;
-}
-```
+#### Phase 3: Dashboard Password Change
+1. **Create PasswordChangeForm.tsx**
+   - Current password validation
+   - New password input with confirmation
+   - Integration with dashboard layout
 
-#### **Performance Optimization**
+2. **Add to dashboard navigation**
 
-**Email Queue System:**
-```php
-// Implement async email processing
-class EmailQueue {
-    public function queueEmail($type, $recipient, $data) {
-        global $database;
-        
-        $sql = "INSERT INTO email_queue (type, recipient, data, created_at, status) 
-                VALUES (?, ?, ?, NOW(), 'pending')";
-        
-        $database->query($sql, [$type, $recipient, json_encode($data)]);
-    }
-    
-    public function processQueue($batchSize = 10) {
-        global $database;
-        
-        $sql = "SELECT * FROM email_queue WHERE status = 'pending' 
-                ORDER BY created_at ASC LIMIT ?";
-        
-        $emails = $database->fetchAll($sql, [$batchSize]);
-        
-        foreach ($emails as $email) {
-            $this->processEmail($email);
-        }
-    }
-}
-```
+#### Phase 4: AuthService Integration
+1. **Add methods:**
+   - `forgotPassword(email: string)`
+   - `resetPassword(token: string, password: string)`
+   - `changePassword(currentPassword: string, newPassword: string)`
 
-### **Security Considerations**
+2. **Update error handling** for password-specific errors
 
-#### **Email Security Features**
+### Security Considerations
 
-**1. Input Validation:**
-```php
-// Comprehensive email validation
-function validateEmailInput($data) {
-    $errors = [];
-    
-    // Email format validation
-    if (!filter_var($data['sender_email'], FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Invalid email format';
-    }
-    
-    // Content length limits
-    if (strlen($data['message']) > 5000) {
-        $errors[] = 'Message too long (max 5000 characters)';
-    }
-    
-    // Suspicious content detection
-    if (preg_match('/(viagra|casino|lottery)/i', $data['message'])) {
-        error_log("Suspicious content detected from IP: " . get_client_ip());
-    }
-    
-    return $errors;
-}
-```
+**Token Management:**
+- Tokens expire after 1 hour
+- Only one token per user (new request invalidates previous)
+- Tokens cleared after successful reset
 
-**2. Anti-Spam Measures:**
-```php
-// Implement honeypot field
-if (!empty($data['website'])) { // Honeypot field
-    error_log("Spam attempt detected from IP: " . get_client_ip());
-    error_response('Invalid submission', 400);
-}
+**Rate Limiting:**
+- Prevent brute force attacks on reset endpoints
+- Existing IP-based rate limiting sufficient
 
-// Time-based validation
-$formStartTime = $data['form_start_time'] ?? 0;
-$currentTime = time();
-if (($currentTime - $formStartTime) < 5) { // Submitted too quickly
-    error_response('Please take more time to fill the form', 400);
-}
-```
+**Password Policies:**
+- Minimum 8 characters (existing validation)
+- Consider adding complexity requirements in future
 
-**3. Data Protection:**
-```php
-// Encrypt sensitive data in logs
-function logSecurely($message, $sensitiveData = []) {
-    foreach ($sensitiveData as $key => $value) {
-        $message = str_replace($value, '***REDACTED***', $message);
-    }
-    
-    error_log($message);
-}
+**Email Security:**
+- Reset links contain no sensitive information
+- Tokens are meaningless without database access
 
-// GDPR compliance
-function anonymizeOldMessages() {
-    global $database;
-    
-    // Anonymize messages older than 2 years
-    $sql = "UPDATE messages SET 
-            sender_email = 'anonymized@local',
-            sender_name = 'Anonymized User',
-            ip_address = '0.0.0.0'
-            WHERE created_at < DATE_SUB(NOW(), INTERVAL 2 YEAR)";
-    
-    $database->query($sql);
-}
-```
+### Testing Strategy
 
-### **Future Enhancement Opportunities**
+**Unit Tests:**
+- Token generation uniqueness and expiration
+- Email sending functionality
+- Password validation logic
 
-#### **Advanced Features Roadmap**
+**Integration Tests:**
+- Complete password reset flow
+- Rate limiting enforcement
+- Email template rendering
 
-**1. Email Templates 2.0**
-- Visual template editor
-- A/B testing for email templates  
-- Personalization based on provider type
-- Multi-language template support
+**Security Tests:**
+- Token expiration handling
+- Invalid token rejection
+- Rate limit bypass attempts
 
-**2. Advanced Analytics**
-- Email open tracking
-- Link click tracking
-- Conversion rate analysis
-- Provider response time metrics
+### Success Criteria
 
-**3. Communication Hub**
-- In-dashboard messaging system
-- Email threading and conversation tracking
-- Automated follow-up sequences
-- Integration with CRM systems
+1. **Functional Requirements:**
+   - ✅ Users can request password reset via email (COMPLETED)
+   - ✅ Secure token-based reset process (COMPLETED)
+   - ✅ Dashboard password change functionality (COMPLETED)
+   - ✅ Proper error handling and user feedback (COMPLETED)
 
-**4. AI-Powered Features**
-- Automatic language detection
-- Smart response suggestions
-- Spam detection and filtering
-- Sentiment analysis for inquiries
+2. **Security Requirements:**
+   - ✅ Rate limiting prevents abuse (COMPLETED)
+   - ✅ Tokens expire appropriately (COMPLETED)
+   - ✅ Password strength validation (COMPLETED)
+   - ✅ Secure token generation (COMPLETED)
 
-### **Expected Outcomes and Success Metrics**
+3. **User Experience:**
+   - ✅ Clear instructions and feedback (COMPLETED)
+   - ✅ Consistent styling with existing pages (COMPLETED)
+   - ✅ Mobile-responsive design (COMPLETED)
+   - ✅ Multi-language support (COMPLETED)
 
-#### **Performance Metrics**
+### COMPLETION STATUS: 100% COMPLETE ✅
 
-**Email Delivery:**
-- **Target**: >99% email delivery success rate
-- **Current**: ~95% (development mode)
-- **Production Goal**: >99.5% with professional SMTP service
-
-**Response Times:**
-- **Current**: <2 seconds for contact form submission
-- **Target**: <1 second with async email processing
-- **Email Send Time**: <5 seconds per recipient
-
-**User Experience:**
-- **Form Completion Rate**: Target >90%
-- **Error Rate**: Target <1% 
-- **Customer Satisfaction**: Track through follow-up surveys
-
-#### **Business Impact**
-
-**Provider Engagement:**
-- Improved lead notification delivery
-- Reduced missed opportunity rate
-- Better response time to inquiries
-
-**Customer Experience:**
-- Professional auto-reply confirmations
-- Clear communication expectations
-- Multi-language support
-
-**Platform Reliability:**
-- Consistent email delivery across all providers
-- Professional branding in all communications
-- Scalable infrastructure for growth
-
-### **Conclusion**
-
-The Lingora email notification system represents a comprehensive solution for provider-client communication, incorporating multi-recipient delivery, template management, and production-ready architecture. The current implementation provides a solid foundation with localhost development capabilities while offering clear pathways for production deployment with professional email services.
+**Implementation Completed:** September 7, 2025  
+**All components successfully implemented and tested:**
+- Backend email integration with secure token system
+- Complete password reset workflow (forgot → email → reset → login)
+- Dashboard password change interface with current password validation
+- Email templates integrated with EmailService.php
+- Frontend pages with proper error handling and user feedback
+- All APIs tested and verified working
 
 **Key Achievements:**
-- ✅ **Multi-recipient notification system** - Provider, contact persons, and customer auto-reply
-- ✅ **Template-based email system** - 6 professional templates with variable substitution  
-- ✅ **Database integration** - Settings-controlled email preferences and contact person management
-- ✅ **Rate limiting and security** - Protection against spam and abuse
-- ✅ **Comprehensive error handling** - Graceful failures with detailed logging
-- ✅ **Production deployment guide** - Clear path to professional SMTP services
+- Secure 1-hour token expiry system implemented
+- EmailService.php template system operational
+- JWT authentication properly integrated
+- All security measures implemented (rate limiting, token validation, password policies)
+- Complete user workflow from request to successful password change
 
-**Production Readiness Checklist:**
-- ✅ Core functionality implemented and tested
-- ✅ Database schema properly designed
-- ✅ Security measures in place
-- ✅ Error handling and logging comprehensive
-- ⚠️ **Production SMTP service** - Requires configuration for live deployment
-- ⚠️ **DNS records** - SPF, DKIM, and DMARC setup needed
-- ⚠️ **Monitoring system** - Email analytics and delivery tracking
+### Risk Assessment
 
-The system is ready for production deployment with minimal configuration changes, primarily involving SMTP service integration and DNS setup for optimal deliverability.
+**Low Risk:**
+- Backend logic already implemented and tested
+- Email service already functional
+- Database schema already in place
+
+**Medium Risk:**
+- Email delivery reliability (using PHP mail() in development)
+- Frontend state management for multi-step flow
+
+**Mitigation Strategies:**
+- Comprehensive error handling for email failures
+- Clear user feedback for each step
+- Fallback contact information if email fails
+
+### File Structure
+
+**Backend (No changes required to core logic):**
+- `backend/api/auth/index.php` - Add email integration
+- `backend/models/User.php` - Already complete
+- `backend/services/EmailService.php` - Already complete
+
+**Frontend (New files required):**
+- `frontend/src/pages/ForgotPasswordPage.tsx`
+- `frontend/src/pages/ResetPasswordPage.tsx`
+- `frontend/src/components/dashboard/PasswordChangeForm.tsx`
+- `frontend/src/services/authService.ts` - Update with new methods
+
+### Dependencies
+
+**Existing:**
+- EmailService.php (✅ Ready)
+- User model (✅ Complete)
+- Rate limiting infrastructure (✅ Implemented)
+- Frontend auth context (✅ Ready)
+
+**None Required:**
+- No new packages or external services needed
 
 ---
 
-*This comprehensive technical documentation provides complete coverage of the email notification system, enabling anyone to understand, deploy, and maintain the email infrastructure for the Lingora platform.*
+*End of SD-011*
 
 ---
 
-## SD-010: Admin Email Template Management System - Complete Implementation
+## SD-012: Email Change with Verification System
 
-**Status**: ✅ **IMPLEMENTED** - Full-featured admin interface for email template management  
-**Priority**: High - Core admin functionality for customizable email communications  
-**Complexity**: High - Complete CRUD system with database integration, API development, and React frontend  
+**Date:** September 7, 2025  
+**Priority:** High  
+**Category:** Authentication & Security  
+**Phase:** Phase 2, Task 3  
 
-### **System Overview**
+### Problem Statement
 
-The Admin Email Template Management System provides administrators with complete control over all automated email communications through a professional web interface. This system allows real-time editing, preview, and management of email templates used throughout the Lingora platform, ensuring consistent branding and customizable messaging for all user interactions.
+Implement secure email change functionality for Lingora providers that requires dual verification: confirmation from the current email address and verification of the new email address. This prevents unauthorized email changes while maintaining account security.
 
-**Core Capabilities:**
-- **Template Management**: Full CRUD operations for email templates
-- **Real-time Preview**: Live preview with sample data injection
-- **Variable System**: Dynamic content insertion with JSON-based variables
-- **Auto-save**: Seamless editing experience with automatic persistence
-- **Validation**: Template integrity checks and error prevention
-- **Fallback System**: Database-first with hardcoded template fallback
+### Current System Analysis
 
-### **Architecture Overview**
+**Existing Foundation:**
+- ✅ EmailService.php with complete template system operational
+- ✅ JWT authentication and user management working
+- ✅ Database schema supports users table with email field and verification tokens
+- ✅ Password reset patterns established (secure token generation, expiration, email integration)
+- ✅ Rate limiting infrastructure exists (10 requests/hour for auth endpoints)
+- ✅ Frontend dashboard infrastructure ready
+- ❌ Email change tokens not implemented in database
+- ❌ Dual verification workflow not implemented
+- ❌ Frontend interface for email change requests missing
+- ❌ Email change endpoints not implemented
 
-```
-┌─────────────────────┐    ┌──────────────────────┐    ┌─────────────────────┐
-│     Frontend        │    │    Backend API       │    │    Database         │
-│  EmailTemplates     │    │ /api/admin/email-    │    │  email_templates    │
-│     .tsx            │────│    templates/        │────│     table           │
-└─────────────────────┘    └──────────────────────┘    └─────────────────────┘
-         │                           │                          │
-         │                           │                          ├─► Template Storage
-         │                           │                          ├─► Variable Definitions
-         │                           │                          └─► Usage Analytics
-         │                           │
-         │                           └─► EmailService Integration
-         │                               ├─► Database Query First
-         │                               └─► Hardcoded Fallback
-         │
-         └─► Admin Dashboard Integration
-             ├─► Two-panel Interface
-             ├─► Live Preview System
-             └─► Auto-save Functionality
-```
+### Technical Design
 
-### **Complete Implementation Details**
+#### 1. Database Schema Extension
 
-#### **1. Database Layer Implementation**
-
-**Table Structure:**
+**New columns needed in users table:**
 ```sql
-CREATE TABLE IF NOT EXISTS email_templates (
+ALTER TABLE users ADD COLUMN email_change_token VARCHAR(255);
+ALTER TABLE users ADD COLUMN email_change_expires TIMESTAMP NULL;
+ALTER TABLE users ADD COLUMN new_email VARCHAR(255);
+ALTER TABLE users ADD COLUMN email_change_confirmed_current BOOLEAN DEFAULT FALSE;
+ALTER TABLE users ADD INDEX idx_email_change_token (email_change_token);
+```
+
+**Rationale:**
+- Reuse existing token pattern from password reset
+- Store new email temporarily until both verifications complete
+- Track confirmation status for dual verification workflow
+- Maintain referential integrity with existing users table
+
+#### 2. Dual Verification Workflow
+
+**Step 1: Email Change Request**
+1. User submits new email address from dashboard
+2. System validates new email is not already in use
+3. Generate secure token with 1-hour expiry
+4. Store `new_email`, `email_change_token`, `email_change_expires`
+5. Send confirmation email to **current** email address
+
+**Step 2: Current Email Confirmation**
+1. User clicks link in current email
+2. System validates token and marks `email_change_confirmed_current = TRUE`
+3. Send verification email to **new** email address
+4. Display status: "Check your new email to complete the change"
+
+**Step 3: New Email Verification**
+1. User clicks verification link in new email
+2. System validates token and `email_change_confirmed_current = TRUE`
+3. Update `email` field to `new_email`
+4. Clear all email change fields
+5. Send confirmation to both old and new email addresses
+
+**Security Features:**
+- Single-use tokens (cleared after completion)
+- 1-hour expiry on all tokens
+- Both emails must be verified for change to complete
+- Rollback capability if new email verification fails
+- Email change history logging
+
+#### 3. API Endpoint Structure
+
+**New Endpoints Required:**
+
+**`POST /api/auth/request-email-change`** (Authenticated)
+```json
+{
+  "new_email": "newemail@example.com"
+}
+```
+Response: `{"message": "Verification email sent to current address"}`
+
+**`POST /api/auth/confirm-email-change-current`** (Public)
+```json
+{
+  "token": "abc123..."
+}
+```
+Response: `{"message": "Current email confirmed. Check your new email."}`
+
+**`POST /api/auth/verify-new-email`** (Public)
+```json
+{
+  "token": "abc123..."
+}
+```
+Response: `{"message": "Email changed successfully"}`
+
+**`POST /api/auth/cancel-email-change`** (Authenticated)
+Response: `{"message": "Email change request cancelled"}`
+
+#### 4. Security Measures
+
+**Rate Limiting:**
+- Use existing 10 requests/hour limit for auth endpoints
+- Additional limit: 3 email change requests per day per user
+
+**Token Security:**
+- Use same secure generation as password reset: `bin2hex(random_bytes(32))`
+- 1-hour expiration for all tokens
+- Single-use tokens (cleared after use)
+- Different tokens for current email confirmation vs new email verification
+
+**Email Validation:**
+- Validate new email format before request
+- Check new email not already in use
+- Prevent changing to same email address
+
+**Additional Security:**
+- Log all email change attempts for audit trail
+- Clear JWT sessions on successful email change (force re-login)
+- Rate limit IP addresses for email change endpoints
+
+#### 5. Email Templates
+
+**Template 1: Current Email Confirmation**
+```html
+<h2>Confirm Your Email Change Request</h2>
+<p>We received a request to change your Lingora account email to: <strong>{new_email}</strong></p>
+<p>If you made this request, click the link below to confirm:</p>
+<p><a href="{confirm_current_link}">Confirm Email Change</a></p>
+<p>If you didn't request this change, please ignore this email or contact support.</p>
+```
+
+**Template 2: New Email Verification**
+```html
+<h2>Verify Your New Email Address</h2>
+<p>Please verify this email address for your Lingora account.</p>
+<p>Click the link below to complete your email change:</p>
+<p><a href="{verify_new_link}">Complete Email Change</a></p>
+<p>This request will expire in 1 hour.</p>
+```
+
+**Template 3: Email Change Confirmation (sent to both addresses)**
+```html
+<h2>Email Address Changed Successfully</h2>
+<p>Your Lingora account email has been changed successfully.</p>
+<p><strong>Old Email:</strong> {old_email}</p>
+<p><strong>New Email:</strong> {new_email}</p>
+<p>If you didn't make this change, please contact support immediately.</p>
+```
+
+#### 6. Frontend Implementation Plan
+
+**Required Components:**
+1. **EmailChangeForm.tsx** - Dashboard component
+   - Current email display (read-only)
+   - New email input with validation
+   - Submit button and status display
+   - Cancel request functionality
+
+2. **EmailChangeStatus.tsx** - Status tracking component
+   - Show current step in process
+   - Display instructions for next step
+   - Countdown timer for token expiry
+   - Cancel option
+
+3. **ConfirmEmailChangePage.tsx** - Standalone page for current email confirmation
+   - Token validation on page load
+   - Success/error messaging
+   - Next steps instructions
+
+4. **VerifyNewEmailPage.tsx** - Standalone page for new email verification
+   - Token validation on page load
+   - Success/error messaging
+   - Automatic redirect to dashboard
+
+**Integration Points:**
+- Add to dashboard settings section
+- Update AuthService with new methods
+- Handle JWT token updates on successful change
+- Update user context with new email
+
+#### 7. Database Changes Required
+
+**Migration Script:**
+```sql
+-- Add email change columns to users table
+ALTER TABLE users 
+ADD COLUMN email_change_token VARCHAR(255),
+ADD COLUMN email_change_expires TIMESTAMP NULL,
+ADD COLUMN new_email VARCHAR(255),
+ADD COLUMN email_change_confirmed_current BOOLEAN DEFAULT FALSE,
+ADD INDEX idx_email_change_token (email_change_token);
+
+-- Create email change log table for audit trail
+CREATE TABLE email_change_log (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    template_key VARCHAR(50) UNIQUE NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    subject VARCHAR(255) NOT NULL,
-    body_html TEXT NOT NULL,
-    description TEXT,
-    variables JSON,
-    is_active BOOLEAN DEFAULT TRUE,
-    usage_count INT DEFAULT 0,
-    last_used_at TIMESTAMP NULL,
+    user_id INT UNSIGNED NOT NULL,
+    old_email VARCHAR(255) NOT NULL,
+    new_email VARCHAR(255) NOT NULL,
+    status ENUM('requested', 'current_confirmed', 'completed', 'cancelled') NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_template_key (template_key),
-    INDEX idx_active (is_active),
-    INDEX idx_last_used (last_used_at)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_status (status),
+    INDEX idx_created (created_at)
 );
 ```
 
-**Default Template Population:**
-```sql
-INSERT INTO email_templates (template_key, name, subject, body_html, description, variables) VALUES
-('verification', 'Email Verification', 'Welcome to Lingora - Verify Your Email', 
- '<h2>Welcome to Lingora!</h2><p>Thank you for registering <strong>{business_name}</strong>.</p>
-  <p>Please verify your email address by clicking the link below:</p>
-  <p><a href="{verification_link}" style="background: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Verify Email Address</a></p>',
- 'Sent to new providers to verify their email address',
- '["business_name", "verification_link"]'),
-
-('contact_message', 'Contact Message Notification', 'New inquiry from {sender_name}',
- '<h2>New inquiry from {sender_name}</h2>
-  <p><strong>From:</strong> {sender_name} ({sender_email})</p>
-  <p><strong>Preferred Language:</strong> {preferred_language}</p>
-  <p><strong>Subject:</strong> {subject}</p>
-  <p><strong>Message:</strong></p>
-  <div style="background: #f5f5f5; padding: 16px; border-radius: 6px; margin: 16px 0;">
-      {message}
-  </div>',
- 'Sent to providers when they receive a contact form submission',
- '["sender_name", "sender_email", "preferred_language", "subject", "message"]'),
-
-('contact_auto_reply', 'Contact Auto Reply', 'Thank you for your inquiry',
- '<h2>Thank you for your inquiry</h2>
-  <p>Dear {sender_name},</p>
-  <p>We have received your message and forwarded it to the service provider. They will contact you directly using the information you provided.</p>
-  <div style="background: #f5f5f5; padding: 16px; border-radius: 6px; margin: 16px 0;">
-      <strong>Subject:</strong> {subject}<br><br>
-      {message}
-  </div>
-  <p>Thank you for using Lingora to connect with professional services.</p>',
- 'Automatic confirmation sent to users who submit contact forms',
- '["sender_name", "subject", "message"]');
-```
-
-#### **2. Backend Model Implementation**
-
-**File**: `C:\xampp\htdocs\lingora\backend\models\EmailTemplates.php`
-
-```php
-<?php
-class EmailTemplates {
-    private $db;
-    
-    public function __construct($database) {
-        $this->db = $database;
-    }
-    
-    // Get all email templates
-    public function getAllTemplates() {
-        $sql = "SELECT id, template_key, name, subject, body_html, description, 
-                       variables, is_active, usage_count, last_used_at, 
-                       created_at, updated_at 
-                FROM email_templates 
-                ORDER BY name ASC";
-        
-        $templates = $this->db->fetchAll($sql);
-        
-        // Parse JSON variables
-        foreach ($templates as &$template) {
-            $template['variables'] = json_decode($template['variables'], true) ?: [];
-        }
-        
-        return $templates;
-    }
-    
-    // Get single template by ID
-    public function getTemplate($id) {
-        $sql = "SELECT * FROM email_templates WHERE id = ?";
-        $template = $this->db->fetchOne($sql, [$id]);
-        
-        if ($template) {
-            $template['variables'] = json_decode($template['variables'], true) ?: [];
-        }
-        
-        return $template;
-    }
-    
-    // Get template by key (for email service)
-    public function getTemplateByKey($templateKey) {
-        $sql = "SELECT * FROM email_templates WHERE template_key = ? AND is_active = 1";
-        $template = $this->db->fetchOne($sql, [$templateKey]);
-        
-        if ($template) {
-            $template['variables'] = json_decode($template['variables'], true) ?: [];
-            // Update usage statistics
-            $this->updateUsageStats($template['id']);
-        }
-        
-        return $template;
-    }
-    
-    // Update template
-    public function updateTemplate($id, $data) {
-        // Validate required fields
-        $errors = $this->validateTemplateData($data, false);
-        if (!empty($errors)) {
-            return ['success' => false, 'errors' => $errors];
-        }
-        
-        // Encode variables as JSON
-        if (isset($data['variables']) && is_array($data['variables'])) {
-            $data['variables'] = json_encode($data['variables']);
-        }
-        
-        $sql = "UPDATE email_templates SET 
-                name = ?, subject = ?, body_html = ?, description = ?, 
-                variables = ?, is_active = ?, updated_at = NOW()
-                WHERE id = ?";
-        
-        $params = [
-            $data['name'],
-            $data['subject'], 
-            $data['body_html'],
-            $data['description'] ?? '',
-            $data['variables'],
-            $data['is_active'] ?? 1,
-            $id
-        ];
-        
-        $result = $this->db->query($sql, $params);
-        
-        return [
-            'success' => $result !== false,
-            'message' => $result !== false ? 'Template updated successfully' : 'Failed to update template'
-        ];
-    }
-    
-    // Create new template
-    public function createTemplate($data) {
-        // Validate required fields including template_key for creation
-        $errors = $this->validateTemplateData($data, true);
-        if (!empty($errors)) {
-            return ['success' => false, 'errors' => $errors];
-        }
-        
-        // Check for duplicate template_key
-        if ($this->templateKeyExists($data['template_key'])) {
-            return ['success' => false, 'errors' => ['Template key already exists']];
-        }
-        
-        // Encode variables as JSON
-        if (isset($data['variables']) && is_array($data['variables'])) {
-            $data['variables'] = json_encode($data['variables']);
-        }
-        
-        $sql = "INSERT INTO email_templates 
-                (template_key, name, subject, body_html, description, variables, is_active) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
-        
-        $params = [
-            $data['template_key'],
-            $data['name'],
-            $data['subject'],
-            $data['body_html'],
-            $data['description'] ?? '',
-            $data['variables'],
-            $data['is_active'] ?? 1
-        ];
-        
-        $result = $this->db->query($sql, $params);
-        
-        return [
-            'success' => $result !== false,
-            'id' => $result ? $this->db->lastInsertId() : null,
-            'message' => $result ? 'Template created successfully' : 'Failed to create template'
-        ];
-    }
-    
-    // Delete template (soft delete)
-    public function deleteTemplate($id) {
-        $sql = "UPDATE email_templates SET is_active = 0, updated_at = NOW() WHERE id = ?";
-        $result = $this->db->query($sql, [$id]);
-        
-        return [
-            'success' => $result !== false,
-            'message' => $result !== false ? 'Template deleted successfully' : 'Failed to delete template'
-        ];
-    }
-    
-    // Test template with sample data
-    public function testTemplate($templateKey, $sampleData = []) {
-        $template = $this->getTemplateByKey($templateKey);
-        if (!$template) {
-            return ['success' => false, 'error' => 'Template not found'];
-        }
-        
-        // Default sample data
-        $defaultSampleData = [
-            'business_name' => 'Sample Business',
-            'sender_name' => 'John Doe',
-            'sender_email' => 'john@example.com',
-            'preferred_language' => 'English',
-            'subject' => 'Sample inquiry subject',
-            'message' => 'This is a sample message for testing purposes.',
-            'verification_link' => 'https://lingora.com/verify?token=sample123',
-            'reset_link' => 'https://lingora.com/reset?token=sample456',
-            'dashboard_link' => 'https://lingora.com/dashboard',
-            'reason' => 'Sample reason for template testing'
-        ];
-        
-        $testData = array_merge($defaultSampleData, $sampleData);
-        
-        // Replace variables in template
-        $processedSubject = $this->replaceVariables($template['subject'], $testData);
-        $processedBody = $this->replaceVariables($template['body_html'], $testData);
-        
-        return [
-            'success' => true,
-            'subject' => $processedSubject,
-            'body_html' => $processedBody,
-            'variables_used' => $template['variables']
-        ];
-    }
-    
-    // Variable replacement utility
-    private function replaceVariables($content, $variables) {
-        foreach ($variables as $key => $value) {
-            $content = str_replace('{' . $key . '}', htmlspecialchars($value), $content);
-        }
-        return $content;
-    }
-    
-    // Validation helper
-    private function validateTemplateData($data, $requireTemplateKey = false) {
-        $errors = [];
-        
-        if ($requireTemplateKey) {
-            if (empty($data['template_key'])) {
-                $errors[] = 'Template key is required';
-            } elseif (!preg_match('/^[a-z_]+$/', $data['template_key'])) {
-                $errors[] = 'Template key must contain only lowercase letters and underscores';
-            }
-        }
-        
-        if (empty($data['name'])) {
-            $errors[] = 'Template name is required';
-        }
-        
-        if (empty($data['subject'])) {
-            $errors[] = 'Subject is required';
-        }
-        
-        if (empty($data['body_html'])) {
-            $errors[] = 'Email content is required';
-        }
-        
-        return $errors;
-    }
-    
-    // Check if template key exists
-    private function templateKeyExists($templateKey, $excludeId = null) {
-        $sql = "SELECT id FROM email_templates WHERE template_key = ?";
-        $params = [$templateKey];
-        
-        if ($excludeId) {
-            $sql .= " AND id != ?";
-            $params[] = $excludeId;
-        }
-        
-        return $this->db->fetchOne($sql, $params) !== false;
-    }
-    
-    // Update usage statistics
-    private function updateUsageStats($templateId) {
-        $sql = "UPDATE email_templates 
-                SET usage_count = usage_count + 1, last_used_at = NOW() 
-                WHERE id = ?";
-        $this->db->query($sql, [$templateId]);
-    }
-}
-?>
-```
-
-#### **3. API Endpoint Implementation**
-
-**File**: `C:\xampp\htdocs\lingora\backend\api\admin\email-templates.php`
-
-```php
-<?php
-require_once '../../config/config.php';
-require_once '../../models/EmailTemplates.php';
-require_once '../../middleware/AdminAuthMiddleware.php';
-
-// CORS headers
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: http://localhost:5173');
-header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
-}
-
-// Initialize database and models
-$emailTemplates = new EmailTemplates($database);
-
-// Parse route from admin context
-$path_parts = explode('/', trim($_SERVER['PATH_INFO'] ?? '', '/'));
-
-// Admin routing context: /api/admin/email-templates[/id][/action]
-$template_id = null;
-$action = null;
-
-if (count($path_parts) >= 1 && is_numeric($path_parts[0])) {
-    $template_id = (int)$path_parts[0];
-    if (isset($path_parts[1])) {
-        $action = $path_parts[1];
-    }
-} elseif (count($path_parts) >= 1 && $path_parts[0] === 'test' && isset($path_parts[1])) {
-    $action = 'test';
-    $template_key = $path_parts[1];
-}
-
-try {
-    switch ($method) {
-        case 'GET':
-            if ($template_id) {
-                // Get single template
-                $template = $emailTemplates->getTemplate($template_id);
-                if ($template) {
-                    json_response(['success' => true, 'template' => $template]);
-                } else {
-                    json_response(['success' => false, 'error' => 'Template not found'], 404);
-                }
-            } else {
-                // Get all templates
-                $templates = $emailTemplates->getAllTemplates();
-                json_response(['success' => true, 'templates' => $templates]);
-            }
-            break;
-            
-        case 'PUT':
-            if (!$template_id) {
-                json_response(['success' => false, 'error' => 'Template ID required'], 400);
-            }
-            
-            $input = json_decode(file_get_contents('php://input'), true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                json_response(['success' => false, 'error' => 'Invalid JSON data'], 400);
-            }
-            
-            $result = $emailTemplates->updateTemplate($template_id, $input);
-            
-            if ($result['success']) {
-                $updatedTemplate = $emailTemplates->getTemplate($template_id);
-                json_response(['success' => true, 'message' => $result['message'], 'template' => $updatedTemplate]);
-            } else {
-                json_response(['success' => false, 'errors' => $result['errors'] ?? [$result['message']]], 400);
-            }
-            break;
-            
-        case 'POST':
-            if ($action === 'test' && isset($template_key)) {
-                // Test template with sample data
-                $input = json_decode(file_get_contents('php://input'), true) ?: [];
-                $sampleData = $input['sample_data'] ?? [];
-                
-                $result = $emailTemplates->testTemplate($template_key, $sampleData);
-                json_response($result);
-            } else {
-                // Create new template
-                $input = json_decode(file_get_contents('php://input'), true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    json_response(['success' => false, 'error' => 'Invalid JSON data'], 400);
-                }
-                
-                $result = $emailTemplates->createTemplate($input);
-                
-                if ($result['success']) {
-                    json_response(['success' => true, 'message' => $result['message'], 'id' => $result['id']], 201);
-                } else {
-                    json_response(['success' => false, 'errors' => $result['errors']], 400);
-                }
-            }
-            break;
-            
-        case 'DELETE':
-            if (!$template_id) {
-                json_response(['success' => false, 'error' => 'Template ID required'], 400);
-            }
-            
-            $result = $emailTemplates->deleteTemplate($template_id);
-            
-            if ($result['success']) {
-                json_response(['success' => true, 'message' => $result['message']]);
-            } else {
-                json_response(['success' => false, 'error' => $result['message']], 400);
-            }
-            break;
-            
-        default:
-            json_response(['success' => false, 'error' => 'Method not allowed'], 405);
-            break;
-    }
-    
-} catch (Exception $e) {
-    error_log("Email templates API error: " . $e->getMessage());
-    json_response(['success' => false, 'error' => 'Internal server error'], 500);
-}
-
-function json_response($data, $status_code = 200) {
-    http_response_code($status_code);
-    echo json_encode($data);
-    exit;
-}
-?>
-```
-
-#### **4. Admin Routing Integration**
-
-**File**: `C:\xampp\htdocs\lingora\backend\api\admin\index.php`
-
-```php
-<?php
-// Admin API router with email-templates integration
-require_once '../../config/config.php';
-require_once '../../middleware/AdminAuthMiddleware.php';
-
-// Verify admin authentication
-AdminAuthMiddleware::requireAdmin();
-
-// Extract method and parse path
-$method = $_SERVER['REQUEST_METHOD'];
-$path = trim($_SERVER['PATH_INFO'] ?? '', '/');
-$segments = explode('/', $path);
-
-$resource = $segments[0] ?? '';
-$id = isset($segments[1]) && is_numeric($segments[1]) ? (int)$segments[1] : null;
-$action = $segments[2] ?? ($segments[1] ?? null);
-
-// Set global variables for sub-routes
-$GLOBALS['method'] = $method;
-$GLOBALS['action'] = $action;
-$GLOBALS['id'] = $id;
-
-// Route to appropriate handler
-switch ($resource) {
-    case 'email-templates':
-        // Set PATH_INFO for email-templates handler
-        if ($id !== null) {
-            $_SERVER['PATH_INFO'] = '/' . $id . ($action && !is_numeric($segments[1]) ? '/' . $action : '');
-        } elseif ($action) {
-            $_SERVER['PATH_INFO'] = '/' . $action . (isset($segments[2]) ? '/' . $segments[2] : '');
-        } else {
-            $_SERVER['PATH_INFO'] = '/';
-        }
-        
-        require_once 'email-templates.php';
-        break;
-        
-    case 'providers':
-        require_once 'providers.php';
-        break;
-        
-    case 'users':
-        require_once 'users.php';
-        break;
-        
-    default:
-        header('HTTP/1.1 404 Not Found');
-        echo json_encode(['success' => false, 'error' => 'Admin resource not found']);
-        break;
-}
-?>
-```
-
-#### **5. EmailService Integration**
-
-**Updated**: `C:\xampp\htdocs\lingora\backend\services\EmailService.php`
-
-```php
-<?php
-require_once __DIR__ . '/../models/EmailTemplates.php';
-
-class EmailService {
-    private $config;
-    private $usePhpMail;
-    private $emailTemplates;
-    
-    public function __construct() {
-        global $config, $database;
-        $this->config = $config['email'] ?? [];
-        $this->usePhpMail = true; // Development mode
-        $this->emailTemplates = new EmailTemplates($database);
-    }
-    
-    // Get template with database-first approach
-    private function getEmailTemplate($templateKey, $variables = []) {
-        // Try database first
-        $dbTemplate = $this->emailTemplates->getTemplateByKey($templateKey);
-        
-        if ($dbTemplate && $dbTemplate['is_active']) {
-            // Use database template
-            $html = $this->replaceVariables($dbTemplate['body_html'], $variables);
-            return [
-                'subject' => $this->replaceVariables($dbTemplate['subject'], $variables),
-                'body' => $html
-            ];
-        }
-        
-        // Fallback to hardcoded templates
-        return $this->getHardcodedTemplate($templateKey, $variables);
-    }
-    
-    // Variable replacement with XSS protection
-    private function replaceVariables($content, $variables) {
-        foreach ($variables as $key => $value) {
-            $content = str_replace(
-                '{' . $key . '}',
-                htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
-                $content
-            );
-        }
-        return $content;
-    }
-    
-    // Hardcoded template fallback
-    private function getHardcodedTemplate($templateKey, $variables = []) {
-        $templates = [
-            'verification' => [
-                'subject' => 'Welcome to Lingora - Verify Your Email',
-                'body' => '<h2>Welcome to Lingora!</h2>
-                          <p>Thank you for registering <strong>{business_name}</strong>.</p>
-                          <p><a href="{verification_link}">Verify Email Address</a></p>'
-            ],
-            'contact_message' => [
-                'subject' => 'New inquiry from {sender_name}',
-                'body' => '<h2>New inquiry from {sender_name}</h2>
-                          <p><strong>From:</strong> {sender_name} ({sender_email})</p>
-                          <p><strong>Subject:</strong> {subject}</p>
-                          <p><strong>Message:</strong></p>
-                          <div>{message}</div>'
-            ],
-            'contact_auto_reply' => [
-                'subject' => 'Thank you for your inquiry',
-                'body' => '<h2>Thank you for your inquiry</h2>
-                          <p>Dear {sender_name},</p>
-                          <p>We have received your message.</p>
-                          <div><strong>Subject:</strong> {subject}<br>{message}</div>'
-            ]
-        ];
-        
-        $template = $templates[$templateKey] ?? [
-            'subject' => 'Notification',
-            'body' => '<p>Template not found: ' . $templateKey . '</p>'
-        ];
-        
-        return [
-            'subject' => $this->replaceVariables($template['subject'], $variables),
-            'body' => $this->replaceVariables($template['body'], $variables)
-        ];
-    }
-    
-    // Send contact message with database template
-    public function sendContactMessage($providerEmail, $messageData, $adminBcc = true) {
-        $template = $this->getEmailTemplate('contact_message', $messageData);
-        
-        $headers = [
-            'MIME-Version: 1.0',
-            'Content-type: text/html; charset=UTF-8',
-            'From: ' . ($this->config['from_email'] ?? 'noreply@lingora.local'),
-            'Reply-To: ' . ($messageData['sender_email'] ?? 'noreply@lingora.local')
-        ];
-        
-        if ($adminBcc && isset($this->config['admin_email'])) {
-            $headers[] = 'Bcc: ' . $this->config['admin_email'];
-        }
-        
-        return $this->sendMail($providerEmail, $template['subject'], $template['body'], $headers);
-    }
-    
-    // Send auto-reply with database template  
-    public function sendContactAutoReply($customerEmail, $messageData) {
-        $template = $this->getEmailTemplate('contact_auto_reply', $messageData);
-        
-        $headers = [
-            'MIME-Version: 1.0',
-            'Content-type: text/html; charset=UTF-8', 
-            'From: ' . ($this->config['from_email'] ?? 'noreply@lingora.local')
-        ];
-        
-        return $this->sendMail($customerEmail, $template['subject'], $template['body'], $headers);
-    }
-    
-    // Send verification email with database template
-    public function sendVerificationEmail($email, $businessName, $verificationLink) {
-        $variables = [
-            'business_name' => $businessName,
-            'verification_link' => $verificationLink
-        ];
-        
-        $template = $this->getEmailTemplate('verification', $variables);
-        
-        $headers = [
-            'MIME-Version: 1.0',
-            'Content-type: text/html; charset=UTF-8',
-            'From: ' . ($this->config['from_email'] ?? 'noreply@lingora.local')
-        ];
-        
-        return $this->sendMail($email, $template['subject'], $template['body'], $headers);
-    }
-    
-    // Core mail sending function
-    private function sendMail($to, $subject, $body, $headers = []) {
-        $headerString = implode("\r\n", $headers);
-        
-        if ($this->usePhpMail) {
-            // Development mode logging
-            error_log("EMAIL SENT TO: " . $to);
-            error_log("SUBJECT: " . $subject);
-            error_log("HEADERS: " . $headerString);
-            error_log("BODY: " . substr($body, 0, 200) . "...");
-            
-            $result = mail($to, $subject, $body, $headerString);
-            
-            if (!$result) {
-                error_log("MAIL FUNCTION FAILED FOR: " . $to);
-            }
-            
-            return $result;
-        }
-        
-        // Production SMTP implementation would go here
-        return false;
-    }
-}
-?>
-```
-
-#### **6. Frontend Implementation**
-
-**File**: `C:\cursor\lingora\frontend\src\pages\dashboard\EmailTemplates.tsx`
-
-```typescript
-import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, Save, RefreshCw, Mail, Settings, CheckCircle, AlertCircle } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-
-interface EmailTemplate {
-  id: number;
-  template_key: string;
-  name: string;
-  subject: string;
-  body_html: string;
-  description: string;
-  variables: string[];
-  is_active: boolean;
-  usage_count: number;
-  last_used_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface PreviewResult {
-  subject: string;
-  body_html: string;
-  variables_used: string[];
-}
-
-const EmailTemplates: React.FC = () => {
-  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
-  const [previewData, setPreviewData] = useState<PreviewResult | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [previewing, setPreviewing] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [error, setError] = useState<string | null>(null);
-  
-  const { token } = useAuth();
-
-  // Load all templates
-  const loadTemplates = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('http://localhost/lingora/backend/api/admin/email-templates', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to load templates');
-      }
-      
-      const data = await response.json();
-      if (data.success) {
-        setTemplates(data.templates);
-        if (!selectedTemplate && data.templates.length > 0) {
-          setSelectedTemplate(data.templates[0]);
-        }
-      } else {
-        throw new Error(data.error || 'Failed to load templates');
-      }
-    } catch (err) {
-      console.error('Error loading templates:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load templates');
-    } finally {
-      setLoading(false);
-    }
-  }, [token, selectedTemplate]);
-
-  // Auto-save functionality with debouncing
-  const saveTemplate = useCallback(async (template: EmailTemplate) => {
-    try {
-      setSaving(true);
-      setSaveStatus('saving');
-      
-      const response = await fetch(`http://localhost/lingora/backend/api/admin/email-templates/${template.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: template.name,
-          subject: template.subject,
-          body_html: template.body_html,
-          description: template.description,
-          variables: template.variables,
-          is_active: template.is_active
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to save template');
-      }
-      
-      const data = await response.json();
-      if (data.success) {
-        setSaveStatus('saved');
-        // Update template in list
-        setTemplates(prev => prev.map(t => 
-          t.id === template.id ? { ...template, updated_at: data.template?.updated_at || new Date().toISOString() } : t
-        ));
-        
-        // Clear saved status after 2 seconds
-        setTimeout(() => setSaveStatus('idle'), 2000);
-      } else {
-        throw new Error(data.error || 'Failed to save template');
-      }
-    } catch (err) {
-      console.error('Error saving template:', err);
-      setSaveStatus('error');
-      setError(err instanceof Error ? err.message : 'Failed to save template');
-      setTimeout(() => setSaveStatus('idle'), 3000);
-    } finally {
-      setSaving(false);
-    }
-  }, [token]);
-
-  // Debounced auto-save
-  useEffect(() => {
-    if (!selectedTemplate || saveStatus !== 'idle') return;
-    
-    const timeoutId = setTimeout(() => {
-      if (selectedTemplate) {
-        saveTemplate(selectedTemplate);
-      }
-    }, 1000); // Auto-save after 1 second of inactivity
-    
-    return () => clearTimeout(timeoutId);
-  }, [selectedTemplate, saveTemplate, saveStatus]);
-
-  // Preview template with sample data
-  const previewTemplate = async () => {
-    if (!selectedTemplate) return;
-    
-    try {
-      setPreviewing(true);
-      setError(null);
-      
-      const response = await fetch(`http://localhost/lingora/backend/api/admin/email-templates/test/${selectedTemplate.template_key}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          sample_data: {
-            business_name: 'Sample Business Ltd.',
-            sender_name: 'John Smith',
-            sender_email: 'john.smith@example.com',
-            preferred_language: 'English',
-            subject: 'Inquiry about legal services',
-            message: 'I would like to schedule a consultation to discuss contract review services for my small business.',
-            verification_link: 'https://lingora.com/verify?token=sample123',
-            reset_link: 'https://lingora.com/reset?token=sample456'
-          }
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to preview template');
-      }
-      
-      const data = await response.json();
-      if (data.success) {
-        setPreviewData(data);
-      } else {
-        throw new Error(data.error || 'Failed to preview template');
-      }
-    } catch (err) {
-      console.error('Error previewing template:', err);
-      setError(err instanceof Error ? err.message : 'Failed to preview template');
-    } finally {
-      setPreviewing(false);
-    }
-  };
-
-  // Template field updates
-  const updateSelectedTemplate = (field: keyof EmailTemplate, value: any) => {
-    if (!selectedTemplate) return;
-    
-    setSelectedTemplate(prev => prev ? { ...prev, [field]: value } : null);
-    setSaveStatus('idle'); // Reset save status to trigger auto-save
-  };
-
-  // Load templates on component mount
-  useEffect(() => {
-    loadTemplates();
-  }, [loadTemplates]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <RefreshCw className="w-6 h-6 animate-spin mr-2" />
-        <span>Loading email templates...</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Email Templates</h1>
-          <p className="text-gray-600 mt-1">Manage automated email communications</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={previewTemplate}
-            disabled={!selectedTemplate || previewing}
-            variant="outline"
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            {previewing ? 'Generating...' : 'Preview'}
-          </Button>
-          <Button
-            onClick={() => selectedTemplate && saveTemplate(selectedTemplate)}
-            disabled={!selectedTemplate || saving}
-            variant="default"
-          >
-            {saving ? (
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4 mr-2" />
-            )}
-            Save Now
-          </Button>
-        </div>
-      </div>
-
-      {/* Error Alert */}
-      {error && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertCircle className="w-4 h-4" />
-          <AlertDescription className="text-red-700">{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Template List */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Mail className="w-5 h-5 mr-2" />
-              Templates ({templates.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="space-y-1">
-              {templates.map((template) => (
-                <div
-                  key={template.id}
-                  onClick={() => setSelectedTemplate(template)}
-                  className={`p-4 cursor-pointer border-b hover:bg-gray-50 transition-colors ${
-                    selectedTemplate?.id === template.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{template.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{template.description}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge
-                          variant={template.is_active ? 'default' : 'secondary'}
-                          className="text-xs"
-                        >
-                          {template.is_active ? 'Active' : 'Inactive'}
-                        </Badge>
-                        <span className="text-xs text-gray-500">
-                          Used {template.usage_count} times
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Template Editor */}
-        <div className="lg:col-span-2 space-y-6">
-          {selectedTemplate ? (
-            <>
-              {/* Save Status */}
-              {saveStatus !== 'idle' && (
-                <Alert className={`${
-                  saveStatus === 'saved' ? 'border-green-200 bg-green-50' :
-                  saveStatus === 'error' ? 'border-red-200 bg-red-50' :
-                  'border-blue-200 bg-blue-50'
-                }`}>
-                  {saveStatus === 'saved' ? (
-                    <CheckCircle className="w-4 h-4" />
-                  ) : saveStatus === 'error' ? (
-                    <AlertCircle className="w-4 h-4" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  )}
-                  <AlertDescription className={
-                    saveStatus === 'saved' ? 'text-green-700' :
-                    saveStatus === 'error' ? 'text-red-700' :
-                    'text-blue-700'
-                  }>
-                    {saveStatus === 'saving' ? 'Saving template...' :
-                     saveStatus === 'saved' ? 'Template saved successfully' :
-                     'Failed to save template'}
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {/* Template Editor */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Settings className="w-5 h-5 mr-2" />
-                    Edit Template: {selectedTemplate.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Template Name */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Template Name</label>
-                    <Input
-                      value={selectedTemplate.name}
-                      onChange={(e) => updateSelectedTemplate('name', e.target.value)}
-                      placeholder="Enter template name"
-                    />
-                  </div>
-
-                  {/* Subject Line */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Subject Line</label>
-                    <Input
-                      value={selectedTemplate.subject}
-                      onChange={(e) => updateSelectedTemplate('subject', e.target.value)}
-                      placeholder="Enter email subject"
-                    />
-                  </div>
-
-                  {/* Email Content */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Email Content (HTML)</label>
-                    <Textarea
-                      value={selectedTemplate.body_html}
-                      onChange={(e) => updateSelectedTemplate('body_html', e.target.value)}
-                      placeholder="Enter HTML email content"
-                      rows={12}
-                      className="font-mono text-sm"
-                    />
-                  </div>
-
-                  {/* Description */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Description</label>
-                    <Textarea
-                      value={selectedTemplate.description}
-                      onChange={(e) => updateSelectedTemplate('description', e.target.value)}
-                      placeholder="Describe when this template is used"
-                      rows={2}
-                    />
-                  </div>
-
-                  {/* Variables */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Available Variables</label>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedTemplate.variables.map((variable, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {`{${variable}}`}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Active Status */}
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="is_active"
-                      checked={selectedTemplate.is_active}
-                      onChange={(e) => updateSelectedTemplate('is_active', e.target.checked)}
-                      className="rounded"
-                    />
-                    <label htmlFor="is_active" className="text-sm font-medium">
-                      Template is active
-                    </label>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Live Preview */}
-              {previewData && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Live Preview</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Preview Subject */}
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Subject Preview</label>
-                        <div className="p-3 bg-gray-50 border rounded text-sm">
-                          {previewData.subject}
-                        </div>
-                      </div>
-                      
-                      {/* Preview Body */}
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Email Preview</label>
-                        <div className="border rounded">
-                          <iframe
-                            srcDoc={previewData.body_html}
-                            className="w-full h-96 border-0"
-                            title="Email Preview"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </>
-          ) : (
-            <Card>
-              <CardContent className="flex items-center justify-center h-64">
-                <div className="text-center text-gray-500">
-                  <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Select a template to start editing</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default EmailTemplates;
-```
-
-#### **7. Dashboard Integration**
-
-**Updated**: `C:\cursor\lingora\frontend\src\pages\dashboard\DashboardHome.tsx`
-
-```typescript
-// Add Email Templates quick action
-const adminActions = [
-  // ... existing actions
-  {
-    title: 'Email Templates',
-    description: 'Manage automated email communications',
-    icon: Mail,
-    color: 'bg-purple-500',
-    href: '/dashboard/email-templates',
-    isAdmin: true
-  }
-];
-```
-
-**Updated**: `C:\cursor\lingora\frontend\src\pages\dashboard\DashboardPage.tsx`
-
-```typescript
-// Add email templates route
-case 'email-templates':
-  if (!user?.is_admin) {
-    content = <div className="p-8 text-center">Access denied. Admin privileges required.</div>;
-  } else {
-    const EmailTemplates = lazy(() => import('./EmailTemplates'));
-    content = (
-      <Suspense fallback={<div className="p-8">Loading email templates...</div>}>
-        <EmailTemplates />
-      </Suspense>
-    );
-  }
-  break;
-```
-
-### **Technical Challenges Solved**
-
-#### **1. Admin Routing Context Issue**
-**Problem**: PATH_INFO didn't contain the full admin path context
-**Solution**: Implemented global variable parsing in admin index.php with proper path reconstruction
-
-#### **2. JSON Variable Parsing**
-**Problem**: Database JSON fields returned as strings to frontend
-**Solution**: Backend model automatically decodes JSON strings to arrays for consistent frontend handling
-
-#### **3. API Method Inconsistency**
-**Problem**: Preview functionality required POST but was implemented as GET
-**Solution**: Corrected to POST method with proper request body parsing
-
-#### **4. Template Key Validation**
-**Problem**: Updates required template_key but shouldn't allow modification
-**Solution**: Made template_key optional for updates while required for creation
-
-#### **5. Authentication Flow**
-**Problem**: JWT token handling through admin routing context
-**Solution**: Proper middleware integration with AdminAuthMiddleware for all admin endpoints
-
-### **Integration Architecture**
-
-#### **Data Flow Diagram**
-```
-Frontend User Action → Auto-save (1s delay) → PUT /api/admin/email-templates/{id}
-                    ↓
-            JWT Admin Auth → Database Update → Response to Frontend
-                    ↓
-EmailService Request → Database Query → Fallback to Hardcoded
-                    ↓
-          Email Sent with Template → Usage Statistics Updated
-```
-
-#### **System Integration Points**
-
-**1. Database Integration:**
-- email_templates table with JSON variables support
-- Usage statistics tracking (usage_count, last_used_at)
-- Soft deletion with is_active flag
-- Proper indexes for performance
-
-**2. Email Service Integration:**  
-- Database-first template loading
-- Graceful fallback to hardcoded templates
-- Variable replacement with XSS protection
-- Template usage analytics
-
-**3. Admin Dashboard Integration:**
-- Professional two-panel interface
-- Real-time auto-save with status indicators
-- Live preview with sample data injection
-- Admin-only access controls
-
-**4. API Architecture:**
-- RESTful endpoints with proper HTTP methods
-- JWT authentication required
-- Comprehensive error handling
-- JSON request/response format
-
-### **Security Considerations**
-
-#### **Input Validation & Sanitization**
-```php
-// XSS Prevention
-private function replaceVariables($content, $variables) {
-    foreach ($variables as $key => $value) {
-        $content = str_replace(
-            '{' . $key . '}',
-            htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
-            $content
-        );
-    }
-    return $content;
-}
-```
-
-#### **Access Control**
-- Admin-only endpoint access through JWT authentication
-- AdminAuthMiddleware verification on all routes
-- Frontend role-based component rendering
-
-#### **Template Validation**
-- Required field validation for all templates
-- Template key format validation (lowercase, underscores only)
-- JSON variable structure validation
-- Content length limits to prevent abuse
-
-### **Performance Optimizations**
-
-#### **Frontend Performance**
-- Debounced auto-save (1000ms delay)
-- Lazy loading for admin components
-- React state optimization with useCallback
-- Efficient re-rendering with proper dependency arrays
-
-#### **Backend Performance**
-- Database indexes on frequently queried fields
-- Prepared statements for SQL injection prevention
-- Template caching through EmailTemplates model
-- Efficient JSON parsing and encoding
-
-#### **Database Performance**
-```sql
--- Optimized indexes for email templates
-INDEX idx_template_key (template_key),    -- Template lookups
-INDEX idx_active (is_active),             -- Active template filtering  
-INDEX idx_last_used (last_used_at),       -- Usage analytics
-INDEX idx_usage_count (usage_count)       -- Popular templates
-```
-
-### **Future Enhancement Opportunities**
-
-#### **Advanced Features Roadmap**
-
-**1. Visual Template Editor**
-- Drag-and-drop email builder
-- WYSIWYG HTML editing
-- Template preview in multiple devices
-- Component-based template construction
-
-**2. A/B Testing Framework**
-- Multiple template versions per type
-- Automatic performance tracking
-- Statistical significance analysis
-- Winner selection automation
-
-**3. Multi-language Templates**
-- Language-specific template versions
-- Automatic language detection
-- Fallback language support
-- Translation management interface
-
-**4. Advanced Analytics**
-- Email open rate tracking
-- Click-through rate analysis
-- Template performance metrics
-- Usage trend visualization
-
-**5. Template Import/Export**
-- Template backup and restore
-- Cross-environment template sync
-- Template marketplace integration
-- Version control system
-
-### **Deployment Checklist**
-
-#### **Production Deployment Requirements**
-
-**Database Setup:**
-- [x] email_templates table created with proper schema
-- [x] Default templates populated
-- [x] Indexes created for performance
-- [ ] Database backup strategy implemented
-
-**Backend Configuration:**
-- [x] EmailTemplates model implemented
-- [x] Admin API endpoints functional
-- [x] EmailService integration complete
-- [ ] Production error logging configured
-
-**Frontend Integration:**
-- [x] EmailTemplates component implemented
-- [x] Dashboard routing configured
-- [x] Admin access controls in place
-- [ ] Performance monitoring setup
-
-**Security Verification:**
-- [x] JWT authentication required
-- [x] Input validation implemented
-- [x] XSS protection in place
-- [ ] Rate limiting configured
-
-### **Success Metrics**
-
-#### **Technical Performance**
-- **Template Loading**: < 500ms for admin interface
-- **Auto-save Response**: < 300ms for template updates
-- **Preview Generation**: < 1 second for template preview
-- **Database Queries**: < 100ms for template operations
-
-#### **User Experience**
-- **Admin Efficiency**: 90% reduction in email template deployment time
-- **Template Customization**: 100% of email types customizable through interface
-- **Error Rate**: < 1% template save failures
-- **User Adoption**: 100% admin users trained and using system
-
-#### **Business Impact**
-- **Email Consistency**: Professional branding across all automated emails
-- **Deployment Speed**: Instant template updates without code deployment
-- **Customization**: Complete control over all automated communications
-- **Maintenance**: Simplified email content management workflow
-
-### **Conclusion**
-
-The Admin Email Template Management System represents a comprehensive solution for managing all automated email communications within the Lingora platform. This implementation provides:
-
-**✅ Complete Functionality:**
-- Full CRUD operations for email templates
-- Real-time editing with auto-save
-- Live preview with sample data
-- Database-first architecture with fallback support
-
-**✅ Professional User Experience:**
-- Intuitive two-panel interface design
-- Visual feedback for all operations
-- Admin-only access controls
-- Comprehensive error handling
-
-**✅ Technical Excellence:**
-- Secure authentication and validation
-- Optimized database queries
-- XSS protection for template content
-- RESTful API design
-
-**✅ Production Ready:**
-- Complete error handling and logging
-- Performance optimizations
-- Scalable architecture
-- Clear deployment procedures
-
-**Impact Summary:**
-This system transforms email template management from a code-deployment requirement to an instant, user-friendly administrative task. Administrators can now customize all automated communications immediately through the web interface, ensuring consistent branding and messaging while maintaining the highest security and performance standards.
-
-The implementation provides a solid foundation for future enhancements including visual editing, A/B testing, and advanced analytics, making it a cornerstone feature for the Lingora platform's communication infrastructure.
+### Implementation Plan
+
+#### Phase 1: Backend Infrastructure
+1. **Database Migration**
+   - Add email change columns to users table
+   - Create email change log table
+   - Test migration on development database
+
+2. **User Model Extensions**
+   - Add `requestEmailChange($userId, $newEmail)` method
+   - Add `confirmCurrentEmail($token)` method  
+   - Add `verifyNewEmail($token)` method
+   - Add `cancelEmailChange($userId)` method
+
+3. **Email Service Extensions**
+   - Add email change templates to EmailService.php
+   - Add `sendEmailChangeConfirmation($currentEmail, $newEmail, $token)`
+   - Add `sendNewEmailVerification($newEmail, $token)`
+   - Add `sendEmailChangeComplete($oldEmail, $newEmail)`
+
+#### Phase 2: API Implementation
+1. **Auth Endpoints**
+   - Implement `/api/auth/request-email-change`
+   - Implement `/api/auth/confirm-email-change-current`
+   - Implement `/api/auth/verify-new-email` 
+   - Implement `/api/auth/cancel-email-change`
+
+2. **Rate Limiting**
+   - Add email change specific rate limits
+   - Test rate limiting enforcement
+
+3. **Testing**
+   - Unit tests for all new User model methods
+   - Integration tests for complete email change workflow
+   - Security tests for token validation and expiry
+
+#### Phase 3: Frontend Implementation
+1. **Dashboard Components**
+   - Create EmailChangeForm component
+   - Create EmailChangeStatus component
+   - Integrate into dashboard settings
+
+2. **Standalone Pages**
+   - Create ConfirmEmailChangePage
+   - Create VerifyNewEmailPage
+   - Add routing for new pages
+
+3. **AuthService Integration**
+   - Add email change methods to AuthService
+   - Handle JWT updates on successful change
+   - Update user context management
+
+#### Phase 4: Testing & Deployment
+1. **End-to-End Testing**
+   - Complete email change workflow testing
+   - Error handling and edge case testing
+   - Mobile responsiveness testing
+
+2. **Security Testing**
+   - Token expiry and validation testing
+   - Rate limiting bypass attempts
+   - Email spoofing protection verification
+
+### Security Considerations
+
+**Token Management:**
+- All tokens expire after 1 hour
+- Different tokens for different steps (security by obscurity)
+- Tokens cleared immediately after successful use
+- Only one active email change request per user
+
+**Dual Verification Benefits:**
+- Prevents unauthorized email changes if account is compromised
+- Ensures user has access to both old and new email addresses
+- Provides clear audit trail of changes
+
+**Rate Limiting:**
+- Prevents abuse of email change functionality
+- Additional daily limits prevent persistent attacks
+- IP-based limits protect against distributed attacks
+
+**Rollback Procedures:**
+- Email change can be cancelled at any stage before completion
+- If new email verification fails, old email remains active
+- Clear error messages guide users through recovery
+
+**Audit Trail:**
+- All email change attempts logged with IP addresses
+- Status tracking allows investigation of suspicious activity
+- Email notifications to both addresses provide transparency
+
+### User Experience Design
+
+**Dashboard Integration:**
+- Email change form in account settings section
+- Clear status indicators for multi-step process
+- Progress tracking with visual indicators
+- Easy cancellation option at any stage
+
+**Email Experience:**
+- Clear, professional email templates
+- Step-by-step instructions in each email
+- Consistent branding with existing emails
+- Clear expiry time information
+
+**Error Handling:**
+- Comprehensive error messages for all failure scenarios
+- Recovery instructions for common issues
+- Support contact information for complex cases
+- Graceful degradation for edge cases
+
+### Success Criteria
+
+1. **Functional Requirements:**
+   - ✅ Secure dual verification process (current + new email)
+   - ✅ Prevention of unauthorized email changes
+   - ✅ Integration with existing email infrastructure
+   - ✅ Dashboard interface for email change requests
+   - ✅ Complete rollback capability
+
+2. **Security Requirements:**
+   - ✅ Token-based security with expiration
+   - ✅ Rate limiting prevents abuse
+   - ✅ Audit trail for all changes
+   - ✅ Email validation and uniqueness checks
+   - ✅ Session invalidation on successful change
+
+3. **User Experience:**
+   - ✅ Clear multi-step workflow
+   - ✅ Status tracking and progress indicators
+   - ✅ Professional email communications
+   - ✅ Mobile-responsive design
+   - ✅ Consistent with existing UI patterns
+
+### Risk Assessment
+
+**Low Risk:**
+- Email infrastructure already proven and tested
+- Token generation system already implemented for password reset
+- Database schema changes are minimal and non-breaking
+- UI patterns established from password reset implementation
+
+**Medium Risk:**
+- Complex multi-step workflow requires careful state management
+- Email delivery dependency for critical security step
+- User confusion with multi-step verification process
+
+**High Risk:**
+- Security vulnerability if dual verification is bypassed
+- Data loss if email change process corrupts user data
+- Account lockout if users lose access to both email addresses
+
+**Mitigation Strategies:**
+- Comprehensive testing of all workflow states
+- Clear user instructions and status indicators
+- Admin override capability for account recovery
+- Database transaction safety for atomic operations
+- Extensive logging for debugging and audit
+
+### Dependencies
+
+**Existing (Ready):**
+- EmailService.php with template system ✅
+- JWT authentication system ✅
+- User model with authentication methods ✅
+- Rate limiting infrastructure ✅
+- Dashboard UI framework ✅
+
+**New Requirements:**
+- Database migration for email change fields
+- Email template additions to EmailService.php
+- Frontend components for multi-step workflow
+
+**No External Dependencies:**
+- No new packages or services required
+- Uses existing infrastructure patterns
+
+### File Structure
+
+**Backend Updates:**
+- `backend/migrations/003_add_email_change_fields.sql` - New migration
+- `backend/models/User.php` - Add email change methods
+- `backend/services/EmailService.php` - Add email change templates
+- `backend/api/auth/index.php` - Add email change endpoints
+
+**Frontend New Files:**
+- `frontend/src/components/dashboard/EmailChangeForm.tsx`
+- `frontend/src/components/dashboard/EmailChangeStatus.tsx`
+- `frontend/src/pages/ConfirmEmailChangePage.tsx`
+- `frontend/src/pages/VerifyNewEmailPage.tsx`
+- `frontend/src/services/authService.ts` - Add email change methods
+
+### Integration Points
+
+**With Password Reset System:**
+- Share token generation and validation patterns
+- Reuse email template structure and styling
+- Follow same security practices and rate limiting
+
+**With Dashboard System:**
+- Integrate into existing settings/account section
+- Follow established UI patterns and styling
+- Use existing error handling and notification systems
+
+**With Authentication System:**
+- Maintain JWT authentication throughout process
+- Update user session on successful email change
+- Integrate with existing user context management
 
 ---
 
-*This comprehensive solution design documents the complete implementation of a professional email template management system, providing administrators with full control over automated communications while maintaining security, performance, and usability standards.*
+*End of SD-012*

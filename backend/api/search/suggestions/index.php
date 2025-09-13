@@ -5,6 +5,9 @@
 
 global $method, $database, $jwt;
 
+// Include comprehensive LanguageDetector service
+require_once dirname(__DIR__, 3) . '/services/LanguageDetector.php';
+
 if ($method !== 'GET') {
     error_response('Method not allowed', 405);
 }
@@ -43,19 +46,8 @@ class SearchSuggestionService {
     private $database;
     private $detectedComponents;
     
-    // Language keywords mapping
-    private $languageKeywords = [
-        'nederlands' => 'nl', 'nederlandse' => 'nl', 'holland' => 'nl', 'dutch' => 'nl',
-        'engels' => 'en', 'engelse' => 'en', 'english' => 'en',
-        'turks' => 'tr', 'turkse' => 'tr', 'turkish' => 'tr',
-        'arabisch' => 'ar', 'arabische' => 'ar', 'arabic' => 'ar',
-        'marokkaans' => 'ar', 'marokkaanse' => 'ar', 'moroccan' => 'ar',
-        'pools' => 'pl', 'poolse' => 'pl', 'polish' => 'pl',
-        'spaans' => 'es', 'spaanse' => 'es', 'spanish' => 'es',
-        'frans' => 'fr', 'franse' => 'fr', 'french' => 'fr',
-        'duits' => 'de', 'duitse' => 'de', 'german' => 'de',
-        'chinees' => 'zh', 'chinese' => 'zh'
-    ];
+    // LanguageDetector service for comprehensive language detection
+    private $languageDetector;
     
     // Common profession synonyms
     private $professionKeywords = [
@@ -72,6 +64,7 @@ class SearchSuggestionService {
     
     public function __construct($database) {
         $this->database = $database;
+        $this->languageDetector = new LanguageDetector();
         $this->detectedComponents = [
             'language' => null,
             'profession' => null,
@@ -118,29 +111,47 @@ class SearchSuggestionService {
     }
     
     private function detectComponents($query) {
-        $words = explode(' ', $query);
-        
-        // Detect language
-        foreach ($words as $word) {
-            $word = trim($word);
-            if (isset($this->languageKeywords[$word])) {
-                $this->detectedComponents['language'] = $this->languageKeywords[$word];
-                break;
+        try {
+            // Use comprehensive LanguageDetector for better detection
+            $detectionResult = $this->languageDetector->detectLanguageFromQuery($query, 'nl');
+            
+            if ($detectionResult) {
+                // Extract detected language(s) - take first one
+                if (!empty($detectionResult['detected_languages'])) {
+                    $this->detectedComponents['language'] = $detectionResult['detected_languages'][0];
+                }
+                
+                // Extract detected profession (if available)
+                if (isset($detectionResult['profession'])) {
+                    $this->detectedComponents['profession'] = $detectionResult['profession'];
+                }
+                
+                // Extract detected city (if available)
+                if (isset($detectionResult['detected_city'])) {
+                    $this->detectedComponents['location'] = $detectionResult['detected_city'];
+                }
             }
+        } catch (Exception $e) {
+            // Fallback to original detection methods if LanguageDetector fails
+            error_log("LanguageDetector failed in suggestions: " . $e->getMessage());
         }
         
-        // Detect profession
-        foreach ($this->professionKeywords as $profession => $keywords) {
-            foreach ($keywords as $keyword) {
-                if (strpos($query, $keyword) !== false) {
-                    $this->detectedComponents['profession'] = $profession;
-                    break 2;
+        // Fallback profession detection if not detected by LanguageDetector
+        if (!$this->detectedComponents['profession']) {
+            foreach ($this->professionKeywords as $profession => $keywords) {
+                foreach ($keywords as $keyword) {
+                    if (strpos($query, $keyword) !== false) {
+                        $this->detectedComponents['profession'] = $profession;
+                        break 2;
+                    }
                 }
             }
         }
         
-        // Detect location (check against cities database)
-        $this->detectLocation($query);
+        // Fallback location detection if not detected by LanguageDetector
+        if (!$this->detectedComponents['location']) {
+            $this->detectLocation($query);
+        }
     }
     
     private function detectLocation($query) {
@@ -301,13 +312,7 @@ class SearchSuggestionService {
         $language = $this->detectedComponents['language'];
         
         // Get language name
-        $langName = array_search($language, $this->languageKeywords);
-        if (!$langName) {
-            if ($language === 'nl') $langName = 'nederlandse';
-            if ($language === 'en') $langName = 'engelse';
-            if ($language === 'tr') $langName = 'turkse';
-            if ($language === 'ar') $langName = 'arabische';
-        }
+        $langName = $this->getLanguageName($language);
         
         // Popular combinations
         $professions = ['advocaat', 'dokter', 'tandarts', 'psycholoog'];
@@ -350,10 +355,11 @@ class SearchSuggestionService {
         // Try to complete partial words
         if (strlen($query) >= 3) {
             // Check if it's a partial language
-            foreach ($this->languageKeywords as $keyword => $code) {
-                if (strpos($keyword, $query) === 0) {
-                    $suggestions[] = $keyword . ' advocaat';
-                    $suggestions[] = $keyword . ' dokter';
+            $languageNames = ['nederlandse', 'engelse', 'turkse', 'arabische', 'poolse', 'spaanse', 'chinese'];
+            foreach ($languageNames as $langName) {
+                if (strpos($langName, $query) === 0) {
+                    $suggestions[] = $langName . ' advocaat';
+                    $suggestions[] = $langName . ' dokter';
                     break;
                 }
             }
@@ -383,6 +389,27 @@ class SearchSuggestionService {
         }
         
         return array_unique($suggestions);
+    }
+    
+    private function getLanguageName($languageCode) {
+        $languageNames = [
+            'nl' => 'nederlandse',
+            'en' => 'engelse',
+            'tr' => 'turkse',
+            'ar' => 'arabische',
+            'pl' => 'poolse',
+            'es' => 'spaanse',
+            'zh' => 'chinese',
+            'fr' => 'franse',
+            'de' => 'duitse',
+            'ru' => 'russische',
+            'it' => 'italiaanse',
+            'pt' => 'portugese',
+            'ja' => 'japanese',
+            'ko' => 'koreaanse'
+        ];
+        
+        return $languageNames[$languageCode] ?? 'nederlandse';
     }
     
     public function getDetectedComponents() {

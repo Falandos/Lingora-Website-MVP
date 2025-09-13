@@ -39,16 +39,76 @@ Monitor and advise on:
 - Security vulnerabilities
 - Scalability concerns
 
-## Files You Manage
+## 📁 CLEAN FILE STRUCTURE - WHERE TO READ/WRITE
 
-### Read Continuously:
-- bugs-and-issues.md - Current problems to solve
-- technical-development.md - System knowledge base
-- Project source files - When analyzing specific issues
+### **Root Directory (3 Files ONLY)**
+| File | Your Access | Purpose |
+|------|------------|---------|
+| **CLAUDE.md** | ✅ READ ONLY | Master development guide - reference for system architecture |
+| **PITCH.md** | ✅ READ ONLY | Platform overview - reference for business context |
+| **Whimsical.md** | ✅ READ ONLY | UI guidelines - reference for technical implementation |
 
-### Maintain:
-- technical-development.md - Update with new learnings
-- solution-designs.md - Document all proposed solutions
+### **/active/ Directory - YOUR PRIMARY WORKSPACE**
+| File | Your Access | Purpose |
+|------|------------|---------|
+| **project-status.md** | ✅ READ ONLY | Project context (PM agent writes, you read) |
+| **work-in-progress.md** | ✅ READ ONLY | Current session context (PM agent writes, you read) |
+| **session-handovers.md** | ✅ READ ONLY | Session continuity (PM agent writes, you read) |
+| **KNOWN_ISSUES.md** | ✅ READ + WRITE | Technical solutions (shared with PM agent) |
+| **solution-designs.md** | ✅ READ + WRITE | Your technical solution repository |
+| **technical-development.md** | ✅ READ + WRITE | Your architectural knowledge base |
+| **search-page-handover.md** | ✅ READ ONLY | Phase-specific context (PM tracks, you reference) |
+
+### **/agents/ Directory - AGENT COORDINATION**
+| File | Your Access | Purpose |
+|------|------------|---------|
+| **solution-architect-instructions.md** | ✅ READ + WRITE | Your own instructions - update as you learn |
+| **pm-agent-instructions.md** | ✅ READ ONLY | PM coordination reference |
+| **github-agent-instructions.md** | ✅ READ ONLY | Git workflow reference |
+| **agent-registry.md** | ✅ READ ONLY | Agent capabilities reference |
+| **documentation-index.md** | ✅ READ ONLY | File organization map |
+
+### **/archive/ Directory - HISTORICAL REFERENCE**
+| Files | Your Access | Purpose |
+|-------|------------|---------|
+| **All archived files** | ✅ READ ONLY | Historical technical decisions - reference only |
+
+### **🚨 CRITICAL FILE ACCESS RULES**
+
+#### ✅ YOUR PRIMARY FILES (Read + Write):
+- `/active/solution-designs.md` - Your solution repository
+- `/active/technical-development.md` - Your knowledge base
+- `/active/KNOWN_ISSUES.md` - Shared technical issue tracking
+
+#### 📖 REFERENCE FILES (Read Only):
+- Root files (CLAUDE.md, PITCH.md, Whimsical.md) - System context
+- `/active/project-status.md` - Project context from PM
+- `/active/work-in-progress.md` - Current session context from PM
+- `/active/session-handovers.md` - Session history from PM
+- All `/agents/` files except your own instructions
+- All `/archive/` files - Historical reference only
+
+#### ❌ NEVER ACCESS:
+- PM agent's primary tracking files for writing
+- Archived files for writing - they are historical records
+- Any file not in your access list above
+
+### **🔄 AGENT COORDINATION PATTERNS**
+
+#### When You Write To Shared Files:
+- **KNOWN_ISSUES.md**: Add technical solutions, root cause analysis
+- **solution-designs.md**: Document all technical proposals with SD-XXX IDs
+- **technical-development.md**: Update architectural knowledge and patterns
+
+#### When You Read PM Files:
+- **project-status.md**: Get project context and priorities
+- **work-in-progress.md**: Understand current session changes
+- **session-handovers.md**: Get continuity context
+
+#### File Creation Rules:
+- **NEVER create new files** - use existing structure
+- **ALWAYS reference PM when suggesting new organizational needs**
+- **UPDATE documentation-index.md through PM agent** when files change
 
 ## Solution Design Format
 

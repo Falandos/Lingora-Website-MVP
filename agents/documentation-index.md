@@ -1,40 +1,51 @@
 # Documentation Index - Lingora Project
 *Complete file mapping and organization guide*
-*Created: 2025-08-29 | Last Updated: 2025-09-07 (Alpha v0.9 Complete)**
+*Created: 2025-08-29 | Last Updated: 2025-09-12 (Clean Structure Complete)**
 
-## 📋 Current File Organization (Reorganization Complete)
+## 🎉 **MAJOR CLEANUP COMPLETE - September 12, 2025**
 
-### 📄 Root Directory Files
+**Reduced from 22+ files to 10 core files with clear ownership!**
+- ✅ Root directory: ONLY 3 files (CLAUDE.md, PITCH.md, Whimsical.md)
+- ✅ Active directory: 7 focused files with clear purposes
+- ✅ Archived: 15+ redundant files properly timestamped
 
-| File Name | Purpose | Category | Status |
-|-----------|---------|----------|--------|
-| **PROJECT_OVERVIEW.md** | Master project status and roadmap | reference | ✅ Active |
-| **CLAUDE.md** | Agent system instructions (updated for new structure) | reference | ✅ Active |
-| **DEVELOPMENT_GUIDE.md** | Technical setup and architecture | reference | ✅ Active |
-| **TECHNICAL_NOTES.md** | Detailed technical analysis | reference | ✅ Active |
-| **CODE_QUALITY_ANALYSIS.md** | Code review and production readiness | reference | ✅ Active |
-| **UX_UI_ANALYSIS.md** | User experience improvements | reference | ✅ Active |
-| **PITCH.md** | Platform capabilities overview | reference | ✅ Active |
-| **Whimsical.md** | UI delight and animation guidelines | reference | ✅ Active |
+## 📋 **CLEAN FILE ORGANIZATION**
 
-### 📁 /active/ - Dynamic Tracking Files
+### 📄 **Root Directory (3 Files ONLY)**
 
-| File Name | Purpose | Status |
-|-----------|---------|--------|
-| **project-status.md** | Current sprint progress and priorities | ✅ Active |
-| **work-in-progress.md** | Session tracking and uncommitted changes | ✅ Active |
-| **search-page-handover.md** | Search Page improvement phase documentation | ✅ Active |
-| **session-handovers.md** | Session context and development continuity | ✅ Active |
-| **technical-development.md** | Architecture and implementation patterns | ✅ Active |
+| File Name | Purpose | Owner | Status |
+|-----------|---------|--------|--------|
+| **CLAUDE.md** | Master development guide with startup procedures | System | ✅ Active |
+| **PITCH.md** | Platform capabilities overview | Marketing | ✅ Active |
+| **Whimsical.md** | UI delight and animation guidelines | Design | ✅ Active |
+
+### 📁 **/active/ - Core Working Files (7 Files)**
+
+| File Name | Purpose | Primary Reader | Primary Writer | Status |
+|-----------|---------|---------------|---------------|--------|
+| **project-status.md** | Current sprint progress and priorities | PM Agent | PM Agent | ✅ Active |
+| **work-in-progress.md** | Session tracking and uncommitted changes | PM Agent | PM Agent | ✅ Active |
+| **session-handovers.md** | Session context and development continuity | PM Agent | PM Agent | ✅ Active |
+| **KNOWN_ISSUES.md** | Known problems with proven solutions | Both Agents | Both Agents | ✅ Active |
+| **solution-designs.md** | Technical solution designs and architecture | Solution Architect | Solution Architect | ✅ Active |
+| **technical-development.md** | Implementation patterns and debugging | Solution Architect | Solution Architect | ✅ Active |
+| **search-page-handover.md** | Search page development tracking | PM Agent | PM Agent | ✅ Phase-Specific |
 
 ### 📁 /agents/ - Agent Instructions
 
 | File Name | Purpose | Status |
 |-----------|---------|--------|
-| **pm-agent-instructions.md** | Project manager agent guide | ✅ Moved |
+| **pm-agent-instructions.md** | Project manager agent guide with startup procedures | ✅ Updated |
 | **github-agent-instructions.md** | Git operations agent (formerly GIT_WORKFLOW.md) | ✅ Moved |
 | **agent-registry.md** | Agent capabilities catalog | ✅ Moved |
 | **documentation-index.md** | This file - master documentation map | ✅ Current |
+
+### 📁 /scripts/ - Startup and Utility Scripts
+
+| File Name | Purpose | Status |
+|-----------|---------|--------|
+| **start-all-services.bat** | Master startup script - kills conflicts, starts 3 services, health checks | ✅ New |
+| **health-check.bat** | Service health verification with AI corruption detection | ✅ New |
 
 ### 📁 /archive/ - Historical Documentation
 
@@ -51,7 +62,7 @@
 
 ```
 /lingora-project/
-├── 📄 CLAUDE.md                    # Agent system master instructions ✅
+├── 📄 CLAUDE.md                    # Master development guide with startup procedures ✅
 ├── 📄 PROJECT_OVERVIEW.md          # Project vision and status ✅
 ├── 📄 DEVELOPMENT_GUIDE.md         # Technical setup guide ✅
 ├── 📄 TECHNICAL_NOTES.md           # Architecture deep dive ✅
@@ -60,12 +71,19 @@
 ├── 📄 PITCH.md                     # Platform overview ✅
 ├── 📄 Whimsical.md                 # UI animation guidelines ✅
 │
+├── 📁 /scripts/                    # Startup and utility scripts
+│   ├── 📄 start-all-services.bat   # Master startup with health checks ✅
+│   └── 📄 health-check.bat         # Service verification and AI corruption detection ✅
+│
 ├── 📁 /active/                     # Frequently updated tracking files
 │   ├── 📄 project-status.md        # Current sprint and progress ✅
-│   └── 📄 work-in-progress.md      # Uncommitted changes tracking ✅
+│   ├── 📄 work-in-progress.md      # Uncommitted changes tracking ✅
+│   ├── 📄 search-page-handover.md  # Search page development tracking ✅
+│   ├── 📄 session-handovers.md     # Session continuity ✅
+│   └── 📄 technical-development.md # Architecture patterns and solutions ✅
 │
 ├── 📁 /agents/                     # Agent instruction files
-│   ├── 📄 pm-agent-instructions.md # Project manager agent ✅
+│   ├── 📄 pm-agent-instructions.md # Project manager agent with startup control ✅
 │   ├── 📄 github-agent-instructions.md # Git workflow agent ✅
 │   ├── 📄 agent-registry.md        # Agent capabilities catalog ✅
 │   └── 📄 documentation-index.md   # This file ✅
@@ -129,11 +147,11 @@ Historical records valuable for reference but no longer actively maintained:
 ## 🎯 Current Project Status Summary
 
 **From Documentation Analysis:**
-- **Progress**: 80% MVP Complete - ALPHA 0.8 achieved
-- **Major Milestone**: Homepage phase complete (99%) with interactive features
-- **Focus**: Search Page improvements (70% → 100%) for Alpha 0.9
-- **Recent Achievement**: Complete homepage with language carousel and navigation
-- **Critical Systems**: All operational, ready for Search Page enhancement phase
+- **Progress**: 95% MVP Complete - ALPHA 0.1 ACHIEVED
+- **Major Milestone**: Complete clean startup procedure implemented (September 12, 2025)
+- **Focus**: Reliable development environment with automated service management
+- **Recent Achievement**: Single-command startup with health checks and AI corruption detection
+- **Critical Systems**: All operational with automated startup and monitoring
 
 ## 📅 File Modification Timeline
 

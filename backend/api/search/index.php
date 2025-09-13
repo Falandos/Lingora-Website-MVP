@@ -1,7 +1,19 @@
 <?php
 // Search API endpoint
 
-global $method, $action, $database, $jwt;
+// Include config for global functions and constants
+if (!defined('ROOT_PATH')) {
+    require_once dirname(__DIR__, 2) . '/config/config.php';
+}
+
+global $method, $action, $database, $jwt, $config;
+
+// Include EmbeddingService for semantic search
+require_once dirname(__DIR__, 2) . '/services/EmbeddingService.php';
+
+// Include LanguageDetector for comprehensive language detection
+require_once dirname(__DIR__, 2) . '/services/LanguageDetector.php';
+
 
 // Route to suggestions endpoint if action is 'suggestions'
 if ($action === 'suggestions') {
@@ -46,11 +58,77 @@ $city = $_GET['city'] ?? '';
 $radius = isset($_GET['radius']) ? (int)$_GET['radius'] : 0; // Default to 0 = show all providers
 $mode = $_GET['mode'] ?? '';
 $keyword = $_GET['keyword'] ?? '';
+$ui_lang = $_GET['ui_lang'] ?? 'nl'; // Current UI language for detection
 $lat = isset($_GET['lat']) ? (float)$_GET['lat'] : null;
 $lng = isset($_GET['lng']) ? (float)$_GET['lng'] : null;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = isset($_GET['limit']) ? min((int)$_GET['limit'], 50) : 20;
 $offset = ($page - 1) * $limit;
+
+// Language detection and auto-application
+$languageDetection = null;
+$autoAppliedLanguages = [];
+
+if ($keyword) {
+    try {
+        $languageDetector = new LanguageDetector();
+        $detectionResult = $languageDetector->detectLanguageFromQuery($keyword, $ui_lang);
+        
+        // 1. AUTO-APPLY LANGUAGE FILTERS (e.g., "turkse dokter" -> apply Turkish filter)
+        if ($detectionResult && !empty($detectionResult['detected_languages'])) {
+            $detectedLanguages = $detectionResult['detected_languages'];
+            
+            // Auto-apply detected language filters if not already applied by user
+            if (empty($languages)) {
+                $autoAppliedLanguages = $detectedLanguages;
+                // Apply the language filter to the search
+                $languages = $detectedLanguages;
+            }
+        }
+        
+        // 1.5. AUTO-APPLY CITY FILTER (e.g., "turkse dokter amsterdam" -> apply Amsterdam filter)
+        $autoAppliedCity = null;
+        if ($detectionResult && !empty($detectionResult['detected_city'])) {
+            $detectedCity = $detectionResult['detected_city'];
+            
+            // Auto-apply detected city if not already set by user
+            if (empty($city)) {
+                $autoAppliedCity = $detectedCity;
+                $city = $detectedCity;
+            }
+        }
+        
+        // 2. UI LANGUAGE SWITCH SUGGESTION (e.g., "lekarz" -> suggest Polish UI)
+        $typedLanguage = isset($detectionResult['typed_language']) ? $detectionResult['typed_language'] : null;
+        if ($typedLanguage && $typedLanguage !== $ui_lang) {
+            $languageDetection = [
+                'typed_language' => $typedLanguage,
+                'current_ui_language' => $ui_lang,
+                'confidence' => $detectionResult['confidence'] ?? null
+            ];
+        }
+        
+        // 3. AUTO-APPLICATION INFO (languages and city)
+        if (!empty($autoAppliedLanguages) || !empty($autoAppliedCity)) {
+            if (!$languageDetection) {
+                $languageDetection = [];
+            }
+            $languageDetection['auto_applied'] = true;
+            
+            if (!empty($autoAppliedLanguages)) {
+                $languageDetection['detected_languages'] = $autoAppliedLanguages;
+            }
+            
+            if (!empty($autoAppliedCity)) {
+                $languageDetection['detected_city'] = $autoAppliedCity;
+            }
+        }
+        
+    } catch (Exception $e) {
+        // Fallback: no language detection if service fails
+        error_log("LanguageDetector error: " . $e->getMessage());
+    }
+}
 
 // Build search query
 $sql = "SELECT p.id, p.business_name, p.slug, p.city, p.address,
@@ -94,13 +172,56 @@ if ($mode && in_array($mode, ['in_person', 'online', 'both'])) {
     $params[] = $mode;
 }
 
-// Keyword search
+// Semantic + Traditional hybrid search
 if ($keyword) {
-    $keyword = '%' . $keyword . '%';
-    $where .= " AND (p.business_name LIKE ? OR p.bio_nl LIKE ? OR p.bio_en LIKE ?)";
-    $params[] = $keyword;
-    $params[] = $keyword;
-    $params[] = $keyword;
+    try {
+        $embeddingService = new EmbeddingService($database);
+        
+        // Try semantic search first
+        if ($embeddingService->isServiceAvailable()) {
+            $semanticResponse = $embeddingService->semanticSearch($keyword, ['limit' => $limit * 2]);
+            
+            // If semantic search succeeds and has results
+            if ($semanticResponse && $semanticResponse['success'] && !empty($semanticResponse['results'])) {
+                // Extract provider IDs from semantic results
+                $providerIds = array_column($semanticResponse['results'], 'provider_id');
+                if (!empty($providerIds)) {
+                    $placeholders = str_repeat('?,', count($providerIds) - 1) . '?';
+                    $where .= " AND p.id IN ($placeholders)";
+                    $params = array_merge($params, $providerIds);
+                } else {
+                    // No semantic results, fallback to SQL search
+                    $keyword = '%' . $keyword . '%';
+                    $where .= " AND (p.business_name LIKE ? OR p.bio_nl LIKE ? OR p.bio_en LIKE ?)";
+                    $params[] = $keyword;
+                    $params[] = $keyword;
+                    $params[] = $keyword;
+                }
+            } else {
+                // Semantic search returned no results, fallback to SQL search
+                $keyword = '%' . $keyword . '%';
+                $where .= " AND (p.business_name LIKE ? OR p.bio_nl LIKE ? OR p.bio_en LIKE ?)";
+                $params[] = $keyword;
+                $params[] = $keyword;
+                $params[] = $keyword;
+            }
+        } else {
+            // AI service not available, fallback to SQL search
+            $keyword = '%' . $keyword . '%';
+            $where .= " AND (p.business_name LIKE ? OR p.bio_nl LIKE ? OR p.bio_en LIKE ?)";
+            $params[] = $keyword;
+            $params[] = $keyword;
+            $params[] = $keyword;
+        }
+    } catch (Exception $e) {
+        // Error with semantic search, fallback to SQL search
+        error_log("Semantic search failed: " . $e->getMessage());
+        $keyword = '%' . $keyword . '%';
+        $where .= " AND (p.business_name LIKE ? OR p.bio_nl LIKE ? OR p.bio_en LIKE ?)";
+        $params[] = $keyword;
+        $params[] = $keyword;
+        $params[] = $keyword;
+    }
 }
 
 // Handle city-based search with radius
@@ -229,6 +350,7 @@ try {
     
     $totalResult = $database->fetchOne($countSql, $countParams);
     
+    
     response([
         'results' => $results,
         'pagination' => [
@@ -245,7 +367,8 @@ try {
             'mode' => $mode,
             'keyword' => $keyword,
             'coordinates' => $lat && $lng ? ['lat' => $lat, 'lng' => $lng] : null
-        ]
+        ],
+        'language_detection' => $languageDetection
     ]);
     
 } catch (Exception $e) {
